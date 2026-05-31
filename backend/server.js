@@ -50,15 +50,12 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY;
 // GLOBAL MIDDLEWARE
 // CORS, JSON Parsing, Input Sanitization
 app.use(cors({
-
-origin: [
+  origin: [
     "http://127.0.0.1:5500",
-    "http://127.0.0.1:5501",
-    "http://127.0.0.1:5502",
     "http://localhost:5500",
-    "http://localhost:5501",
-    "http://localhost:5502"
-]
+    "https://movie-ai-fullstack.vercel.app"
+  ],
+  credentials: true
 }));
 app.use(express.json());
 app.use(mongoSanitize());
