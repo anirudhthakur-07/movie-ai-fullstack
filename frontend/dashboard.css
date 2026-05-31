@@ -228,4 +228,9 @@ body {
     pointer-events: auto !important;
     z-index: 99999;
 }
-/* Removed the rogue extra trailing brace */
+#totalClicks,
+#topProvider,
+#topGenre {
+    user-select: none;
+    cursor: default;
+}
