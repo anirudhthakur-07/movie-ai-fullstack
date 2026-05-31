@@ -213,11 +213,11 @@ Add screenshots here after deployment.
 
 ### Home Page
 
-![Home](screenshots/home.png)
+![Home](screenshots/HomePage.png)
 
 ### Movie Details Modal
 
-![Modal](screenshots/modal.png)
+![Modal](screenshots/Dashboardresult.png)
 
 ### Watchlist
 
