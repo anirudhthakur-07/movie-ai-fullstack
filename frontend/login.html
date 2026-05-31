@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieAI - Login</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-body">
+
+    <video autoplay muted loop playsinline id="bg-video">
+        <source src="assets/videos/bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay"></div>
+    <!-- Login Card -->
+    <div class="login-wrapper">
+        <div class="login-card">
+
+      <h1 class="brand">
+  <span class="icon">🎬</span>
+  Movie Recommendation System
+</h1>
+            <p class="subtitle">Sign in and Discover movies</p>
+
+            <!-- Error message -->
+            <div id="error-msg" class="error-message hidden"></div>
+
+            <!-- Form -->
+            <form onsubmit="event.preventDefault(); login();">
+                 
+                <!-- Username -->
+                <div class="input-group">
+                    <input type="text" id="username" required autocomplete="off" placeholder=" ">
+                    <label for="username">Username</label>
+                </div>
+
+                <!-- Password -->
+                <div class="input-group">
+                    <input type="password" id="password" required placeholder=" ">
+                    <label for="password">Password</label></div>
+               <div class="terms-box">
+
+    <input type="checkbox" id="terms" >
+
+    <label for="terms">
+        By continuing, you agree to the
+
+        <span class="policy-link"
+              onclick="openPolicy()">
+
+            Terms & Privacy Policy
+
+        </span>
+    </label>
+
+</div>
+<p id="termsError"
+   class="terms-error hidden">
+
+   Please accept Terms & Privacy Policy
+
+</p>
+                <!-- Login Button -->
+                <button type="submit" class="btn login-btn">
+                    Login
+                </button>
+
+                <div class="divider"><span>OR</span></div>
+                <p class="subtitle">Don't have an account? Sign Up</p>
+                <!-- Register Button -->
+
+                <button type="button" class="btn register-btn" onclick="register()">
+                    Sign Up
+                </button>
+
+            </form>
+<!-- POLICY MODAL -->
+<div id="policyModal"
+     class="policy-modal hidden">
+
+    <div class="policy-content">
+
+        <button class="close-policy"
+                onclick="closePolicy()">
+
+            ✖
+
+        </button>
+
+<h2>Privacy & Terms</h2>
+<p class="policy-subtitle">
+Please review and accept before continuing.
+</p>
+        <div class="policy-text">
+
+          <ul class="policy-list">
+          <li>Uses TMDB API for movie information.</li>
+          <li>No copyrighted movies are hosted.</li>
+          <li>Streaming availability varies by region.</li>
+           <li>User accounts are securely authenticated.</li>
+         </ul>
+
+        </div>
+
+        <button class="accept-policy-btn"
+                onclick="acceptPolicy()">
+
+            Accept & Continue
+
+        </button>
+
+    </div>
+
+</div>
+        </div>
+    </div>
+    <script src="config.js"></script>
+    <!-- SCRIPT -->
+    <script>
+        // 🔐 Redirect if already logged in
+        if (localStorage.getItem("token")) {
+            window.location.href = "index.html";
+        }
+
+// POLICY SYSTEM
+document
+.getElementById("username")
+.addEventListener("input", () => {
+
+    const username =
+    document.getElementById("username").value;
+
+    const accepted =
+    localStorage.getItem(
+      "policyAccepted_" + username
+    );
+
+    document.getElementById("terms").checked =
+    accepted === "true";
+});
+function openPolicy() {
+
+    document
+        .getElementById("policyModal")
+        .classList.remove("hidden");
+}
+
+function closePolicy() {
+
+    document
+        .getElementById("policyModal")
+        .classList.add("hidden");
+}
+
+function acceptPolicy() {
+
+   const username =
+document.getElementById("username").value;
+
+if(username){
+
+localStorage.setItem(
+    "policyAccepted_" + username,
+    "true"
+);
+
+}
+    document
+        .getElementById("terms")
+        .checked = true;
+
+    closePolicy();
+}
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const accepted =
+document.getElementById("terms").checked;
+const error =
+document.getElementById("termsError");
+
+if (!accepted) {
+
+    error.classList.remove("hidden");
+
+    return;
+}
+
+error.classList.add("hidden");
+           const res = await fetch(`${API_BASE}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (!data.token) {
+                document.getElementById("error-msg").innerText = data.error || "Login failed";
+                document.getElementById("error-msg").classList.remove("hidden");
+                return;
+            }
+
+            localStorage.setItem("token", data.token);
+            window.location.href = "index.html";
+        }
+        async function register() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+const accepted =
+document.getElementById("terms").checked;
+
+const error =
+document.getElementById("termsError");
+
+if (!accepted) {
+
+    error.classList.remove("hidden");
+
+    return;
+}
+
+error.classList.add("hidden");
+            if (!username || !password) {
+                alert("Enter username & password");
+                return;
+            }
+
+            const res = await fetch(`${API_BASE}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (data.error) {
+                document.getElementById("error-msg").innerText =
+                data.error;
+
+              document.getElementById("error-msg")
+               .classList.remove("hidden");
+                return;
+            }
+
+            //  AUTO LOGIN
+            localStorage.setItem("token", data.token);
+
+            window.location.href = "index.html";
+        }
+        
+    </script>
+
+</body>
+
+</html>

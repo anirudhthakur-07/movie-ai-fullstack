@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>Analytics Dashboard</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="dashboard-navbar">
+<div class="logo">
+
+    <svg width="40"
+    height="40"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style="vertical-align: middle;">
+
+        <circle cx="50"
+        cy="50"
+        r="48"
+        stroke="#E32636"
+        stroke-width="3" />
+
+        <path
+        d="M42 35.5L64 50L42 64.5V35.5Z"
+        fill="#E32636" />
+
+        <path
+        d="M75 30C80 36.5 82 43.5 82 50C82 56.5 80 63.5 75 70"
+        stroke="#FFFFFF"
+        stroke-width="3.5"
+        stroke-linecap="round" />
+
+        <circle cx="75"
+        cy="30"
+        r="3.5"
+        fill="#FFFFFF" />
+
+        <circle cx="75"
+        cy="70"
+        r="3.5"
+        fill="#FFFFFF" />
+
+        <path
+        d="M66 38.5C69 42.5 70.5 46.5 70.5 50C70.5 53.5 69 57.5 66 61.5"
+        stroke="#FFFFFF"
+        stroke-width="3.5"
+        stroke-linecap="round" />
+
+        <circle cx="66"
+        cy="38.5"
+        r="3.5"
+        fill="#FFFFFF" />
+
+        <circle cx="66"
+        cy="61.5"
+        r="3.5"
+        fill="#FFFFFF" />
+
+    </svg>
+
+    <h1 class="logo">
+        Dark<span class="ai-text"></span>
+    </h1>
+
+</div>
+      
+
+        <button class="back-btn"
+        onclick="window.location.href='index.html'">
+
+            ← Back Home
+
+        </button>
+
+    </nav>
+
+    <!-- DASHBOARD -->
+    <main class="dashboard-container">
+
+        <!-- CARD 1 -->
+        <div class="analytics-card">
+
+    <h2>Movies Explored</h2>
+
+    <p id="totalClicks">
+        Loading...
+    </p>
+
+    <div class="analytics-subtext">
+
+        Your streaming activity this month
+
+    </div>
+
+</div>
+
+        <!-- CARD 2 -->
+     <div class="analytics-card">
+
+    <h2>Your Favorite Streaming Home</h2>
+
+    <p id="topProvider">
+        Loading...
+    </p>
+
+    <div class="analytics-subtext">
+
+        Most clicked streaming platform
+
+    </div>
+
+</div>
+
+      <div class="analytics-card">
+
+    <h2>Favorite Genre</h2>
+
+    <p id="topGenre">
+        Loading...
+    </p>
+
+    <div class="analytics-subtext">
+
+        Based on your viewing behavior
+
+    </div>
+
+</div>
+
+<!-- FULL WIDTH CHARTS -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <h2>Your Streaming Universe</h2>
+        <div class="chart-wrapper">
+            <canvas id="providerChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h2>Your Movie Personality</h2>
+        <div class="chart-wrapper">
+            <canvas id="genreChart"></canvas>
+        </div>
+    </div>
+</div>
+    </main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="config.js"></script>
+<script src="dashboard.js"></script>
+<footer class="site-footer">
+
+  <div class="footer-content">
+
+    <p>
+      This product uses the TMDB API but is not endorsed or certified by TMDB.
+    </p>
+
+    <p>
+      Movie data and images are provided by TMDB.
+      Trailers are embedded from YouTube.
+      Streaming availability may vary by region.
+    </p>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie AI Recommender</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="logo">
+      <!-- PASTE THE SVG LOGO CODE HERE -->
+      <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style="vertical-align: middle;">
+        <circle cx="50" cy="50" r="48" stroke="#E32636" stroke-width="3" />
+        <path d="M42 35.5L64 50L42 64.5V35.5Z" fill="#E32636" />
+        <path d="M75 30C80 36.5 82 43.5 82 50C82 56.5 80 63.5 75 70" stroke="#FFFFFF" stroke-width="3.5"
+          stroke-linecap="round" />
+        <circle cx="75" cy="30" r="3.5" fill="#FFFFFF" />
+        <circle cx="75" cy="70" r="3.5" fill="#FFFFFF" />
+        <path d="M66 38.5C69 42.5 70.5 46.5 70.5 50C70.5 53.5 69 57.5 66 61.5" stroke="#FFFFFF" stroke-width="3.5"
+          stroke-linecap="round" />
+        <circle cx="66" cy="38.5" r="3.5" fill="#FFFFFF" />
+        <circle cx="66" cy="61.5" r="3.5" fill="#FFFFFF" />
+      </svg>
+      <h1 class="logo">Dark<span class="ai-text"></span></h1>
+    </div>
+
+    <div class="nav-right">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Titles, people, genres" autocomplete="off">
+        <div id="searchSpinner" class="spinner hidden"></div>
+      </div>
+
+      <button class="nav-action-btn watchlist-btn" onclick="openWatchlistPage()">
+        <i class="fas fa-list"></i> My List
+      </button>
+      <button class="nav-action-btn dashboard-btn"
+onclick="window.location.href='dashboard.html'">
+
+  <i class="fas fa-chart-line"></i> Dashboard
+
+</button>
+
+      <button class="nav-action-btn logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </nav>
+  <!-- Main Content -->
+  <div id="hero">
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <h1 id="heroTitle">AI Based <br><span>Movie</span> Recommender</h1>
+      <p style="color: #ccc; font-size: 1.2rem; margin-bottom: 25px; max-width: 500px;">
+        Discover your next favorite film with our advanced neural engine. Tailored specifically for your taste.
+      </p>
+    </div>
+  </div>
+
+  <!-- Search Results Section -->
+  <section id="searchResultsSection" class="movie-section hidden">
+    <h3 class="section-title">Search Results</h3>
+    <p id="noResultsMsg" class="hidden no-results">No results found.</p>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('searchResultsRow', -1)">❮</button>
+      <div class="movie-row" id="searchResultsRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('searchResultsRow', 1)">❯</button>
+    </div>
+    <div style="text-align:center; margin:20px;">
+      <button id="loadMoreBtn" class="load-more-btn hidden">
+        Load More
+      </button>
+    </div>
+  </section>
+  <!-- AI Recommendations Section (Shows up after searching) -->
+  <section id="recommendationsSection" class="movie-section hidden">
+    <h3 class="section-title">AI Recommendations <span class="badge">AI</span></h3>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('recommendationsRow', -1)">❮</button>
+      <div class="movie-row" id="recommendationsRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('recommendationsRow', 1)">❯</button>
+    </div>
+  </section>
+
+  <!-- Default Rows -->
+  <section class="movie-section" id="trendingSection">
+    <h3 class="section-title">Trending Now</h3>
+    <div class="row-container">
+      <button class="scroll-btn  scroll-left" onclick="scrollRow('trendingRow', -1)">❮</button>
+
+      <div class="movie-row" id="trendingRow"></div>
+
+      <button class="scroll-btn scroll-right" onclick="scrollRow('trendingRow', 1)">❯</button>
+    </div>
+  </section>
+  <section class="movie-section">
+    <div class="section-header">
+      <h3 class="section-title">Recommended Based on Your Watchlist</h3>
+
+      <div class="refresh-container">
+        <button class="refresh-btn" onclick="loadWatchlistRecommendations(true)">
+          <span class="refresh-icon">⟳</span>
+        </button>
+
+        <span id="refreshText" class="hidden">Refreshing...</span>
+      </div>
+    </div>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('watchlistRecRow', -1)">❮</button>
+
+      <div class="movie-row" id="watchlistRecRow"></div>
+
+      <button class="scroll-btn scroll-right" onclick="scrollRow('watchlistRecRow', 1)">❯</button>
+    </div>
+  </section>
+  <!-- ANALYTICS GENRE RECOMMENDATION -->
+
+<section
+id="genreAnalyticsSection"
+
+class="movie-section hidden">
+
+    <h3
+    id="genreAnalyticsTitle"
+
+    class="section-title">
+    </h3>
+
+    <div class="row-container">
+
+        <button
+        class="scroll-btn scroll-left"
+
+        onclick="scrollRow('genreAnalyticsRow', -1)">
+            ❮
+        </button>
+
+        <div
+        class="movie-row"
+
+        id="genreAnalyticsRow">
+        </div>
+
+        <button
+        class="scroll-btn scroll-right"
+
+        onclick="scrollRow('genreAnalyticsRow', 1)">
+            ❯
+        </button>
+
+    </div>
+
+</section>
+
+
+
+<!-- PROVIDER RECOMMENDATION -->
+
+<section
+id="providerAnalyticsSection"
+
+class="movie-section hidden">
+
+    <h3
+    id="providerAnalyticsTitle"
+
+    class="section-title">
+    </h3>
+
+    <div class="row-container">
+
+        <button
+        class="scroll-btn scroll-left"
+
+        onclick="scrollRow('providerAnalyticsRow', -1)">
+            ❮
+        </button>
+
+        <div
+        class="movie-row"
+
+        id="providerAnalyticsRow">
+        </div>
+
+        <button
+        class="scroll-btn scroll-right"
+
+        onclick="scrollRow('providerAnalyticsRow', 1)">
+            ❯
+        </button>
+
+    </div>
+
+</section>
+  <section class="movie-section">
+    <h3 class="section-title">Popular</h3>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('popularRow', -1)">❮</button>
+      <div class="movie-row" id="popularRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('popularRow', 1)">❯</button>
+    </div>
+  </section>
+  <section class="movie-section">
+    <h3 class="section-title">Top Rated</h3>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('topRatedRow', -1)">❮</button>
+      <div class="movie-row" id="topRatedRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('topRatedRow', 1)">❯</button>
+    </div>
+  </section>
+  <section class="movie-section" id="actionSection">
+    <h3 class="section-title">Action Thrillers</h3>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('actionRow', -1)">❮</button>
+      <div class="movie-row" id="actionRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('actionRow', 1)">❯</button>
+    </div>
+  </section>
+  <section class="movie-section" id="comedySection">
+    <h3 class="section-title">Comedies</h3>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('comedyRow', -1)">❮</button>
+      <div class="movie-row" id="comedyRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('comedyRow', 1)">❯</button>
+    </div>
+  </section>
+  <section class="movie-section">
+    <h3 class="section-title">Sci-Fi</h3>
+    <div class="row-container">
+      <button class="scroll-btn  scroll-left" onclick="scrollRow('scifiRow', -1)">❮</button>
+      <div class="movie-row" id="scifiRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('scifiRow', 1)">❯</button>
+    </div>
+  </section>
+  <section class="movie-section">
+    <h3 class="section-title">Horror</h3>
+    <div class="row-container">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('horrorRow', -1)">❮</button>
+      <div class="movie-row" id="horrorRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('horrorRow', 1)">❯</button>
+    </div>
+  </section>
+  <!-- Movie Detail Modal -->
+  <div id="movieModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <div class="modal-body">
+        <div class="modal-poster">
+          <img id="modalImg" src="" alt="Movie Poster">
+        </div>
+        <div class="modal-info">
+          <!--  FLOATING OTT PROVIDERS -->
+<div id="floatingProviders" class="floating-providers hidden">
+  <div id="providerIcons" class="floating-provider-icons"></div>
+</div>
+          <h2 id="modalTitle">Movie Title</h2>
+          <div class="modal-meta">
+            <span id="modalRating" class="rating-badge"><i class="fas fa-star"></i> 8.5</span>
+            <span id="modalYear">2024</span>
+          </div>
+          <p id="modalOverview" class="modal-overview">Overview text goes here...</p>
+          <!--  TRAILER BUTTON -->
+          <div class="modal-buttons">
+            <button id="playTrailerBtn" class="modal-btn trailer-btn">
+              ▶ Watch Trailer
+            </button>
+
+            <button id="refreshMovieBtn" class="modal-btn refresh-btn">
+              <span class="refresh-icon">⟳</span> Refresh Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--  TRAILER MODAL OUTSIDE -->
+  <div id="trailerModal" class="trailer-modal hidden">
+    <div class="trailer-box">
+      <button class="close-trailer" onclick="closeTrailer()">✖</button>
+      <iframe id="trailerFrame" src="" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script src="modal.js"></script>
+  <footer class="site-footer">
+
+  <div class="footer-content">
+
+    <p>
+      This product uses the TMDB API but is not endorsed or certified by TMDB.
+    </p>
+
+    <p>
+      Movie data and images are provided by TMDB.
+      Trailers are embedded from YouTube.
+      Streaming availability may vary by region.
+    </p>
+
+  </div>
+
+</footer>
+
+</body>
+
+</html>

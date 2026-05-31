@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>My Watchlist</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+
+    <svg width="40"
+    height="40"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style="vertical-align: middle;">
+
+        <circle cx="50"
+        cy="50"
+        r="48"
+        stroke="#E32636"
+        stroke-width="3" />
+
+        <path
+        d="M42 35.5L64 50L42 64.5V35.5Z"
+        fill="#E32636" />
+
+        <path
+        d="M75 30C80 36.5 82 43.5 82 50C82 56.5 80 63.5 75 70"
+        stroke="#FFFFFF"
+        stroke-width="3.5"
+        stroke-linecap="round" />
+
+        <circle cx="75"
+        cy="30"
+        r="3.5"
+        fill="#FFFFFF" />
+
+        <circle cx="75"
+        cy="70"
+        r="3.5"
+        fill="#FFFFFF" />
+
+        <path
+        d="M66 38.5C69 42.5 70.5 46.5 70.5 50C70.5 53.5 69 57.5 66 61.5"
+        stroke="#FFFFFF"
+        stroke-width="3.5"
+        stroke-linecap="round" />
+
+        <circle cx="66"
+        cy="38.5"
+        r="3.5"
+        fill="#FFFFFF" />
+
+        <circle cx="66"
+        cy="61.5"
+        r="3.5"
+        fill="#FFFFFF" />
+
+    </svg>
+
+    <h1 class="logo">
+        Dark<span class="ai-text"></span>
+    </h1>
+
+</div>
+
+        <div class="nav-right">
+            <button class="back-btn" onclick="goHome()">
+    ← Back Home
+</button>
+        </div>
+    </nav>
+    <main class="watchlist-container">
+        <h3 class="section-title">My Watchlist</h3>
+        <div id="watchlistPageRow" class="watchlist-grid"></div>
+    </main>
+   
+    <!-- Movie Detail Modal -->
+    <div id="movieModal" class="modal hidden">
+        <div class="modal-content">
+           <span class="close-modal">&times;</span>
+
+            <div class="modal-body">
+                <div class="modal-poster">
+                    <img id="modalImg" src="" alt="Movie Poster">
+                </div>
+
+                <div class="modal-info">
+                    <h2 id="modalTitle">Movie Title</h2>
+
+                    <div class="modal-meta">
+                        <span id="modalRating" class="rating-badge">⭐ 8.5</span>
+                        <span id="modalYear">2024</span>
+                    </div>
+
+
+                    <p id="modalOverview" class="modal-overview"></p>
+                    <div class="modal-buttons">
+                        <button id="playTrailerBtn" class="modal-btn trailer-btn">
+                            ▶ Watch Trailer
+                        </button>
+
+                        <button id="refreshMovieBtn" class="modal-btn refresh-btn">
+                            🔄 Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  TRAILER MODAL -->
+    <div id="trailerModal" class="trailer-modal hidden">
+        <div class="trailer-box">
+
+            <button class="close-trailer" onclick="closeTrailer()">✖</button>
+
+            <iframe id="trailerFrame" src="" frameborder="0" allowfullscreen>
+            </iframe>
+
+        </div>
+    </div>
+    <script src="config.js"></script>
+    <script src="watchlist.js"></script>
+    <script src="modal.js"></script>
+    <footer class="site-footer">
+
+  <div class="footer-content">
+
+    <p>
+      This product uses the TMDB API but is not endorsed or certified by TMDB.
+    </p>
+
+    <p>
+      Movie data and images are provided by TMDB.
+      Trailers are embedded from YouTube.
+      Streaming availability may vary by region.
+    </p>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
