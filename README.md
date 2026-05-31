@@ -215,9 +215,9 @@ Add screenshots here after deployment.
 
 ![Home](screenshots/HomePage.png)
 
-### Movie Details Modal
+### Movie Details 
 
-![Modal](screenshots/Dashboardresult.png)
+![Search](screenshots/Search.png)
 
 ### Watchlist
 
