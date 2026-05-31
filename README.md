@@ -11,7 +11,8 @@ Dark AI Movie Recommendation Platform is a full-stack web application built usin
 The platform integrates with The Movie Database (TMDB) API to provide real-time movie information while offering personalized recommendations, secure authentication, analytics dashboards, and watchlist functionality.
 
 ---
-
+## Live Demo
+https://movie-ai-fullstack.vercel.app
 # ✨ Key Features
 
 ## 🔐 Authentication & Security
