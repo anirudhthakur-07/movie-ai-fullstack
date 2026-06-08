@@ -209,9 +209,28 @@ async function loadGenreChart() {
         console.error("Genre chart failed", err);
     }
 }
+async function loadProfile() {
 
-// START DASHBOARD
+    try {
+
+        const res = await fetch(`${API_BASE}/profile`, {
+            headers: {
+                Authorization: "Bearer " + token
+            }
+        });
+
+        const data = await res.json();
+
+        document.getElementById("profileStrength").innerText =
+            data.profileStrength || "Low";
+
+    } catch (err) {
+
+        console.error("Profile failed", err);
+
+    }
+}
 loadAnalytics();
 loadProviderChart();
 loadGenreChart();
-
+loadProfile();
