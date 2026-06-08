@@ -223,7 +223,8 @@ async function loadProfile() {
 
         document.getElementById("profileStrength").innerText =
             data.profileStrength || "Low";
-
+        document.getElementById("activityLevel").innerText =
+    data.activityLevel || "Casual";
     } catch (err) {
 
         console.error("Profile failed", err);

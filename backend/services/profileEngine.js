@@ -11,6 +11,10 @@ async function buildUserProfile(userId) {
 
     const watchlistCount =
         user.watchlist?.length || 0;
+        const totalInteractions =
+await ProviderClick.countDocuments({
+    userId: user._id
+});
     const providerStats =
 await ProviderClick.aggregate([
   {
@@ -53,7 +57,14 @@ await ProviderClick.aggregate([
     let profileStrength = "Low";
    let movieExplorerLevel =
 "Beginner";
+let activityLevel = "Casual";
 
+if (totalInteractions >= 50) {
+    activityLevel = "Power User";
+}
+else if (totalInteractions >= 20) {
+    activityLevel = "Active";
+}
 if (watchlistCount >= 20) {
     movieExplorerLevel =
     "Advanced";
@@ -72,11 +83,10 @@ else if (watchlistCount >= 10) {
 
     username:
     user.username,
-
     watchlistCount,
-
     profileStrength,
-
+    activityLevel,
+    totalInteractions,
     movieExplorerLevel,
 
     topGenres:
