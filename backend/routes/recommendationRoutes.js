@@ -132,8 +132,8 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
     const topGenres = sortedGenres.slice(0, 2);
     const genreIds = topGenres.join(',');
     let recommendations = [];
-    const recent = movieIds.slice(-3);
-    const older = movieIds.slice(0, 3);
+    const recent = movieIds.slice(-5);
+const older = movieIds.slice(0, 2);
     const selectedMovies = [...recent, ...older];
 
    
@@ -158,35 +158,58 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
 
       recommendations.push(...genreRes.data.results);
     }
-    const uniqueMap = new Map();
+ const scoreMap = new Map();
 
-    recommendations.forEach(m => {
-      if (
-        !movieIds.includes(m.id) &&
-        m.poster_path &&
-        m.vote_average >= 5 &&
-        m.vote_count > 100
-      ) {
-        uniqueMap.set(m.id, m);
-      }
-    });
+recommendations.forEach(m => {
 
-    const filtered = Array.from(uniqueMap.values())
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 50);
+  if (
+    !movieIds.includes(m.id) &&
+    m.poster_path &&
+    m.vote_average >= 5 &&
+    m.vote_count > 100
+  ) {
 
-    const refined = filtered;
+    if (!scoreMap.has(m.id)) {
 
-    refined.sort((a, b) => {
-      const scoreA = (a.vote_average * 2) + (a.popularity / 100);
-      const scoreB = (b.vote_average * 2) + (b.popularity / 100);
-      return scoreB - scoreA;
-    });
-    refined.sort(() => Math.random() - 0.5);
+      scoreMap.set(m.id, {
+        ...m,
+        recommendationScore: 5
+      });
 
-    res.json({
-      results: refined.slice(0, 20),
-      status: "ok"
+    } else {
+
+      scoreMap.get(m.id).recommendationScore += 5;
+
+    }
+  }
+});
+ const refined = Array.from(scoreMap.values());
+
+refined.sort((a, b) => {
+
+  const scoreA =
+    a.recommendationScore +
+    (a.vote_average * 3) +
+    (a.popularity / 100);
+
+  const scoreB =
+    b.recommendationScore +
+    (b.vote_average * 3) +
+    (b.popularity / 100);
+
+  return scoreB - scoreA;
+});
+console.log(
+  refined.slice(0, 10).map(m => ({
+    title: m.title,
+    rating: m.vote_average,
+    popularity: m.popularity,
+    recommendationScore: m.recommendationScore
+  }))
+);
+res.json({
+  results: refined.slice(0, 20),
+  status: "ok"
     });
   } catch (err) {
     console.error("WATCHLIST RECOMMEND ERROR:", err.message);
