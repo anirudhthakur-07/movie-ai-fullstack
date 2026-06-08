@@ -1043,11 +1043,22 @@ function hideError(){
         errorBox.classList.add("hidden");
     }
 }
+const usernameInput =
+document.getElementById("username");
 
-document
-.getElementById("username")
-.addEventListener("input", hideError);
+if (usernameInput) {
+  usernameInput.addEventListener(
+    "input",
+    hideError
+  );
+}
 
-document
-.getElementById("password")
-.addEventListener("input", hideError);
+const passwordInput =
+document.getElementById("password");
+
+if (passwordInput) {
+  passwordInput.addEventListener(
+    "input",
+    hideError
+  );
+}

@@ -16,7 +16,7 @@ const analyticsRoutes =require("./routes/analyticsRoutes");
 const watchlistRoutes =require("./routes/watchlistRoutes");
 const authRoutes =require("./routes/authRoutes");
 const recommendationRoutes =require("./routes/recommendationRoutes");
-
+const profileRoutes =require("./routes/profileRoutes");
 // EXPRESS APPLICATION SETUP
 const app = express();
 const movieRoutes =require("./routes/movieRoutes");
@@ -205,7 +205,10 @@ app.use(
     "/api/analytics",
     analyticsRoutes
 );
-
+app.use(
+    "/api",
+    profileRoutes
+);
 // SERVER STARTUP
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

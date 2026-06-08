@@ -199,14 +199,7 @@ refined.sort((a, b) => {
 
   return scoreB - scoreA;
 });
-console.log(
-  refined.slice(0, 10).map(m => ({
-    title: m.title,
-    rating: m.vote_average,
-    popularity: m.popularity,
-    recommendationScore: m.recommendationScore
-  }))
-);
+
 res.json({
   results: refined.slice(0, 20),
   status: "ok"
