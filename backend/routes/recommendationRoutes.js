@@ -6,6 +6,28 @@ const User = require("../models/User");
 const auth = require("../middleware/auth");
 const tmdbApi = require("../config/tmdb");
 const {buildUserProfile} = require("../services/profileEngine");
+const genreMap = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western"
+};
+
 // SEARCH-BASED RECOMMENDATIONS
 // Generates Recommendations Using Search Query,
 // Similar Movies & Genre Matching
@@ -103,6 +125,8 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
 
 const profile =
   await buildUserProfile(req.userId);
+  const favoriteGenres =
+  profile?.topGenres || [];
     if (!user.watchlist || user.watchlist.length === 0) {
       return res.json({ results: [], status: "empty" });
     }
@@ -196,14 +220,43 @@ const activityBonus =
     ? 5
     : 0;
 
+const genreBonusA =
+  (a.genre_ids || []).reduce((score, id) => {
+
+    const genreName = genreMap[id];
+
+    if (favoriteGenres.includes(genreName)) {
+      return score + 10;
+    }
+
+    return score;
+
+  }, 0);
+
+const genreBonusB =
+  (b.genre_ids || []).reduce((score, id) => {
+
+    const genreName = genreMap[id];
+
+    if (favoriteGenres.includes(genreName)) {
+      return score + 10;
+    }
+
+    return score;
+
+  }, 0);
+  
+
 const scoreA =
   a.recommendationScore +
+  genreBonusA +
   (a.vote_average * 3) +
   (a.popularity / 100) +
   activityBonus;
 
 const scoreB =
   b.recommendationScore +
+  genreBonusB +
   (b.vote_average * 3) +
   (b.popularity / 100) +
   activityBonus;
