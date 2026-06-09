@@ -210,23 +210,26 @@ recommendations.forEach(m => {
   }
 });
  const refined = Array.from(scoreMap.values());
-
-refined.sort((a, b) => {
-
 const activityBonus =
   profile.activityLevel === "Power User"
     ? 10
     : profile.activityLevel === "Active"
     ? 5
     : 0;
-
+ const profileMultiplier =
+  profile.profileStrength === "High"
+    ? 2
+    : profile.profileStrength === "Medium"
+    ? 1.5
+    : 1;
+refined.sort((a, b) => {
 const genreBonusA =
   (a.genre_ids || []).reduce((score, id) => {
 
     const genreName = genreMap[id];
 
     if (favoriteGenres.includes(genreName)) {
-      return score + 10;
+   return score + (10 * profileMultiplier);
     }
 
     return score;
@@ -239,13 +242,13 @@ const genreBonusB =
     const genreName = genreMap[id];
 
     if (favoriteGenres.includes(genreName)) {
-      return score + 10;
+     return score + (10 * profileMultiplier);
     }
 
     return score;
 
   }, 0);
-  
+
 
 const scoreA =
   a.recommendationScore +
