@@ -5,7 +5,7 @@ const router = express.Router();
 const User = require("../models/User");
 const auth = require("../middleware/auth");
 const tmdbApi = require("../config/tmdb");
-
+const {buildUserProfile} = require("../services/profileEngine");
 // SEARCH-BASED RECOMMENDATIONS
 // Generates Recommendations Using Search Query,
 // Similar Movies & Genre Matching
@@ -101,6 +101,8 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
 
+const profile =
+  await buildUserProfile(req.userId);
     if (!user.watchlist || user.watchlist.length === 0) {
       return res.json({ results: [], status: "empty" });
     }
@@ -187,16 +189,24 @@ recommendations.forEach(m => {
 
 refined.sort((a, b) => {
 
-  const scoreA =
-    a.recommendationScore +
-    (a.vote_average * 3) +
-    (a.popularity / 100);
+const activityBonus =
+  profile.activityLevel === "Power User"
+    ? 10
+    : profile.activityLevel === "Active"
+    ? 5
+    : 0;
 
-  const scoreB =
-    b.recommendationScore +
-    (b.vote_average * 3) +
-    (b.popularity / 100);
+const scoreA =
+  a.recommendationScore +
+  (a.vote_average * 3) +
+  (a.popularity / 100) +
+  activityBonus;
 
+const scoreB =
+  b.recommendationScore +
+  (b.vote_average * 3) +
+  (b.popularity / 100) +
+  activityBonus;
   return scoreB - scoreA;
 });
 
