@@ -13,7 +13,6 @@ router.get("/profile", auth, async (req, res) => {
 
         const profile =
             await buildUserProfile(req.userId);
-
         res.json(profile);
 
     } catch (err) {
