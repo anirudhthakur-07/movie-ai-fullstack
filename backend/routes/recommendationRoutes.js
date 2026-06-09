@@ -123,10 +123,16 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
 
-const profile =
+  const profile =
   await buildUserProfile(req.userId);
   const favoriteGenres =
   profile?.topGenres || [];
+  const genreScores = {};
+  favoriteGenres.forEach(g => {
+
+  genreScores[g.genre] = g.count;
+
+   });
     if (!user.watchlist || user.watchlist.length === 0) {
       return res.json({ results: [], status: "empty" });
     }
@@ -228,21 +234,26 @@ const genreBonusA =
 
     const genreName = genreMap[id];
 
-    if (favoriteGenres.includes(genreName)) {
-   return score + (10 * profileMultiplier);
+    if (genreScores[genreName]) {
+
+      return score +
+        (genreScores[genreName] * profileMultiplier);
+
     }
 
     return score;
 
   }, 0);
-
-const genreBonusB =
+  const genreBonusB =
   (b.genre_ids || []).reduce((score, id) => {
 
     const genreName = genreMap[id];
 
-    if (favoriteGenres.includes(genreName)) {
-     return score + (10 * profileMultiplier);
+    if (genreScores[genreName]) {
+
+      return score +
+        (genreScores[genreName] * profileMultiplier);
+
     }
 
     return score;

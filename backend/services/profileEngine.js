@@ -89,10 +89,13 @@ else if (watchlistCount >= 10) {
     totalInteractions,
     movieExplorerLevel,
 
-    topGenres:
-    genreStats
-      .slice(0, 3)
-      .map(g => g._id),
+   topGenres:
+genreStats
+  .slice(0, 3)
+  .map(g => ({
+      genre: g._id,
+      count: g.count
+  })),
 
     topProviders:
     providerStats
