@@ -95,7 +95,7 @@ window.openModal = async function (movie) {
     const modalRating = document.getElementById('modalRating');
     const modalYear = document.getElementById('modalYear');
     const modalOverview = document.getElementById('modalOverview');
-
+    const reasonsBox =document.getElementById("recommendationReasons");
     const movieId = movie.id || movie.tmdbId;
     currentOpenMovieId = movieId;
     let fullMovie = movie;
@@ -116,6 +116,10 @@ window.openModal = async function (movie) {
   <br>
   <div class="skeleton skeleton-text" style="width:50%"></div>
 `;
+if (reasonsBox) {
+    reasonsBox.innerHTML = "";
+    reasonsBox.classList.add("hidden");
+}
     modalImg.style.opacity = 0;
     const imgUrl = fullMovie.poster_path
         ? `${IMG_BASE}${fullMovie.poster_path}`
@@ -169,8 +173,29 @@ rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
       <br><br>
       <strong>Cast:</strong> ${cast}
     `;
+const isWatchlistRecommendation =
+    movie.explanations &&
+    movie.explanations.length;
 
-        const trailerUrl = await fetchTrailer(movieId);
+if (reasonsBox) {
+
+    if (isWatchlistRecommendation) {
+
+        reasonsBox.innerHTML =
+            movie.explanations
+                .map(reason =>
+                    `<span class="reason-tag">${reason}</span>`
+                )
+                .join("");
+
+        reasonsBox.classList.remove("hidden");
+
+    } else {
+
+        reasonsBox.innerHTML = "";
+        reasonsBox.classList.add("hidden");
+    }
+}     const trailerUrl = await fetchTrailer(movieId);
         // Clear previously displayed OTT providers
 const providerContainer =
 document.getElementById("floatingProviders");

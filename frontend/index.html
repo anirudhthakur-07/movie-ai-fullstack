@@ -64,7 +64,17 @@ onclick="window.location.href='dashboard.html'">
       </p>
     </div>
   </div>
+<section id="historySection" class="movie-section">
 
+    <h3 class="section-title">
+        Recent Searches
+    </h3>
+
+    <div class="history-row"
+         id="historyRow">
+    </div>
+
+</section>
   <!-- Search Results Section -->
   <section id="searchResultsSection" class="movie-section hidden">
     <h3 class="section-title">Search Results</h3>
@@ -266,9 +276,18 @@ class="movie-section hidden">
             <span id="modalRating" class="rating-badge"><i class="fas fa-star"></i> 8.5</span>
             <span id="modalYear">2024</span>
           </div>
-          <p id="modalOverview" class="modal-overview">Overview text goes here...</p>
-          <!--  TRAILER BUTTON -->
-          <div class="modal-buttons">
+            <div class="modal-scroll-content">
+
+    <p id="modalOverview"
+       class="modal-overview"></p>
+
+    <div id="recommendationReasons"
+         class="recommendation-reasons hidden">
+    </div>
+
+</div>
+
+<div class="modal-buttons">
             <button id="playTrailerBtn" class="modal-btn trailer-btn">
               ▶ Watch Trailer
             </button>

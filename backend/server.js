@@ -11,6 +11,7 @@ const rateLimit =require("express-rate-limit");
 const morgan = require("morgan");
 
 // MIDDLEWARE & ROUTE IMPORTS
+const searchHistoryRoutes =require("./routes/searchHistoryRoutes");
 const auth =require("./middleware/auth");
 const analyticsRoutes =require("./routes/analyticsRoutes");
 const watchlistRoutes =require("./routes/watchlistRoutes");
@@ -60,6 +61,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use("/api", searchHistoryRoutes);
 app.use(mongoSanitize());
 
 // MOVIE DATABASE ROUTES
@@ -165,23 +167,6 @@ genre: genre
             error: "Failed to track click"
         });
     }
-});
-
-// SEARCH HISTORY MANAGEMENT
-let searchHistory = [];
-app.post('/api/history', (req, res) => {
-  const { query } = req.body;
-
-  if (!query) {
-    return res.status(400).json({ error: 'Query is required' });
-  }
-
-  searchHistory.unshift(query);
-  if (searchHistory.length > 10) {
-    searchHistory.pop();
-  }
-
-  res.json({ message: 'Saved' });
 });
 
 // APPLICATION ROUTES

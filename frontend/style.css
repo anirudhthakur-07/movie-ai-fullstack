@@ -463,49 +463,38 @@ h4 {
   font-weight: bold;
 }
 
-/* Target the specific container for the overview */
-.modal-overview::-webkit-scrollbar {
+.modal-scroll-content::-webkit-scrollbar {
   width: 6px;
-  /* Keep it thin and minimalist */
 }
 
-/* The track (background) of the scrollbar */
-.modal-overview::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  /* Very subtle transparent track */
+.modal-scroll-content::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
   border-radius: 10px;
 }
 
-/* The thumb (the draggable part) */
-.modal-overview::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  /* Muted white to match text */
+.modal-scroll-content::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
   border-radius: 10px;
-  transition: background 0.3s ease;
 }
 
-/* Hover effect for the thumb */
-.modal-overview::-webkit-scrollbar-thumb:hover {
+.modal-scroll-content::-webkit-scrollbar-thumb:hover {
   background: var(--primary-color);
-  /* Turns Netflix Red on hover */
 }
-
-/* Firefox Support */
-.modal-overview {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
-}
-
-.modal-overview {
+.modal-scroll-content {
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2)
+                   rgba(255,255,255,0.05);
+}
+
+.modal-overview{
   font-size: 1.1rem;
   line-height: 1.5;
   color: #ccc;
-  margin-bottom: 20px;
-  padding-right: 15px;
 }
-
 .message {
   max-width: 80%;
   padding: 10px 15px;
@@ -2072,4 +2061,102 @@ pointer-events: auto;
     color: #aaa;
     text-align: center;
     width: 100%;
+}
+.recommendation-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.reason-tag {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+/* SEARCH HISTORY */
+
+.search-history-section{
+    margin:40px 0;
+    padding:0 40px;
+}
+
+.search-history-section h2{
+    font-size:22px;
+    font-weight:600;
+    margin-bottom:15px;
+    position:relative;
+}
+
+.search-history-section h2::before{
+    content:"";
+    position:absolute;
+    left:-12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:4px;
+    height:20px;
+    background:#e50914;
+    border-radius:2px;
+}
+
+.history-row{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    padding:10px 0 20px;
+    scrollbar-width:none;
+}
+
+.history-row::-webkit-scrollbar{
+    display:none;
+}
+
+.history-chip{
+    flex-shrink:0;
+
+    background:linear-gradient(
+        135deg,
+        rgba(255,255,255,.05),
+        rgba(255,255,255,.02)
+    );
+
+    border:1px solid rgba(255,255,255,.08);
+
+    color:#fff;
+
+    padding:12px 22px;
+
+    border-radius:999px;
+
+    font-size:14px;
+    font-weight:500;
+
+    backdrop-filter:blur(10px);
+
+    transition:.3s ease;
+}
+
+.history-chip:hover{
+    transform:translateY(-3px);
+
+    background:linear-gradient(
+        135deg,
+        #e50914,
+        #ff2d55
+    );
+
+    border-color:transparent;
+
+    box-shadow:
+        0 10px 25px rgba(229,9,20,.35);
+}
+.history-chip i{
+    margin-right:8px;
+    color:#aaa;
+}
+
+.history-chip:hover i{
+    color:white;
 }

@@ -47,7 +47,9 @@ async function authFetch(url, options = {}) {
 }
 
 // APPLICATION STATE MANAGEMENT
+
 // Caching, Pagination & Runtime Variables
+let historyRow;
 let heroInterval = null;
 let currentPage = 1;
 let currentQuery = '';
@@ -405,6 +407,18 @@ async function searchMovie(query) {
   if (!query) return;
 
   currentQuery = query;
+  await authFetch(
+`${API_BASE}/history`,
+{
+    method: "POST",
+    headers: {
+        "Content-Type":
+        "application/json"
+    },
+    body: JSON.stringify({
+        query
+    })
+});
   currentPage = 1;
 
   searchResultsRow.innerHTML = "";
@@ -485,6 +499,7 @@ function displayMovies(movies, container, replace = false) {
         console.error("openModal not loaded");
     }
 });
+
     const poster = movie.poster_path
       ? IMG_BASE + movie.poster_path
       : movie.backdrop_path
@@ -496,7 +511,6 @@ function displayMovies(movies, container, replace = false) {
   <div class="movie-info-overlay">
     <div class="movie-title">${movie.title}</div>
     <div class="movie-rating">⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}</div>
-
    <button
   class="watch-btn"
   data-id="${movie.id}"
@@ -744,7 +758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   searchSpinner = document.getElementById('searchSpinner');
   noResultsMsg = document.getElementById('noResultsMsg');
   loadMoreBtn = document.getElementById('loadMoreBtn');
-
+  historyRow =document.getElementById("historyRow");
   trendingRow = document.getElementById('trendingRow');
   actionRow = document.getElementById('actionRow');
   comedyRow = document.getElementById('comedyRow');
@@ -784,6 +798,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   //  Initial Data Fetching
   await loadUserWatchlist();
+  loadSearchHistory();
   loadTrending();
   loadHeroCarousel();
   //  Specific Category Loads
@@ -844,6 +859,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ANALYTICS-BASED RECOMMENDATIONS
 // Generate Content Using User Behaviour Insights
+async function loadSearchHistory() {
+
+    const res =
+    await authFetch(
+      `${API_BASE}/history`
+    );
+
+    if (!res) return;
+
+    const history =
+    await res.json();
+
+    historyRow.innerHTML = "";
+
+    history.forEach(item => {
+
+        const btn =
+        document.createElement(
+          "button"
+        );
+
+        btn.className =
+        "history-chip";
+
+        btn.innerText =
+        item.query;
+
+        btn.onclick = () =>
+        searchMovie(item.query);
+
+        historyRow.appendChild(btn);
+    });
+}
 async function loadAnalyticsRecommendations() {
 
   try {
@@ -991,27 +1039,6 @@ function openWatchlistPage() {
 function logout() {
   localStorage.removeItem("token");
   window.location.href = "login.html";
-}
-function updateScrollButtons(row, leftBtn, rightBtn) {
-  const maxScroll = row.scrollWidth - row.clientWidth;
-
-  // LEFT BUTTON
-  if (row.scrollLeft <= 2) {
-    leftBtn.style.opacity = "0";
-    leftBtn.style.pointerEvents = "none";
-  } else {
-    leftBtn.style.opacity = "1";
-    leftBtn.style.pointerEvents = "auto";
-  }
-
-  // RIGHT BUTTON
-  if (row.scrollLeft >= maxScroll - 2) {
-    rightBtn.style.opacity = "0";
-    rightBtn.style.pointerEvents = "none";
-  } else {
-    rightBtn.style.opacity = "1";
-    rightBtn.style.pointerEvents = "auto";
-  }
 }
 window.addEventListener('scroll', function () {
   const nav = document.querySelector('.navbar');

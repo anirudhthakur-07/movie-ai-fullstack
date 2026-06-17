@@ -141,10 +141,12 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
       return res.json({ results: [], status: "insufficient" });
     }
     const movieIds = user.watchlist.map(m => m.tmdbId);
-
+    const recent = movieIds.slice(-5);
+    const older = movieIds.slice(0, 2);
+    const selectedMovies = [...recent, ...older];
     let genreCount = {};
-
-    for (let id of movieIds.slice(0, 5)) {
+    const sourceMovieTitles = {};
+   for (let id of selectedMovies){
       if (!id) continue;
 
       try {
@@ -152,6 +154,8 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
 
         response.data.genres.forEach(g => {
           genreCount[g.id] = (genreCount[g.id] || 0) + 1;
+          sourceMovieTitles[id] =
+      response.data.title;
         });
       } catch (err) {
         console.error("TMDB FAIL:", id);
@@ -164,55 +168,135 @@ router.get('/recommend/watchlist', auth, async (req, res) => {
     const topGenres = sortedGenres.slice(0, 2);
     const genreIds = topGenres.join(',');
     let recommendations = [];
-    const recent = movieIds.slice(-5);
-const older = movieIds.slice(0, 2);
-    const selectedMovies = [...recent, ...older];
-
-   
     const promises = selectedMovies.map(id => tmdbApi.get(`/movie/${id}/recommendations`));
     
     // allSettled ensures that if one movie fetch fails, the rest still succeed
     const responses = await Promise.allSettled(promises);
-    
-    responses.forEach(res => {
-      if (res.status === 'fulfilled' && res.value.data.results) {
-        recommendations.push(...res.value.data.results);
-      }
-    });
     if (topGenres.length > 0) {
-      const genreRes = await tmdbApi.get('/discover/movie', {
+
+  try {
+
+    const genreRes = await tmdbApi.get(
+      '/discover/movie',
+      {
         params: {
-          with_genres: topGenres.join(','),
+          with_genres: genreIds,
           sort_by: 'vote_average.desc',
           'vote_count.gte': 200
         }
-      });
+      }
+    );
 
-      recommendations.push(...genreRes.data.results);
-    }
+    recommendations.push(
+      ...genreRes.data.results
+    );
+
+  } catch (err) {
+
+    console.log(
+      "Genre discover failed"
+    );
+
+  }
+
+}
+   responses.forEach((res,index) => {
+
+  if (
+    res.status === "fulfilled" &&
+    res.value.data.results
+  ) {
+
+    const sourceMovieId =
+      selectedMovies[index];
+
+    const sourceTitle =
+      sourceMovieTitles[sourceMovieId];
+
+    res.value.data.results.forEach(movie => {
+
+      movie.sourceMovie =
+        sourceTitle;
+
+      recommendations.push(movie);
+
+    });
+
+  }
+
+});
  const scoreMap = new Map();
 
 recommendations.forEach(m => {
-
   if (
     !movieIds.includes(m.id) &&
     m.poster_path &&
     m.vote_average >= 5 &&
     m.vote_count > 100
   ) {
+const explanations = [];
+if (
+ profile.profileStrength === "High"
+) {
+ explanations.push(" High Match");
+}
 
-    if (!scoreMap.has(m.id)) {
+if (
+ profile.activityLevel === "Power User"
+) {
+ explanations.push("Based on Viewing Activity");
+}
 
-      scoreMap.set(m.id, {
-        ...m,
-        recommendationScore: 5
-      });
+(m.genre_ids || []).forEach(id => {
 
-    } else {
+  const genreName = genreMap[id];
 
-      scoreMap.get(m.id).recommendationScore += 5;
+  if (genreScores[genreName]) {
 
-    }
+   const shortGenres = {
+  "Action": "Action Match",
+  "Adventure": "Adventure Match",
+  "Comedy": "Comedy Match",
+  "Crime": "Crime Match",
+  "Drama": "Drama Match",
+  "Fantasy": "Fantasy Match",
+  "Horror": "Horror Match",
+  "Mystery": "Mystery Match",
+  "Romance": "Romance Match",
+  "Science Fiction": "Sci-Fi Match",
+  "Thriller": "Thriller Match",
+  "War": "War Match",
+  "Animation": "Animation Match"
+};
+
+    explanations.push(
+      shortGenres[genreName] ||
+      `🎬 ${genreName} Fan`
+    );
+  }
+});
+if (m.sourceMovie) {
+
+explanations.push(
+  `Similar to ${m.sourceMovie}`
+);
+}
+const uniqueExplanations =
+[...new Set(explanations)]
+.slice(0,3);
+if (!scoreMap.has(m.id)) {
+
+  scoreMap.set(m.id, {
+    ...m,
+    recommendationScore: 5,
+    explanations: uniqueExplanations
+  });
+
+} else {
+
+  scoreMap.get(m.id).recommendationScore += 5;
+
+}
   }
 });
  const refined = Array.from(scoreMap.values());
