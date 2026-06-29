@@ -186,11 +186,36 @@ router.get("/", auth, async (req, res) => {
     }
 });
 
+// Temporary in-memory map to store tracking cooldown timestamps per user
+const trackingCooldowns = new Map(); // userId -> { lastOpenTime, lastInteractTime }
+
 // POST ACTION TRACKER
 // Safe endpoint to log user clicks and views on recommendation items
 router.post("/track", auth, async (req, res) => {
     const { action } = req.body;
     try {
+        const userIdStr = req.userId.toString();
+        const now = Date.now();
+
+        if (!trackingCooldowns.has(userIdStr)) {
+            trackingCooldowns.set(userIdStr, { lastOpenTime: 0, lastInteractTime: 0 });
+        }
+        const userCooldown = trackingCooldowns.get(userIdStr);
+
+        if (action === "open_recommendation") {
+            if (now - userCooldown.lastOpenTime < 2000) {
+                return res.status(429).json({ error: "Action too frequent" });
+            }
+            userCooldown.lastOpenTime = now;
+        } else if (action === "recommendation_interaction") {
+            if (now - userCooldown.lastInteractTime < 2000) {
+                return res.status(429).json({ error: "Action too frequent" });
+            }
+            userCooldown.lastInteractTime = now;
+        } else {
+            return res.status(400).json({ error: "Invalid action" });
+        }
+
         const user = await User.findById(req.userId);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
