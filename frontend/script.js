@@ -940,8 +940,6 @@ await Promise.all([
 
     loadHorror(),
 
-    loadUserWatchlist(),
-
     loadWatchlistRecommendations(),
 
     fetchInitialMovies()

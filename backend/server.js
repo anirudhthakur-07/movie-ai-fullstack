@@ -17,6 +17,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Movie = require('./models/Movie');
+const User = require('./models/User');
 const helmet = require("helmet");
 const mongoSanitize =require("express-mongo-sanitize");
 const ProviderClick =require("./models/ProviderClick");

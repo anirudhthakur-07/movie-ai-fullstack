@@ -4,44 +4,8 @@
 var IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 let currentModalRequest = 0;
 let currentOpenMovieId = null;
-// AUTHENTICATED API REQUESTS
-// Automatically Attach JWT Token To Requests
-async function authFetch(url, options = {}) {
-
-    const token =
-    localStorage.getItem("token");
-
-    if (!token) {
-
-        window.location.href =
-        "login.html";
-
-        return null;
-    }
-
-    options.headers = {
-
-        ...(options.headers || {}),
-
-        Authorization:
-        "Bearer " + token
-    };
-
-    const res =
-    await fetch(url, options);
-
-    if (res.status === 401) {
-
-        localStorage.removeItem("token");
-
-        window.location.href =
-        "login.html";
-
-        return null;
-    }
-
-    return res;
-}
+// authFetch is defined globally in script.js
+// No duplicate definition here — uses the script.js version with try/catch
 
 // MOVIE CAST INFORMATION
 // Retrieve Top Cast Members From Backend API
@@ -300,49 +264,7 @@ providers.forEach(provider => {
     uniqueProviders.push(provider);
 });
     
-const normalizedLinks = {
 
-    netflix:
-    "https://www.netflix.com",
-
-    "amazon prime video":
-    "https://www.primevideo.com",
-
-    "prime video":
-    "https://www.primevideo.com",
-
-    "disney plus":
-    "https://www.hotstar.com/in",
-
-    "disney hotstar":
-    "https://www.hotstar.com/in",
-
-    jiohotstar:
-    "https://www.hotstar.com/in",
-
-    zee5:
-    "https://www.zee5.com",
-
-    sonyliv:
-    "https://www.sonyliv.com",
-
-    "sony liv":
-    "https://www.sonyliv.com",
-
-    appletv:
-    "https://tv.apple.com",
-
-    "apple tv":
-    "https://tv.apple.com",
-
-    "apple tv plus":
-    "https://tv.apple.com",
-
-    crunchyroll:
-    "https://www.crunchyroll.com",
-
-  
-};
     uniqueProviders.forEach(provider => {
 
         const img = document.createElement("img");
@@ -353,10 +275,7 @@ const normalizedLinks = {
         img.className = "provider-logo";
 
         img.title = provider.provider_name;
-        console.log("PROVIDER:", provider.provider_name);
 img.onclick = async () => {
-
-console.log("CLICK STARTED");
     const cleanName =
         provider.provider_name
         .toLowerCase()
@@ -462,12 +381,6 @@ if (!genreName) {
     console.warn("Genre missing");
 
 }
-console.log("SENDING ANALYTICS");
-console.log({
-    provider: provider.provider_name,
-    genre: genreName,
-    movie: fullMovie.title
-});
 await authFetch(`${API_BASE}/provider-click`, {
 
     method: "POST",
