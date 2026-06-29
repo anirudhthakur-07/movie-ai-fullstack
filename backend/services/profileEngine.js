@@ -177,6 +177,7 @@ favoriteGenre === "mystery"
     activityLevel,
     totalInteractions,
     movieExplorerLevel,
+    gender: user.gender || "male",
     recentSearches:
 recentSearches.map(
     s => s.query

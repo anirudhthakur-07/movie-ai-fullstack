@@ -8,7 +8,7 @@ const User = require("../models/User");
 const JWT_SECRET =process.env.JWT_SECRET;
 
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, gender } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: "All fields required" });
   }
@@ -19,7 +19,11 @@ router.post('/register', async (req, res) => {
   const hashed = await bcrypt.hash(password, 10);
 
   try {
-    const newUser = await User.create({ username, password: hashed });
+    const newUser = await User.create({ 
+        username, 
+        password: hashed, 
+        gender: (gender === "female") ? "female" : "male" 
+    });
 
     const token = jwt.sign(
       { id: newUser._id },

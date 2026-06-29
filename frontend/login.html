@@ -11,6 +11,52 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        .input-group select {
+            width: 100%;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid transparent;
+            border-radius: 16px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255, 255, 255, 0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 16px;
+            padding-right: 45px;
+        }
+        .input-group select:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.35);
+            padding-top: 25px;
+            padding-bottom: 11px;
+            outline: none;
+        }
+        .input-group select:valid {
+            padding-top: 25px;
+            padding-bottom: 11px;
+        }
+        .input-group select:focus+label,
+        .input-group select:valid+label {
+            top: 15px;
+            font-size: 11px;
+            color: var(--primary-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .input-group select option {
+            background: #16161a;
+            color: #fff;
+        }
+    </style>
 </head>
 
 <body class="login-body">
@@ -45,7 +91,17 @@
                 <!-- Password -->
                 <div class="input-group">
                     <input type="password" id="password" required placeholder=" ">
-                    <label for="password">Password</label></div>
+                    <label for="password">Password</label>
+                </div>
+                
+                <!-- Gender Selection (Applied on Sign Up) -->
+                <div class="input-group">
+                    <select id="gender" required>
+                        <option value="male" selected>Male Profile Avatar</option>
+                        <option value="female">Female Profile Avatar</option>
+                    </select>
+                    <label for="gender">Profile Gender</label>
+                </div>
                <div class="terms-box">
 
     <input type="checkbox" id="terms" >
@@ -215,20 +271,19 @@ error.classList.add("hidden");
         async function register() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
-const accepted =
+            const gender = document.getElementById("gender").value;
+            const accepted =
 document.getElementById("terms").checked;
 
-const error =
+            const error =
 document.getElementById("termsError");
 
-if (!accepted) {
+            if (!accepted) {
+                error.classList.remove("hidden");
+                return;
+            }
 
-    error.classList.remove("hidden");
-
-    return;
-}
-
-error.classList.add("hidden");
+            error.classList.add("hidden");
             if (!username || !password) {
                 alert("Enter username & password");
                 return;
@@ -237,7 +292,7 @@ error.classList.add("hidden");
             const res = await fetch(`${API_BASE}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, gender })
             });
 
             const data = await res.json();
