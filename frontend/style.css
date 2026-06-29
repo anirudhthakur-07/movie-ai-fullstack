@@ -2233,3 +2233,73 @@ pointer-events: auto;
   font-size: 0.75rem;
   color: #fff;
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVE COMPATIBILITY OVERRIDES
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Navigation adjustments */
+  .navbar {
+    padding: 10px 15px !important;
+    height: auto !important;
+  }
+  .nav-right {
+    gap: 8px !important;
+  }
+  .search-wrapper {
+    max-width: 140px !important;
+  }
+  .search-wrapper input {
+    padding: 6px 30px 6px 10px !important;
+    font-size: 13px !important;
+  }
+  .nav-action-btn {
+    font-size: 0 !important; /* Hide text label */
+    padding: 8px 10px !important;
+    border-radius: 50% !important; /* Circular icon buttons */
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-action-btn i {
+    font-size: 15px !important; /* Keep icon visible */
+    margin: 0 !important;
+  }
+  .logo {
+    font-size: 1.5rem !important;
+  }
+
+  /* Movie Details Modal Column Stacking */
+  .modal-content {
+    flex-direction: column !important;
+    height: 90vh !important;
+    width: 95% !important;
+    overflow-y: auto !important;
+  }
+  .modal-body {
+    flex-direction: column !important;
+  }
+  .modal-poster {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: 260px !important;
+  }
+  .modal-info {
+    flex: 0 0 auto !important;
+    padding: 20px !important;
+    height: auto !important;
+  }
+  #modalTitle {
+    font-size: 1.8rem !important;
+  }
+  .modal-buttons {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .modal-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
