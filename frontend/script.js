@@ -382,10 +382,17 @@ async function loadWatchlistRecommendations(reset = false) {
   const oldMsg = document.querySelector(".empty-msg");
   if (oldMsg) oldMsg.remove();
 
-  //  NO MOVIES (legacy fallback)
-  if (data.status === "empty") {
+  //  NO MOVIES or COLD START (empty watchlist)
+  if (data.status === "empty" || data.status === "cold_start") {
     showWatchlistMessage("Add movies to your watchlist to get recommendations 🎯");
     if (text) text.classList.add("hidden");
+    
+    // Hide scroll buttons for watchlist rec row
+    const rowWrapper = watchlistRecRow.parentElement;
+    const leftBtn = rowWrapper.querySelector(".scroll-left");
+    const rightBtn = rowWrapper.querySelector(".scroll-right");
+    if (leftBtn) { leftBtn.style.opacity = "0"; leftBtn.style.pointerEvents = "none"; }
+    if (rightBtn) { rightBtn.style.opacity = "0"; rightBtn.style.pointerEvents = "none"; }
     return;
   }
 
@@ -510,11 +517,18 @@ async function searchMovie(query) {
 
     searchResultsRow.innerHTML = `
       <p class="empty-search">
-        No movies found for "${query}"
+        No movies found for "${escapeHTML(query)}"
       </p>
     `;
 
     searchResultsSection.classList.remove("hidden");
+
+    // Hide scroll buttons for search row when empty
+    const rowWrapper = searchResultsRow.parentElement;
+    const leftBtn = rowWrapper.querySelector(".scroll-left");
+    const rightBtn = rowWrapper.querySelector(".scroll-right");
+    if (leftBtn) { leftBtn.style.opacity = "0"; leftBtn.style.pointerEvents = "none"; }
+    if (rightBtn) { rightBtn.style.opacity = "0"; rightBtn.style.pointerEvents = "none"; }
 
     return; // STOP HERE
   }

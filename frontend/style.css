@@ -2334,3 +2334,25 @@ pointer-events: auto;
     font-size: 1.25rem !important;
   }
 }
+
+/* Premium styling for empty search results state */
+.empty-search {
+  width: 100%;
+  text-align: center;
+  padding: 50px 20px !important;
+  color: #aaa;
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.empty-search::before {
+  content: "🔍";
+  font-size: 2.2rem;
+  display: block;
+}
