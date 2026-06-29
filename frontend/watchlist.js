@@ -186,13 +186,12 @@ function displayWatchlist(list, container) {
     if (!list || list.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">🎬</div>
-            <h2>No Movies Yet</h2>
-            <p>Your watchlist is empty.</p>
-            <!-- This adds the button back so it doesn't disappear -->
-           <button class="browse-btn" onclick="goHome()">
-    Browse Movies
-</button>
+            <div class="empty-icon-glow"><i class="fas fa-clapperboard"></i></div>
+            <h2>Watchlist Empty</h2>
+            <p>Explore trending releases, search for classics, and start building your personalized movie collection.</p>
+            <button class="browse-btn" onclick="goHome()">
+                Browse Titles
+            </button>
           </div>
         `;
         return;

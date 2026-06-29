@@ -384,7 +384,7 @@ async function loadWatchlistRecommendations(reset = false) {
 
   //  NO MOVIES or COLD START (empty watchlist)
   if (data.status === "empty" || data.status === "cold_start") {
-    showWatchlistMessage("Add movies to your watchlist to get recommendations 🎯");
+    showWatchlistMessage();
     if (text) text.classList.add("hidden");
     
     // Hide scroll buttons for watchlist rec row
@@ -422,11 +422,14 @@ async function loadWatchlistRecommendations(reset = false) {
 
   if (text) text.classList.add("hidden");
 }
-function showWatchlistMessage(text) {
+function showWatchlistMessage() {
   const msg = document.createElement("div");
-  msg.className = "empty-msg";
-  msg.innerText = text;
-
+  msg.className = "watchlist-onboarding-card";
+  msg.innerHTML = `
+    <div class="onboarding-icon"><i class="fas fa-sparkles"></i></div>
+    <h4>Cinematic Profile Initializing</h4>
+    <p>Add movies to your Watchlist to construct your taste DNA and unlock AI-powered recommendations.</p>
+  `;
   watchlistRecRow.parentElement.appendChild(msg);
 }
 async function loadHistory() {
