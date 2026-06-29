@@ -182,7 +182,7 @@ Please review and accept before continuing.
     <!-- SCRIPT -->
     <script>
         // 🔐 Redirect if already logged in
-        if (localStorage.getItem("token")) {
+        if (sessionStorage.getItem("token")) {
             window.location.href = "index.html";
         }
 
@@ -265,7 +265,7 @@ error.classList.add("hidden");
                 return;
             }
 
-            localStorage.setItem("token", data.token);
+            sessionStorage.setItem("token", data.token);
             window.location.href = "index.html";
         }
         async function register() {
@@ -307,7 +307,7 @@ document.getElementById("termsError");
             }
 
             //  AUTO LOGIN
-            localStorage.setItem("token", data.token);
+            sessionStorage.setItem("token", data.token);
 
             window.location.href = "index.html";
         }

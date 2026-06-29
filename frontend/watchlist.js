@@ -5,7 +5,7 @@ var IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 // PAGE INITIALIZATION
 // Verify Authentication And Load Watchlist
 window.addEventListener("DOMContentLoaded", () => {
-    if (!localStorage.getItem("token")) {
+    if (!sessionStorage.getItem("token")) {
         window.location.href = "login.html";
         return;
     }
@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", () => {
 async function authFetch(url, options = {}) {
 
     const token =
-    localStorage.getItem("token");
+    sessionStorage.getItem("token");
 
     if (!token) {
 
@@ -39,7 +39,7 @@ async function authFetch(url, options = {}) {
 
     if (res.status === 401) {
 
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
 
         window.location.href =
         "login.html";

@@ -4,7 +4,7 @@
 // Attach JWT Token To Protected Requests
 async function authFetch(url, options = {}) {
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   //  NO TOKEN
   if (!token) {
@@ -27,7 +27,7 @@ async function authFetch(url, options = {}) {
 
       console.warn("Session expired");
 
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
 
       alert("Session expired. Please login again.");
 
@@ -48,7 +48,7 @@ async function authFetch(url, options = {}) {
 
 // Global Behavioral Tracking System
 window.trackBehaviorEvent = function(eventType, movieId, movieTitle, genre) {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   if (!token) return;
 
   fetch(`${API_BASE}/behavior/event`, {
@@ -592,12 +592,12 @@ function displayMovies(movies, container, replace = false) {
     card.dataset.id = movie.id;
     card.classList.add('movie-card');
     card.addEventListener("click", async () => {
-      if (movie.explanations && movie.explanations.length > 0 && localStorage.getItem("token")) {
+      if (movie.explanations && movie.explanations.length > 0 && sessionStorage.getItem("token")) {
         fetch(`${API_BASE}/achievements/track`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + localStorage.getItem("token")
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
           },
           body: JSON.stringify({ action: "open_recommendation" })
         }).catch(err => console.log("Tracking open_recommendation failed", err));
@@ -885,7 +885,7 @@ document.getElementById(
   watchlistRecRow = document.getElementById('watchlistRecRow');
 
   //  Auth Check
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   if (!token) {
     window.location.href = "login.html";
     return;
@@ -1194,7 +1194,7 @@ function openWatchlistPage() {
   window.location.href = "watchlist.html";
 }
 function logout() {
-  localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
   window.location.href = "login.html";
 }
 function updateScrollButtons(row, leftBtn, rightBtn) {

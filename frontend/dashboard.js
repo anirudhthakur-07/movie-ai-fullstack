@@ -4,7 +4,7 @@
 // and full 40-Tier Gamified Achievements Modal
 // ==========================================================================
 
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token");
 
 if (!token) {
     window.location.href = "login.html";
