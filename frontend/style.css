@@ -255,7 +255,7 @@ h4 {
 }
 
 .section-title {
-  font-size: 1.4vw;
+  font-size: 1.4rem;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -2301,5 +2301,36 @@ pointer-events: auto;
   .modal-btn {
     width: 100% !important;
     justify-content: center !important;
+  }
+
+  /* Movie Card scaling on mobile for better proportion */
+  .movie-card {
+    width: 130px !important;
+    min-width: 130px !important;
+    height: 195px !important;
+  }
+  .movie-card img {
+    height: 100% !important;
+  }
+
+  /* Watchlist Grid 2-column forced scaling */
+  .watchlist-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 15px !important;
+  }
+
+  /* Watchlist Container padding adjustment */
+  .watchlist-container {
+    padding: 80px 15px 30px 15px !important;
+  }
+
+  /* Ensure movie section horizontal margins are reduced on mobile */
+  .movie-section {
+    padding: 0 15px !important;
+    margin: 25px 0 !important;
+  }
+
+  .section-title {
+    font-size: 1.25rem !important;
   }
 }
