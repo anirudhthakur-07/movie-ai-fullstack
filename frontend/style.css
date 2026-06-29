@@ -70,6 +70,7 @@ h4 {
   font-size: 2rem;
   font-weight: bold;
   letter-spacing: 1px;
+  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
 }
 
 .ai-text {
@@ -1740,7 +1741,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   gap: 10px;
-
+  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
 }
 
 
