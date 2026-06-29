@@ -13,6 +13,14 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: "All fields required" });
   }
 
+  const cleanUsername = String(username).trim();
+  const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+  if (!usernameRegex.test(cleanUsername)) {
+    return res.status(400).json({ 
+      error: "Username must be 3-30 characters and only contain alphanumeric characters or underscores" 
+    });
+  }
+
   if (password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 chars" });
   }
@@ -20,7 +28,7 @@ router.post('/register', async (req, res) => {
 
   try {
     const newUser = await User.create({ 
-        username, 
+        username: cleanUsername, 
         password: hashed, 
         gender: (gender === "female") ? "female" : "male" 
     });
