@@ -2485,119 +2485,136 @@ pointer-events: auto;
 
 .watchlist-hero-card {
   margin: 90px 4% 20px;
-  padding: 24px 30px;
-  background: rgba(20, 20, 20, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 32px 38px;
+  background: linear-gradient(145deg, rgba(227, 38, 54, 0.08) 0%, rgba(22, 22, 26, 0.6) 60%) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(227, 38, 54, 0.15) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   display: flex;
-  gap: 25px;
+  gap: 24px;
   align-items: center;
+  position: relative;
+  overflow: hidden;
   box-sizing: border-box;
   animation: fadeIn 0.8s ease-out;
 }
 
+.watchlist-hero-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(227, 38, 54, 0.12) 0%, rgba(227, 38, 54, 0) 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
 .watchlist-hero-avatar-container {
   position: relative;
+  width: 95px;
+  height: 95px;
   flex-shrink: 0;
+  z-index: 1;
+}
+
+.watchlist-hero-avatar-ring {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid #ff2e43;
+  opacity: 0.8;
+  animation: ring-pulse 2.5s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .watchlist-hero-avatar {
-  width: 85px;
-  height: 85px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #e50914;
-  box-shadow: 0 0 20px rgba(229, 9, 20, 0.35);
-  display: block;
-}
-
-.watchlist-hero-avatar-text {
-  width: 85px;
-  height: 85px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: linear-gradient(135deg, #e50914, #ff3b47);
-  color: white;
-  font-size: 2.2rem;
-  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  box-sizing: border-box;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.watchlist-hero-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 .watchlist-hero-info {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
+  z-index: 1;
+  text-align: left;
 }
 
-.watchlist-hero-info h2 {
-  font-size: 1.7rem;
+.watchlist-hero-username {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
   margin: 0;
-  color: white;
-  font-weight: 700;
+  background: linear-gradient(90deg, #ffffff, #e2e8f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
-.watchlist-hero-persona {
-  font-size: 0.88rem;
-  color: #ff3b47;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.watchlist-hero-xp-bar-container {
-  width: 100%;
-  max-width: 400px;
-  margin-top: 4px;
-}
-
-.watchlist-hero-xp-bar-wrapper {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.watchlist-hero-xp-progress {
-  height: 100%;
-  background: linear-gradient(90deg, #e50914, #ff3b47);
-  width: 0%;
-  transition: width 1.2s cubic-bezier(0.1, 0.8, 0.1, 1);
-  box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-}
-
-.watchlist-hero-xp-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.76rem;
+.watchlist-hero-tagline {
+  font-size: 1.25rem;
   color: #888;
-  margin-top: 4px;
 }
 
-.watchlist-hero-stats {
-  display: flex;
-  gap: 15px;
+.watchlist-hero-tagline .glowing-red {
+  font-weight: 600;
+  color: #ff3e52;
+  text-shadow: 0 0 10px rgba(255, 62, 82, 0.3);
+}
+
+.watchlist-hero-badge {
+  text-align: right;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
+  z-index: 1;
   flex-shrink: 0;
 }
 
-.watchlist-hero-stat-item {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 12px 18px;
-  border-radius: 12px;
-  text-align: center;
-  min-width: 90px;
-  box-sizing: border-box;
+.watchlist-hero-badge .lvl-label {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.watchlist-hero-badge .lvl-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: white;
 }
 
 .watchlist-hero-stat-item .value {

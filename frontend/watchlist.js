@@ -2,6 +2,49 @@
 // Handles User Saved Movies & Watchlist Operations
 var IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
+const PERSONA_TITLES = {
+    "action addict": "Action Addict",
+    "thriller hunter": "Thriller Hunter",
+    "drama enthusiast": "Drama Enthusiast",
+    "comedy lover": "Comedy Lover",
+    "horror seeker": "Horror Seeker",
+    "adventure explorer": "Adventure Explorer",
+    "fantasy dreamer": "Fantasy Dreamer",
+    "animation enthusiast": "Animation Enthusiast",
+    "mystery detective": "Mystery Detective",
+    "movie fan": "Movie Fan"
+};
+
+function getAvatarPath(persona, gender) {
+    const rawPersona = (persona || "Movie Fan").toLowerCase();
+    const cleanGender = (gender || "male").toLowerCase();
+
+    const mapping = {
+        "action addict": "action_addict",
+        "action": "action_addict",
+        "thriller hunter": "thriller_hunter",
+        "thriller": "thriller_hunter",
+        "drama enthusiast": "drama_enthusiast",
+        "drama": "drama_enthusiast",
+        "comedy lover": "comedy_lover",
+        "comedy": "comedy_lover",
+        "horror seeker": "horror_seeker",
+        "horror": "horror_seeker",
+        "adventure explorer": "adventure_explorer",
+        "adventure": "adventure_explorer",
+        "fantasy dreamer": "fantasy_dreamer",
+        "fantasy": "fantasy_dreamer",
+        "animation enthusiast": "animation_enthusiast",
+        "animation": "animation_enthusiast",
+        "mystery detective": "mystery_detective",
+        "mystery": "mystery_detective",
+        "movie fan": "movie_fan"
+    };
+
+    const prefix = mapping[rawPersona] || "movie_fan";
+    return `assets/avatars/${prefix}_${cleanGender}.jpg`;
+}
+
 function escapeHTML(str) {
     if (!str) return '';
     return str
@@ -104,6 +147,72 @@ async function getWatchlist(retries = 3) {
     }
 }
 
+// Local cache of TMDB details to optimize performance and prevent rate limiting
+const movieDetailsCache = JSON.parse(localStorage.getItem("movieDetailsCache") || "{}");
+
+async function enrichWatchlistDetails(list) {
+    if (!list || list.length === 0) return;
+
+    // Check which IDs are missing from the cache
+    const missingIds = [];
+    list.forEach(m => {
+        const id = m.tmdbId || m.id;
+        if (id && !movieDetailsCache[id]) {
+            missingIds.push(id);
+        } else if (id && movieDetailsCache[id]) {
+            // Apply cached details
+            const cached = movieDetailsCache[id];
+            m.vote_average = cached.vote_average;
+            m.genres = cached.genres;
+            m.release_date = cached.release_date;
+            m.year = cached.year;
+            m.rating = cached.rating;
+        }
+    });
+
+    if (missingIds.length === 0) return;
+
+    // Fetch missing details in chunks (e.g. 6 at a time to prevent browser request limit issues)
+    const chunkSize = 6;
+    for (let i = 0; i < missingIds.length; i += chunkSize) {
+        const chunk = missingIds.slice(i, i + chunkSize);
+        const promises = chunk.map(async id => {
+            try {
+                const res = await fetch(`${API_BASE}/movie/${id}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && !data.error) {
+                    movieDetailsCache[id] = {
+                        vote_average: data.vote_average ?? data.rating ?? 0,
+                        genres: data.genres || [],
+                        release_date: data.release_date || data.first_air_date || "",
+                        year: data.release_date ? data.release_date.substring(0, 4) : "",
+                        rating: data.vote_average ?? data.rating ?? 0
+                    };
+                    // Save to local cache entry
+                    localStorage.setItem("movieDetailsCache", JSON.stringify(movieDetailsCache));
+                }
+            } catch (err) {
+                console.error(`Error fetching movie ${id} details:`, err);
+            }
+        });
+        await Promise.allSettled(promises);
+    }
+
+    // Apply the newly fetched details
+    list.forEach(m => {
+        const id = m.tmdbId || m.id;
+        if (id && movieDetailsCache[id]) {
+            const cached = movieDetailsCache[id];
+            m.vote_average = cached.vote_average;
+            m.genres = cached.genres;
+            m.release_date = cached.release_date;
+            m.year = cached.year;
+            m.rating = cached.rating;
+        }
+    });
+}
+
 // REMOVE WATCHLIST MOVIE
 // Delete Movie From User Watchlist
 async function removeFromWatchlist(id, btn, event) {
@@ -164,10 +273,23 @@ async function renderWatchlistPage() {
 
     // Load cached watchlist for faster page rendering
     const cached = localStorage.getItem("cachedWatchlist");
+    let initialList = [];
     if (cached) {
         try {
-            const list = JSON.parse(cached);
-            displayWatchlist(list, container);
+            initialList = JSON.parse(cached);
+            // Enrich with whatever is already cached in movieDetailsCache
+            initialList.forEach(m => {
+                const id = m.tmdbId || m.id;
+                if (id && movieDetailsCache[id]) {
+                    const cachedD = movieDetailsCache[id];
+                    m.vote_average = cachedD.vote_average;
+                    m.genres = cachedD.genres;
+                    m.release_date = cachedD.release_date;
+                    m.year = cachedD.year;
+                    m.rating = cachedD.rating;
+                }
+            });
+            displayWatchlist(initialList, container);
         } catch { }
     } else {
         container.innerHTML = `
@@ -183,7 +305,18 @@ async function renderWatchlistPage() {
         getWatchlist()
     ]);
 
-    localStorage.setItem("cachedWatchlist", JSON.stringify(list));
+    // Apply currently cached details to fresh list for initial display
+    list.forEach(m => {
+        const id = m.tmdbId || m.id;
+        if (id && movieDetailsCache[id]) {
+            const cachedD = movieDetailsCache[id];
+            m.vote_average = cachedD.vote_average;
+            m.genres = cachedD.genres;
+            m.release_date = cachedD.release_date;
+            m.year = cachedD.year;
+            m.rating = cachedD.rating;
+        }
+    });
 
     // Render primary components
     renderHeroCard(profile, list);
@@ -194,6 +327,16 @@ async function renderWatchlistPage() {
     // Fetch recommendations and explore log asynchronously
     renderAIPicks();
     renderContinueExploring();
+
+    // Enrich watchlist details dynamically in background (fetch ratings/genres if missing)
+    await enrichWatchlistDetails(list);
+    localStorage.setItem("cachedWatchlist", JSON.stringify(list));
+
+    // Re-render components with fully enriched details
+    renderHeroCard(profile, list);
+    renderRecentlyAdded(list);
+    renderCollectionInsights(list, profile);
+    displayWatchlist(list, container);
 }
 
 async function fetchUserProfile() {
@@ -238,64 +381,30 @@ function renderHeroCard(profile, watchlist) {
 
     heroCard.classList.remove("hidden");
 
-    let avatarMarkup = "";
-    if (profile.avatarUrl) {
-        avatarMarkup = `<img src="${escapeHTML(profile.avatarUrl)}" alt="Avatar" class="watchlist-hero-avatar">`;
-    } else {
-        const initials = (profile.username || "U").substring(0, 2).toUpperCase();
-        avatarMarkup = `<div class="watchlist-hero-avatar-text">${escapeHTML(initials)}</div>`;
-    }
+    // Resolve Mapped Persona
+    const rawPersonality = (profile.personality || "Movie Explorer").toLowerCase();
+    const mappedPersona = PERSONA_TITLES[rawPersonality] || profile.personality || "Movie Explorer";
 
-    const persona = profile.persona || "Analyzing taste DNA...";
-    const currentLvl = profile.level || 1;
-    const currentXp = profile.xp || 0;
-    const xpNeededForNextLvl = currentLvl * 1000;
-    const pct = Math.min(100, Math.floor((currentXp / xpNeededForNextLvl) * 100));
+    // Resolve Avatar Path
+    const avatarImgUrl = getAvatarPath(profile.personality, profile.gender);
+    const fallbackInitial = (profile.username || "U").charAt(0).toUpperCase();
 
     const totalSaved = watchlist ? watchlist.length : 0;
-    
-    let favGenre = "None";
-    if (watchlist && watchlist.length > 0) {
-        const genreCounts = {};
-        watchlist.forEach(m => {
-            const g = m.genre || (m.genres && m.genres.length > 0 ? m.genres[0].name : "Unknown");
-            if (g && g !== "Unknown") {
-                genreCounts[g] = (genreCounts[g] || 0) + 1;
-            }
-        });
-        const genres = Object.keys(genreCounts);
-        if (genres.length > 0) {
-            genres.sort((a, b) => genreCounts[b] - genreCounts[a]);
-            favGenre = genres[0];
-        }
-    }
 
     heroCard.innerHTML = `
         <div class="watchlist-hero-avatar-container">
-            ${avatarMarkup}
+            <div class="watchlist-hero-avatar-ring"></div>
+            <div class="watchlist-hero-avatar">
+                <img src="${avatarImgUrl}" alt="${escapeHTML(mappedPersona)}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
+            </div>
         </div>
         <div class="watchlist-hero-info">
-            <span class="watchlist-hero-persona">${escapeHTML(persona)}</span>
-            <h2>${escapeHTML(profile.username || "Movie Explorer")}'s Universe</h2>
-            <div class="watchlist-hero-xp-bar-container">
-                <div class="watchlist-hero-xp-bar-wrapper">
-                    <div class="watchlist-hero-xp-progress" style="width: ${pct}%"></div>
-                </div>
-                <div class="watchlist-hero-xp-labels">
-                    <span>Level ${currentLvl}</span>
-                    <span>${currentXp} / ${xpNeededForNextLvl} XP</span>
-                </div>
-            </div>
+            <h2 class="watchlist-hero-username">${escapeHTML(profile.username || "anirudh")}</h2>
+            <div class="watchlist-hero-tagline">Persona: <span class="glowing-red">${escapeHTML(mappedPersona)}</span></div>
         </div>
-        <div class="watchlist-hero-stats">
-            <div class="watchlist-hero-stat-item">
-                <span class="value">${totalSaved}</span>
-                <span class="label">Saved Titles</span>
-            </div>
-            <div class="watchlist-hero-stat-item">
-                <span class="value">${escapeHTML(favGenre)}</span>
-                <span class="label">Favorite Genre</span>
-            </div>
+        <div class="watchlist-hero-badge">
+            <div class="lvl-label">Saved Titles</div>
+            <div class="lvl-val">${totalSaved}</div>
         </div>
     `;
 }
@@ -414,31 +523,18 @@ function renderCollectionInsights(watchlist, profile) {
     });
     const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : "N/A";
 
+    // Genre count and diversity calculations from enriched genres array
     const genreCounts = {};
     watchlist.forEach(m => {
-        const g = m.genre || (m.genres && m.genres.length > 0 ? m.genres[0].name : "Unknown");
-        if (g && g !== "Unknown") {
-            genreCounts[g] = (genreCounts[g] || 0) + 1;
+        if (m.genres && m.genres.length > 0) {
+            m.genres.forEach(g => {
+                if (g.name) {
+                    genreCounts[g.name] = (genreCounts[g.name] || 0) + 1;
+                }
+            });
         }
     });
-    
-    const sortedGenres = Object.keys(genreCounts).sort((a, b) => genreCounts[b] - genreCounts[a]);
-    const topGenre = sortedGenres[0] || "None";
     const genreDiversity = Object.keys(genreCounts).length;
-
-    const decadeCounts = {};
-    watchlist.forEach(m => {
-        const yearStr = m.release_date || m.year;
-        if (yearStr) {
-            const year = parseInt(yearStr);
-            if (!isNaN(year)) {
-                const decade = Math.floor(year / 10) * 10;
-                decadeCounts[decade] = (decadeCounts[decade] || 0) + 1;
-            }
-        }
-    });
-    const sortedDecades = Object.keys(decadeCounts).sort((a, b) => decadeCounts[b] - decadeCounts[a]);
-    const favDecade = sortedDecades[0] ? `${sortedDecades[0]}s` : "Unknown";
 
     let highestRatedMovie = null;
     watchlist.forEach(m => {
@@ -471,33 +567,8 @@ function renderCollectionInsights(watchlist, profile) {
         </div>
 
         <div class="insight-card">
-            <h4><i class="fas fa-film"></i> Genre Distribution</h4>
-            <div class="insight-bar-chart">
-                ${sortedGenres.slice(0, 3).map(g => {
-                    const count = genreCounts[g];
-                    const pct = Math.floor((count / totalSaved) * 100);
-                    return `
-                        <div class="insight-bar-row">
-                            <div class="insight-bar-label-row">
-                                <span>${escapeHTML(g)}</span>
-                                <span>${count} (${pct}%)</span>
-                            </div>
-                            <div class="insight-bar-bg">
-                                <div class="insight-bar-fill" style="width: ${pct}%"></div>
-                            </div>
-                        </div>
-                    `;
-                }).join("")}
-            </div>
-        </div>
-
-        <div class="insight-card">
             <h4><i class="fas fa-calendar-alt"></i> Collection Eras</h4>
             <div class="insight-metrics">
-                <div class="insight-metric-item">
-                    <span class="name">Favorite Decade</span>
-                    <span class="val">${favDecade}</span>
-                </div>
                 <div class="insight-metric-item">
                     <span class="name">Unique Genres</span>
                     <span class="val">${genreDiversity}</span>
