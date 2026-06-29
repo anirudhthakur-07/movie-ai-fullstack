@@ -387,6 +387,9 @@ async function loadWatchlistRecommendations(reset = false) {
     showWatchlistMessage();
     if (text) text.classList.add("hidden");
     
+    // Hide the empty movie row container itself to completely collapse its height!
+    watchlistRecRow.classList.add("hidden");
+
     // Hide scroll buttons for watchlist rec row
     const rowWrapper = watchlistRecRow.parentElement;
     const leftBtn = rowWrapper.querySelector(".scroll-left");
@@ -395,6 +398,15 @@ async function loadWatchlistRecommendations(reset = false) {
     if (rightBtn) { rightBtn.style.opacity = "0"; rightBtn.style.pointerEvents = "none"; }
     return;
   }
+
+  if (reset || watchlistCache.length === 0) {
+    watchlistRecRow.innerHTML = "";
+    watchlistCache = data.results;
+    watchlistPage = 1;
+  }
+
+  // Restore visibility of the row now that we have recommendations
+  watchlistRecRow.classList.remove("hidden");
 
   // NO MATCHES
   if (!data.results || data.results.length === 0) {
