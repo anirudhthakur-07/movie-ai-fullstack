@@ -61,6 +61,20 @@ window.trackBehaviorEvent = function(eventType, movieId, movieTitle, genre) {
   }).catch(err => console.warn("Failed to track behavior event:", err));
 };
 
+// Global HTML Escaper to prevent XSS in template literals
+window.escapeHTML = function(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+};
+
 // APPLICATION STATE MANAGEMENT
 // Caching, Pagination & Runtime Variables
 let heroInterval = null;
@@ -615,21 +629,21 @@ function displayMovies(movies, container, replace = false) {
       : movie.backdrop_path
         ? IMG_BASE + movie.backdrop_path
         : 'https://via.placeholder.com/300x450?text=No+Image';
-    card.innerHTML = ` <img class="movie-img skeleton" src="${poster}" alt="${movie.title}">
+    card.innerHTML = ` <img class="movie-img skeleton" src="${escapeHTML(poster)}" alt="${escapeHTML(movie.title)}">
  
   
   <div class="movie-info-overlay">
-    <div class="movie-title">${movie.title}</div>
+    <div class="movie-title">${escapeHTML(movie.title)}</div>
    <div class="movie-rating">
 ⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}
 </div>
 
    <button
   class="watch-btn"
-  data-id="${movie.id}"
-  data-title="${movie.title}"
-  data-poster="${movie.poster_path}"
-  data-genre="${primaryGenre}"
+  data-id="${escapeHTML(movie.id)}"
+  data-title="${escapeHTML(movie.title)}"
+  data-poster="${escapeHTML(movie.poster_path)}"
+  data-genre="${escapeHTML(primaryGenre)}"
   data-added="${userWatchlist.some(m => m.tmdbId === movie.id)}"
   onclick="toggleWatchlist(event, this)">
 
