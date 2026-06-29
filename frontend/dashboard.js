@@ -648,3 +648,8 @@ loadAchievements();
 loadProviderChart();
 loadGenreChart();
 setupAchievementsModal();
+
+window.logout = function () {
+    sessionStorage.removeItem("token");
+    window.location.href = "login.html";
+};

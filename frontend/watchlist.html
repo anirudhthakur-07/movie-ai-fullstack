@@ -6,9 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
     <title>My Watchlist</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
+    <!-- STUNNING GLOW ACCENTS IN BACKGROUND -->
+    <div class="glow-accent glow-red"></div>
+    <div class="glow-accent glow-blue"></div>
+
+    <!-- NAVBAR (Identical to Homepage) -->
     <nav class="navbar">
         <div class="logo">
 
@@ -70,9 +76,15 @@
 </div>
 
         <div class="nav-right">
-            <button class="back-btn" onclick="goHome()">
-    ← Back Home
-</button>
+            <button class="nav-action-btn home-btn" onclick="goHome()">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="nav-action-btn dashboard-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="nav-action-btn logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
     </nav>
     <main class="watchlist-container">

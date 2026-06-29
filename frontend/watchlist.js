@@ -228,3 +228,8 @@ function displayWatchlist(list, container) {
         container.appendChild(card);
     });
 }
+
+window.logout = function () {
+    sessionStorage.removeItem("token");
+    window.location.href = "login.html";
+};

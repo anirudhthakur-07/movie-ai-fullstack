@@ -34,7 +34,15 @@
             <h1 class="logo">Dark<span class="ai-text"></span></h1>
         </div>
         <div class="nav-right">
-            <button class="back-btn" onclick="window.location.href='index.html'">← Back Home</button>
+            <button class="nav-action-btn home-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="nav-action-btn watchlist-btn" onclick="window.location.href='watchlist.html'">
+                <i class="fas fa-list"></i> My List
+            </button>
+            <button class="nav-action-btn logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
     </nav>
 
