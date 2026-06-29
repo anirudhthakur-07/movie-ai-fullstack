@@ -100,8 +100,8 @@ body {
     left: 0 !important;
     width: 100% !important;
     z-index: 1000 !important;
-    height: 58px !important;
-    padding: 10px 4% !important;
+    height: 68px !important;
+    padding: 18px 4% !important;
 }
 
 .navbar .logo {
@@ -109,10 +109,16 @@ body {
     align-items: center;
     gap: 12px;
     cursor: default;
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
 }
 
 .navbar .logo h1 {
     cursor: default;
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    font-size: 2rem !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important;
+    color: white !important;
 }
 
 .back-btn {
@@ -125,7 +131,7 @@ body {
 .dashboard-wrapper {
     max-width: 1300px;
     margin: 0 auto;
-    padding: 75px 6% 40px 6%; /* Clears the fixed 58px navbar */
+    padding: 90px 6% 40px 6%; /* Clears the fixed 68px navbar */
     display: flex;
     flex-direction: column;
     gap: 20px;
