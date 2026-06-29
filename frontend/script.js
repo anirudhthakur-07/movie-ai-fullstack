@@ -579,14 +579,7 @@ function displayMovies(movies, container, replace = false) {
         console.error("openModal not loaded");
       }
     });
-let aiReason = "";
 
-if (
-    movie.explanations &&
-    movie.explanations.length > 0
-) {
-    aiReason = movie.explanations[0];
-}
     const poster = movie.poster_path
       ? IMG_BASE + movie.poster_path
       : movie.backdrop_path
@@ -600,16 +593,6 @@ if (
    <div class="movie-rating">
 ⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}
 </div>
-
-${
-  aiReason
-  ? `
-  <div class="movie-ai-reason">
-      ${aiReason}
-  </div>
-  `
-  : ""
-}
 
    <button
   class="watch-btn"
