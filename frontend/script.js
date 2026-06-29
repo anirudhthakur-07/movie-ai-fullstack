@@ -743,14 +743,16 @@ let heroIndex = 0;
 
 function updateHeroBackground() {
   const hero = document.getElementById('hero');
-
   const movie = heroMovies[heroIndex];
+  if (!movie || !movie.backdrop_path) return;
 
-  if (!movie) return;
-
-  hero.style.backgroundImage = `
-    url(https://image.tmdb.org/t/p/original${movie.backdrop_path})
-  `;
+  // Crossfade: fade out → swap → fade in
+  hero.style.opacity = '0';
+  hero.style.transition = 'opacity 0.6s ease';
+  setTimeout(() => {
+    hero.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`;
+    hero.style.opacity = '1';
+  }, 600);
 }
 
 window.addEventListener('beforeunload', () => clearInterval(heroInterval));
