@@ -55,8 +55,50 @@
         </div>
     </nav>
     <main class="watchlist-container">
-        <h3 class="section-title">My Watchlist</h3>
-        <div id="watchlistPageRow" class="watchlist-grid"></div>
+        <!-- 1. PERSONALIZED HERO SUMMARY CARD -->
+        <header class="watchlist-hero-card hidden" id="watchlistHeroCard"></header>
+
+        <!-- 2. RECENTLY SAVED ROW -->
+        <section class="watchlist-section hidden" id="recentlyAddedSection">
+            <h3 class="section-title"><i class="fas fa-history icon-gradient"></i> Recently Saved</h3>
+            <div class="row-container">
+                <button class="scroll-btn scroll-left" onclick="scrollWatchlistRow('recentlyAddedRow', -1)">❮</button>
+                <div class="movie-row" id="recentlyAddedRow"></div>
+                <button class="scroll-btn scroll-right" onclick="scrollWatchlistRow('recentlyAddedRow', 1)">❯</button>
+            </div>
+        </section>
+
+        <!-- 3. AI PICK RECS ROW -->
+        <section class="watchlist-section hidden" id="aiPicksSection">
+            <h3 class="section-title"><i class="fas fa-magic icon-gradient"></i> AI Curation Picks</h3>
+            <div class="row-container">
+                <button class="scroll-btn scroll-left" onclick="scrollWatchlistRow('aiPicksRow', -1)">❮</button>
+                <div class="movie-row" id="aiPicksRow"></div>
+                <button class="scroll-btn scroll-right" onclick="scrollWatchlistRow('aiPicksRow', 1)">❯</button>
+            </div>
+        </section>
+
+        <!-- 4. CONTINUE EXPLORING ROW -->
+        <section class="watchlist-section hidden" id="continueExploringSection">
+            <h3 class="section-title"><i class="fas fa-compass icon-gradient"></i> Continue Exploring</h3>
+            <div class="row-container">
+                <button class="scroll-btn scroll-left" onclick="scrollWatchlistRow('continueExploringRow', -1)">❮</button>
+                <div class="movie-row" id="continueExploringRow"></div>
+                <button class="scroll-btn scroll-right" onclick="scrollWatchlistRow('continueExploringRow', 1)">❯</button>
+            </div>
+        </section>
+
+        <!-- 5. INSIGHTS METRICS GRID -->
+        <section class="watchlist-section hidden" id="collectionInsightsSection">
+            <h3 class="section-title"><i class="fas fa-chart-pie icon-gradient"></i> Collection Insights</h3>
+            <div class="watchlist-insights-grid" id="collectionInsightsGrid"></div>
+        </section>
+
+        <!-- 6. FULL SAVED COLLECTION GRID -->
+        <section class="watchlist-section" id="fullCollectionSection">
+            <h3 class="section-title" id="fullCollectionTitle"><i class="fas fa-folder-open icon-gradient"></i> Your Collection</h3>
+            <div id="watchlistPageRow" class="watchlist-grid"></div>
+        </section>
     </main>
    
     <!-- Movie Detail Modal -->
