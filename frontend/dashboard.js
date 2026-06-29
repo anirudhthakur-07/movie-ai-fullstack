@@ -111,18 +111,21 @@ async function loadAnalytics() {
 
         // Bind metrics to widgets
         document.getElementById("totalClicks").innerText = statsOverview.totalClicks;
-        document.getElementById("topProvider").innerText = statsOverview.topProvider === "No Data" 
-            ? "No Data" 
+        document.getElementById("topProvider").innerText = statsOverview.topProvider === "No Data"
+            ? "No Data"
             : statsOverview.topProvider.replace(/\b\w/g, c => c.toUpperCase());
-            
-        document.getElementById("topGenre").innerText = statsOverview.topGenre === "No Data" 
-            ? "No Data" 
+
+        document.getElementById("topGenre").innerText = statsOverview.topGenre === "No Data"
+            ? "No Data"
             : statsOverview.topGenre.replace(/\b\w/g, c => c.toUpperCase());
 
-        updateSummaryList();
+        // FIX BUG 3: Only render Neural Summary AFTER both profile + stats are ready
+        // profileData is populated by loadProfile(); only call summary if it is already set
+        if (profileData) {
+            updateSummaryList();
+        }
     } catch (err) {
         console.error("Overview analytics failed", err);
-        // Fallback widgets
         document.getElementById("totalClicks").innerText = "0";
         document.getElementById("topProvider").innerText = "No Data";
         document.getElementById("topGenre").innerText = "No Data";
@@ -188,9 +191,26 @@ async function loadProfile() {
             <img src="${avatarImgUrl}" alt="${mappedPersona}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
         `;
 
-        // Load visual sub-cards
+        // FIX BUG 1 + BUG 4: Bind activityLevel and profileStrength from profileData
+        // These were never wired — causing the widgets to always show stale HTML defaults
+        const activityLevelEl = document.getElementById("activityLevel");
+        if (activityLevelEl) activityLevelEl.innerText = data.activityLevel || "Casual";
+
+        const profileStrengthEl = document.getElementById("profileStrength");
+        if (profileStrengthEl) profileStrengthEl.innerText = data.profileStrength || "Low";
+
+        // Load visual sub-cards (DNA bars)
         renderMovieDNA(data.topGenres || []);
-        updateSummaryList();
+
+        // FIX BUG 3: If analytics already resolved first, render summary now;
+        // otherwise loadAnalytics() will call updateSummaryList() when it finishes
+        if (statsOverview.totalClicks > 0 || statsOverview.topProvider !== "No Data") {
+            updateSummaryList();
+        } else {
+            // Analytics not done yet — render with profile-only data now,
+            // loadAnalytics() will re-render with full data when ready
+            updateSummaryList();
+        }
     } catch (err) {
         console.error("Profile load failed", err);
         document.getElementById("profileUsername").innerText = "Guest User";
