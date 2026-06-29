@@ -119,6 +119,8 @@ body {
     font-weight: bold !important;
     letter-spacing: 1px !important;
     color: white !important;
+    margin: 0 !important;
+    line-height: 1 !important;
 }
 
 .back-btn {

@@ -1744,6 +1744,12 @@ body.modal-open {
   font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
 }
 
+.logo h1 {
+  margin: 0 !important;
+  line-height: 1 !important;
+  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
 
 .ai-text {
   color: #fff;
