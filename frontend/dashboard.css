@@ -465,6 +465,12 @@ body {
     grid-column: span 3;
 }
 
+.stats-mini-grid .stat-widget:nth-child(6),
+.stats-mini-grid .stat-widget:nth-child(7),
+.stats-mini-grid .stat-widget:nth-child(8) {
+    grid-column: span 2;
+}
+
 @media (max-width: 600px) {
     .stats-mini-grid {
         grid-template-columns: 1fr;

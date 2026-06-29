@@ -119,6 +119,16 @@ async function loadAnalytics() {
             ? "No Data"
             : statsOverview.topGenre.replace(/\b\w/g, c => c.toUpperCase());
 
+        // Bind behavioral metrics
+        const explorationScoreEl = document.getElementById("explorationScore");
+        if (explorationScoreEl) explorationScoreEl.innerText = data.explorationScore || 0;
+
+        const genreDiversityEl = document.getElementById("genreDiversity");
+        if (genreDiversityEl) genreDiversityEl.innerText = data.genreDiversity || 0;
+
+        const trailerAffinityEl = document.getElementById("trailerAffinity");
+        if (trailerAffinityEl) trailerAffinityEl.innerText = (data.trailerAffinity || 0) + "%";
+
         // FIX BUG 3: Only render Neural Summary AFTER both profile + stats are ready
         // profileData is populated by loadProfile(); only call summary if it is already set
         if (profileData) {
@@ -129,6 +139,15 @@ async function loadAnalytics() {
         document.getElementById("totalClicks").innerText = "0";
         document.getElementById("topProvider").innerText = "No Data";
         document.getElementById("topGenre").innerText = "No Data";
+        
+        const explorationScoreEl = document.getElementById("explorationScore");
+        if (explorationScoreEl) explorationScoreEl.innerText = "0";
+
+        const genreDiversityEl = document.getElementById("genreDiversity");
+        if (genreDiversityEl) genreDiversityEl.innerText = "0";
+
+        const trailerAffinityEl = document.getElementById("trailerAffinity");
+        if (trailerAffinityEl) trailerAffinityEl.innerText = "0%";
     }
 }
 
