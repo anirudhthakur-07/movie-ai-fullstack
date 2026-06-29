@@ -2,6 +2,16 @@
 // Handles User Saved Movies & Watchlist Operations
 var IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
+function escapeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // PAGE INITIALIZATION
 // Verify Authentication And Load Watchlist
 window.addEventListener("DOMContentLoaded", () => {
@@ -218,10 +228,16 @@ function displayWatchlist(list, container) {
   </button>
 
   <img class="watch-img" 
-       src="${resolvePoster(poster)}">
+       src="${resolvePoster(poster)}"
+       onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+  
+  <div class="movie-placeholder-glow hidden">
+    <i class="fas fa-film"></i>
+    <span>${escapeHTML(movie.title)}</span>
+  </div>
 
   <div class="watch-overlay">
-    <div class="watch-title">${movie.title}</div>
+    <div class="watch-title">${escapeHTML(movie.title)}</div>
   </div>
 `;
 

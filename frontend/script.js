@@ -658,10 +658,14 @@ function displayMovies(movies, container, replace = false) {
       : movie.backdrop_path
         ? IMG_BASE + movie.backdrop_path
         : 'https://via.placeholder.com/300x450?text=No+Image';
-    card.innerHTML = ` <img class="movie-img skeleton" src="${escapeHTML(poster)}" alt="${escapeHTML(movie.title)}">
- 
-  
-  <div class="movie-info-overlay">
+
+    card.innerHTML = `
+      <img class="movie-img skeleton" src="${escapeHTML(poster)}" alt="${escapeHTML(movie.title)}" onerror="this.onerror=null; this.classList.remove('skeleton'); this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+      <div class="movie-placeholder-glow hidden">
+        <i class="fas fa-film"></i>
+        <span>${escapeHTML(movie.title)}</span>
+      </div>
+      <div class="movie-info-overlay">
     <div class="movie-title">${escapeHTML(movie.title)}</div>
    <div class="movie-rating">
 ⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}
