@@ -1838,10 +1838,11 @@ pointer-events: auto;
 .site-footer {
   width: 100%;
   background: #080809;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
   padding: 24px 20px;
   margin-top: auto;
   box-sizing: border-box;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .footer-content {
@@ -1851,10 +1852,11 @@ pointer-events: auto;
 }
 
 .site-footer p {
-  color: #8c8c8c;
-  font-size: 0.75rem;
-  line-height: 1.6;
-  margin: 4px 0;
+  color: #64748b !important;
+  font-size: 0.75rem !important;
+  line-height: 1.6 !important;
+  margin: 4px 0 !important;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 /* TERMS */
 .terms-box{
