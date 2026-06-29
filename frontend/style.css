@@ -1837,22 +1837,23 @@ pointer-events: auto;
 }
 .site-footer {
   width: 100%;
-  background: #0b0b0b;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding: 18px 12px;
-  margin-top: 50px;
+  background: #080809;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px 20px;
+  margin-top: auto;
+  box-sizing: border-box;
 }
 
 .footer-content {
-  max-width: 1200px;
-  margin: auto;
+  max-width: 1300px;
+  margin: 0 auto;
   text-align: center;
 }
 
 .site-footer p {
   color: #8c8c8c;
-  font-size: 12px;
-  line-height: 1.7;
+  font-size: 0.75rem;
+  line-height: 1.6;
   margin: 4px 0;
 }
 /* TERMS */

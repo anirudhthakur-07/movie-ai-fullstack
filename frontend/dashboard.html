@@ -74,34 +74,21 @@
             </div>
         </header>
 
-        <!-- 2. GRID LAYOUT FOR DNA, STATS, AND LOGS -->
+        <!-- 2. GRID LAYOUT FOR DNA AND STATS -->
         <div class="dashboard-grid">
             
-            <!-- COLUMN LEFT: MOVIE DNA & NEURAL SUMMARY -->
-            <div class="left-column-group">
-                <section class="glass-card dna-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-dna icon-gradient"></i> Movie DNA</h3>
-                        <p class="subtitle">Dynamic interest distribution matching your stats</p>
-                    </div>
-                    <div class="dna-progress-container" id="dnaContainer">
-                        <div class="skeleton-loader"></div>
-                        <div class="skeleton-loader"></div>
-                        <div class="skeleton-loader"></div>
-                    </div>
-                </section>
-
-                <!-- AI INSIGHTS & SUMMARY -->
-                <section class="glass-card summary-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-sparkles icon-gradient"></i> Neural Summary</h3>
-                        <p class="subtitle">AI generated overview of your streaming profile</p>
-                    </div>
-                    <div id="aiSummaryList" class="summary-insights-list">
-                        <!-- Dynamic AI insights will be rendered here as bullet items -->
-                    </div>
-                </section>
-            </div>
+            <!-- COLUMN LEFT: MOVIE DNA -->
+            <section class="glass-card dna-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-dna icon-gradient"></i> Movie DNA</h3>
+                    <p class="subtitle">Dynamic interest distribution matching your stats</p>
+                </div>
+                <div class="dna-progress-container" id="dnaContainer">
+                    <div class="skeleton-loader"></div>
+                    <div class="skeleton-loader"></div>
+                    <div class="skeleton-loader"></div>
+                </div>
+            </section>
 
             <!-- COLUMN RIGHT: STATS SUB-GRID -->
             <div class="stats-group">
@@ -154,6 +141,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- AI INSIGHTS & SUMMARY (FULL-WIDTH) -->
+        <section class="glass-card summary-card">
+            <div class="card-header">
+                <h3><i class="fas fa-sparkles icon-gradient"></i> Neural Summary</h3>
+                <p class="subtitle">AI generated overview of your streaming profile</p>
+            </div>
+            <div id="aiSummaryList" class="summary-insights-list">
+                <!-- Dynamic AI insights will be rendered here as bullet items -->
+            </div>
+        </section>
 
         <!-- 3. GAMIFIED ACHIEVEMENTS SHOWCASE -->
         <section class="glass-card achievements-section">

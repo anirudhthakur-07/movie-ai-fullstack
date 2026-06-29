@@ -256,15 +256,41 @@ async function loadAchievements() {
         document.getElementById("levelRemaining").innerText = `${remainingXP} XP remaining to level ${data.level + 1}`;
         document.getElementById("levelProgressBar").style.width = `${(data.xpProgress / 500) * 100}%`;
 
-        // Render Unlocked Showcase list (top 3 unlocked)
+        // Render Unlocked Showcase list (Mix of recently completed & close-to-unlocking)
         const showcaseEl = document.getElementById("achievementsContainer");
         showcaseEl.innerHTML = "";
 
-        // Sort: Unlocked first, then by XP size
-        const sortedList = [...data.achievements].sort((a, b) => b.unlocked - a.unlocked || b.xp - a.xp);
-        const topShowcase = sortedList.slice(0, 3);
+        // Sort: Filter unlocked and locked, then sort locked by progress ratio descending
+        const unlockedList = data.achievements.filter(m => m.unlocked);
+        const lockedList = data.achievements.filter(m => !m.unlocked)
+            .sort((a, b) => (b.current / b.target) - (a.current / a.target));
 
-        topShowcase.forEach(m => {
+        const showcaseList = [];
+        
+        // Take up to 2 unlocked ones (recently completed) in reverse order
+        const reversedUnlocked = [...unlockedList].reverse();
+        if (reversedUnlocked.length >= 2) {
+            showcaseList.push(reversedUnlocked[0]);
+            showcaseList.push(reversedUnlocked[1]);
+        } else if (reversedUnlocked.length === 1) {
+            showcaseList.push(reversedUnlocked[0]);
+        }
+
+        // Fill remaining slots with locked achievements closest to completion
+        let lockedIdx = 0;
+        while (showcaseList.length < 3 && lockedIdx < lockedList.length) {
+            showcaseList.push(lockedList[lockedIdx]);
+            lockedIdx++;
+        }
+
+        // If still less than 3, fill with remaining unlocked ones
+        let unlockedIdx = 2;
+        while (showcaseList.length < 3 && unlockedIdx < reversedUnlocked.length) {
+            showcaseList.push(reversedUnlocked[unlockedIdx]);
+            unlockedIdx++;
+        }
+
+        showcaseList.forEach(m => {
             const meta = ACHIEVEMENT_META[m.id] || { icon: "fas fa-trophy", badge: "gold-badge" };
             const unlockClass = m.unlocked ? "unlocked" : "";
             const iconBoxClass = m.unlocked ? meta.badge : "";
