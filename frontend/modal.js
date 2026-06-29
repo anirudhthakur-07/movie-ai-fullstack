@@ -128,6 +128,13 @@ fullMovie.first_air_date ||
 '';
         const cast = await fetchCast(movieId);
         if (currentModalRequest !== requestId) return;
+
+        // Fire behavioral intelligence movie_detail event
+        if (typeof window.trackBehaviorEvent === "function") {
+            const firstGenre = fullMovie.genres?.[0]?.name || "";
+            window.trackBehaviorEvent("movie_detail", movieId, fullMovie.title, firstGenre);
+        }
+
         modalTitle.textContent = fullMovie.title || "Unknown";
         modalRating.innerHTML =
 rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
@@ -417,7 +424,14 @@ await authFetch(`${API_BASE}/provider-click`, {
         if (currentModalRequest !== requestId) return;
         if (trailerUrl) {
             trailerBtn.innerText = "▶ Watch Trailer";
-            trailerBtn.onclick = () => openTrailer(trailerUrl);
+            trailerBtn.onclick = () => {
+                // Fire behavioral intelligence trailer_watch event
+                if (typeof window.trackBehaviorEvent === "function") {
+                    const firstGenre = fullMovie.genres?.[0]?.name || "";
+                    window.trackBehaviorEvent("trailer_watch", movieId, fullMovie.title, firstGenre);
+                }
+                openTrailer(trailerUrl);
+            };
             trailerBtn.disabled = false;
         } else {
             trailerBtn.innerText = "Trailer not available";

@@ -46,6 +46,21 @@ async function authFetch(url, options = {}) {
   }
 }
 
+// Global Behavioral Tracking System
+window.trackBehaviorEvent = function(eventType, movieId, movieTitle, genre) {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  fetch(`${API_BASE}/behavior/event`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ eventType, movieId, movieTitle, genre })
+  }).catch(err => console.warn("Failed to track behavior event:", err));
+};
+
 // APPLICATION STATE MANAGEMENT
 // Caching, Pagination & Runtime Variables
 let heroInterval = null;
@@ -558,6 +573,21 @@ function displayMovies(movies, container, replace = false) {
   movies.forEach(movie => {
     if (!movie || !movie.id || !movie.title) return;
 
+    let primaryGenre = "";
+    if (movie.genre_ids && movie.genre_ids.length > 0) {
+        const genreLookup = {
+            28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
+            80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
+            14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+            9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+            10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+        };
+        primaryGenre = genreLookup[movie.genre_ids[0]] || "";
+    } else if (movie.genres && movie.genres.length > 0) {
+        // Handle cases where details genres list is passed directly
+        primaryGenre = movie.genres[0].name || "";
+    }
+
     const card = document.createElement('div');
     card.dataset.id = movie.id;
     card.classList.add('movie-card');
@@ -599,6 +629,7 @@ function displayMovies(movies, container, replace = false) {
   data-id="${movie.id}"
   data-title="${movie.title}"
   data-poster="${movie.poster_path}"
+  data-genre="${primaryGenre}"
   data-added="${userWatchlist.some(m => m.tmdbId === movie.id)}"
   onclick="toggleWatchlist(event, this)">
 
@@ -639,7 +670,8 @@ async function toggleWatchlist(event, btn) {
   const movie = {
     id: Number(btn.dataset.id),
     title: btn.dataset.title,
-    poster_path: btn.dataset.poster
+    poster_path: btn.dataset.poster,
+    genre: btn.dataset.genre || ""
   };
 
   if (!movie.id) {
@@ -683,6 +715,10 @@ if (!res) {
     if (exists) {
       btn.innerText = "❤️";
       btn.dataset.added = "true";
+      // Fire behavioral intelligence watchlist_add event
+      if (typeof window.trackBehaviorEvent === "function") {
+        window.trackBehaviorEvent("watchlist_add", movie.id, movie.title, movie.genre);
+      }
     } else {
       btn.innerText = "🤍";
       btn.dataset.added = "false";
