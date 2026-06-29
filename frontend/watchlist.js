@@ -233,7 +233,6 @@ function displayWatchlist(list, container) {
   
   <div class="movie-placeholder-glow hidden">
     <i class="fas fa-film"></i>
-    <span>${escapeHTML(movie.title)}</span>
   </div>
 
   <div class="watch-overlay">

@@ -69,6 +69,21 @@ window.openModal = async function (movie) {
     setTimeout(() => modal.classList.add('show'), 10);
     document.body.classList.add("modal-open");
     modalImg.classList.add("skeleton", "skeleton-img");
+    modalImg.style.display = "block";
+    modalImg.style.opacity = 0;
+
+    const placeholder = document.getElementById("modalPlaceholder");
+    if (placeholder) {
+        placeholder.classList.add("hidden");
+    }
+
+    modalImg.onerror = () => {
+        modalImg.classList.remove("skeleton", "skeleton-img");
+        modalImg.style.display = "none";
+        if (placeholder) {
+            placeholder.classList.remove("hidden");
+        }
+    };
 
     modalTitle.innerHTML = `<div class="skeleton skeleton-title"></div>`;
     modalRating.innerHTML = "";
@@ -80,14 +95,15 @@ window.openModal = async function (movie) {
   <br>
   <div class="skeleton skeleton-text" style="width:50%"></div>
 `;
-if (reasonsBox) {
-    reasonsBox.innerHTML = "";
-    reasonsBox.classList.add("hidden");
-}
-    modalImg.style.opacity = 0;
-    const imgUrl = fullMovie.poster_path
-        ? `${IMG_BASE}${fullMovie.poster_path}`
-        : 'https://via.placeholder.com/500x750';
+    if (reasonsBox) {
+        reasonsBox.innerHTML = "";
+        reasonsBox.classList.add("hidden");
+    }
+
+    const imgUrl = (fullMovie.poster_path || fullMovie.poster)
+        ? `${IMG_BASE}${fullMovie.poster_path || fullMovie.poster}`
+        : null;
+
     // handle both cached + fresh images
     modalImg.onload = () => {
         if (currentModalRequest !== requestId) return;
@@ -95,11 +111,18 @@ if (reasonsBox) {
         modalImg.style.opacity = 1;
     };
 
-    modalImg.src = imgUrl;
-
-    if (modalImg.complete) {
+    if (!imgUrl) {
         modalImg.classList.remove("skeleton", "skeleton-img");
-        modalImg.style.opacity = 1;
+        modalImg.style.display = "none";
+        if (placeholder) {
+            placeholder.classList.remove("hidden");
+        }
+    } else {
+        modalImg.src = imgUrl;
+        if (modalImg.complete) {
+            modalImg.classList.remove("skeleton", "skeleton-img");
+            modalImg.style.opacity = 1;
+        }
     }
     const trailerBtn = document.getElementById("playTrailerBtn");
     // Reset trailer button before loading new data

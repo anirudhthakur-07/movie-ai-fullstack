@@ -663,7 +663,6 @@ function displayMovies(movies, container, replace = false) {
       <img class="movie-img skeleton" src="${escapeHTML(poster)}" alt="${escapeHTML(movie.title)}" onerror="this.onerror=null; this.classList.remove('skeleton'); this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
       <div class="movie-placeholder-glow hidden">
         <i class="fas fa-film"></i>
-        <span>${escapeHTML(movie.title)}</span>
       </div>
       <div class="movie-info-overlay">
     <div class="movie-title">${escapeHTML(movie.title)}</div>
