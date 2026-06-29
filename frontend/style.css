@@ -585,6 +585,7 @@ h4 {
   height: 100%;
   pointer-events: none;
   z-index: 1;
+  display: none !important; /* Disabled dark overlay blocks for clean edge-to-edge layout */
 }
 
 .movie-row::before {
