@@ -14,13 +14,14 @@ router.post("/history", auth, async (req, res) => {
 
         console.log("USER ID:", req.userId);
         console.log("QUERY:", query);
-    if (!query) {
-
+if (
+    !query ||
+    query.trim().length < 3
+) {
     return res.status(400).json({
-        error: "Query required"
+        error: "Query must be at least 3 characters"
     });
 }
-
 await SearchHistory.findOneAndUpdate(
     {
         userId: req.userId,

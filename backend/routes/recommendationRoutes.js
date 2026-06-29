@@ -28,6 +28,31 @@ const genreMap = {
   37: "Western"
 };
 
+async function getColdStartRecommendations() {
+  const [trending, topRated] = await Promise.all([
+    tmdbApi.get('/trending/movie/week'),
+    tmdbApi.get('/movie/top_rated', { params: { page: 1 } })
+  ]);
+
+  const seen = new Set();
+  const blended = [];
+
+  for (const m of [
+    ...trending.data.results.slice(0, 10),
+    ...topRated.data.results.slice(0, 10)
+  ]) {
+    if (!seen.has(m.id) && m.poster_path) {
+      seen.add(m.id);
+      blended.push({
+        ...m,
+        explanations: ['Popular on Movie AI', 'Trending This Week']
+      });
+    }
+  }
+
+  return blended.slice(0, 20);
+}
+
 // SEARCH-BASED RECOMMENDATIONS
 // Generates Recommendations Using Search Query,
 // Similar Movies & Genre Matching
@@ -46,20 +71,24 @@ router.get('/recommend', async (req, res) => {
 
     const movies = searchResponse.data.results.slice(0, 3);
     let recommendations = [];
-    for (let movie of movies) {
-      try {
-        const similarRes = await tmdbApi.get(`/movie/${movie.id}/similar`, {
-          params: {
-            page: Math.floor(Math.random() * 3) + 1
-          }
-        });
-
-        recommendations.push(...similarRes.data.results);
-
-      } catch (err) {
-        console.log("Similar fetch failed:", movie.id);
+    
+    // Fetch similar movies concurrently
+    const similarPromises = movies.map(movie => 
+      tmdbApi.get(`/movie/${movie.id}/similar`, {
+        params: {
+          page: Math.floor(Math.random() * 3) + 1
+        }
+      })
+    );
+    
+    const similarResponses = await Promise.allSettled(similarPromises);
+    similarResponses.forEach((res, idx) => {
+      if (res.status === "fulfilled") {
+        recommendations.push(...res.value.data.results);
+      } else {
+        console.log("Similar fetch failed:", movies[idx].id);
       }
-    }
+    });
     const genreSet = new Set();
 
     movies.forEach(m => {
@@ -122,45 +151,58 @@ router.get('/recommend', async (req, res) => {
 router.get('/recommend/watchlist', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) {
+  return res.json({
+    results: [],
+    status: "user_missing"
+  });
+}
+    // Increment AI recommendation views count
+    user.recommendationViewsCount = (user.recommendationViewsCount || 0) + 1;
+    await user.save();
 
-  const profile =
-  await buildUserProfile(req.userId);
-  const favoriteGenres =
-  profile?.topGenres || [];
+const profile =
+await buildUserProfile(req.userId);
+
+if (!profile) {
+  return res.json({
+    results: [],
+    status: "profile_missing"
+  });
+}
+  const favoriteGenres = profile?.topGenres || [];
   const genreScores = {};
   favoriteGenres.forEach(g => {
+    genreScores[g.genre.toLowerCase()] = g.count;
+  });
 
-  genreScores[g.genre] = g.count;
+  if (!user.watchlist || user.watchlist.length === 0) {
+    const results = await getColdStartRecommendations();
+    return res.json({ results, status: "cold_start" });
+  }
 
-   });
-    if (!user.watchlist || user.watchlist.length === 0) {
-      return res.json({ results: [], status: "empty" });
-    }
-
-    if (user.watchlist.length < 3) {
-      return res.json({ results: [], status: "insufficient" });
-    }
-    const movieIds = user.watchlist.map(m => m.tmdbId);
+  const movieIds = user.watchlist.map(m => m.tmdbId);
     const recent = movieIds.slice(-5);
     const older = movieIds.slice(0, 2);
     const selectedMovies = [...recent, ...older];
+    const activeMovieIds = selectedMovies.filter(Boolean);
     let genreCount = {};
     const sourceMovieTitles = {};
-   for (let id of selectedMovies){
-      if (!id) continue;
+    const moviePromises = activeMovieIds.map(id => tmdbApi.get(`/movie/${id}`));
+    const movieResponses = await Promise.allSettled(moviePromises);
 
-      try {
-        const response = await tmdbApi.get(`/movie/${id}`);
-
+    movieResponses.forEach((res, index) => {
+      const id = activeMovieIds[index];
+      if (res.status === "fulfilled") {
+        const response = res.value;
         response.data.genres.forEach(g => {
           genreCount[g.id] = (genreCount[g.id] || 0) + 1;
-          sourceMovieTitles[id] =
-      response.data.title;
+          sourceMovieTitles[id] = response.data.title;
         });
-      } catch (err) {
+      } else {
         console.error("TMDB FAIL:", id);
       }
-    }
+    });
     const sortedGenres = Object.entries(genreCount)
       .sort((a, b) => b[1] - a[1])
       .map(g => g[0]);
@@ -235,11 +277,6 @@ recommendations.forEach(m => {
     m.vote_count > 100
   ) {
 const explanations = [];
-if (
- profile.profileStrength === "High"
-) {
- explanations.push(" High Match");
-}
 
 if (
  profile.activityLevel === "Power User"
@@ -251,7 +288,7 @@ if (
 
   const genreName = genreMap[id];
 
-  if (genreScores[genreName]) {
+  if (genreName && genreScores[genreName.toLowerCase()]) {
 
    const shortGenres = {
   "Action": "Action Match",
@@ -318,10 +355,10 @@ const genreBonusA =
 
     const genreName = genreMap[id];
 
-    if (genreScores[genreName]) {
+    if (genreName && genreScores[genreName.toLowerCase()]) {
 
       return score +
-        (genreScores[genreName] * profileMultiplier);
+        (genreScores[genreName.toLowerCase()] * profileMultiplier);
 
     }
 
@@ -333,10 +370,10 @@ const genreBonusA =
 
     const genreName = genreMap[id];
 
-    if (genreScores[genreName]) {
+    if (genreName && genreScores[genreName.toLowerCase()]) {
 
       return score +
-        (genreScores[genreName] * profileMultiplier);
+        (genreScores[genreName.toLowerCase()] * profileMultiplier);
 
     }
 

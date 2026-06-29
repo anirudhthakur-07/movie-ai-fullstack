@@ -3,7 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const auth =require("../middleware/auth");
+const auth = require("../middleware/auth");
 
 router.post('/', auth, async (req, res) => {
   try {
@@ -13,22 +13,17 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ error: "Invalid movie data" });
     }
 
-     const user =await User.findById(req.userId);
-
+    const user = await User.findById(req.userId);
     if (!user) {
-
-  return res.status(404).json({
-    error: "User not found"
-  });
-
-  }
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const movieId = Number(movie.id);
+    if (isNaN(movieId)) {
+      return res.status(400).json({ error: "Invalid movie id" });
+    }
 
-   const exists =
-   user.watchlist.find(
-    m => m.tmdbId === movieId
-);
+    const exists = user.watchlist.find(m => m.tmdbId === movieId);
 
     if (exists) {
       await User.updateOne(
@@ -36,10 +31,13 @@ router.post('/', auth, async (req, res) => {
         { $pull: { watchlist: { tmdbId: movieId } } }
       );
     } else {
+      if (!movie.title) {
+        return res.status(400).json({ error: "Movie title required" });
+      }
       await User.updateOne(
         { _id: req.userId },
         {
-          $push: {
+          $addToSet: {
             watchlist: {
               tmdbId: movieId,
               title: movie.title,
@@ -54,7 +52,6 @@ router.post('/', auth, async (req, res) => {
 
     const updatedUser = await User.findById(req.userId);
     res.json(updatedUser.watchlist);
-
   } catch (err) {
     console.error("WATCHLIST POST ERROR:", err.message);
     res.status(500).json({ error: "Server error" });
@@ -75,4 +72,5 @@ router.get('/', auth, async (req, res) => {
     res.json([]);
   }
 });
+
 module.exports = router;

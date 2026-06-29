@@ -433,11 +433,30 @@ else if (
 
   // Track user OTT platform interaction for analytics
 
-const genreName =
 
+let genreName =
     fullMovie.genres?.[0]?.name ||
     movie.genres?.[0]?.name;
 
+if (!genreName && movie.genre_ids?.length) {
+
+    const genreLookup = {
+        28:"Action",
+        12:"Adventure",
+        16:"Animation",
+        35:"Comedy",
+        80:"Crime",
+        18:"Drama",
+        14:"Fantasy",
+        27:"Horror",
+        9648:"Mystery",
+        878:"Science Fiction",
+        53:"Thriller"
+    };
+
+    genreName =
+        genreLookup[movie.genre_ids[0]];
+}
 if (!genreName) {
 
     console.warn("Genre missing");

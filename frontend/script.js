@@ -47,9 +47,7 @@ async function authFetch(url, options = {}) {
 }
 
 // APPLICATION STATE MANAGEMENT
-
 // Caching, Pagination & Runtime Variables
-let historyRow;
 let heroInterval = null;
 let currentPage = 1;
 let currentQuery = '';
@@ -65,11 +63,17 @@ let scifiCache = {};
 let horrorCache = {};
 let trendingCache = {};
 // DOM Elements
+let analyticsGenrePage = 1;
+let analyticsProviderPage = 1;
 let searchSpinner, searchResultsSection, recommendationsSection;
 let searchResultsRow, recommendationsRow, noResultsMsg;
 let loadMoreBtn;
 let trendingRow, actionRow, comedyRow;
 let topRatedRow, popularRow, scifiRow, horrorRow;
+let historyRow;
+let historyBtn;
+let historyDropdown;
+let historySection;
 let watchlistRecRow;
 let topRatedPage = 1;
 let popularPage = 1;
@@ -261,14 +265,6 @@ function loadMoreHorror(direction = 1) {
 // INITIAL CONTENT LOADING
 // Populate Homepage Movie Sections
 async function fetchInitialMovies() {
-  // Using search for trending
-
-  const trending = await fetchMovies('/trending');
-  if (trending) {
-    displayMovies(trending, trendingRow);
-  } else {
-    console.warn("No trending data received");
-  }
   // Using Chat API to get action and comedy!
   const action = await fetchMovies('/search?q=action');
   if (action) displayMovies(action, actionRow);
@@ -281,7 +277,10 @@ async function fetchInitialMovies() {
 // Centralized Movie Fetching With Retry Logic
 async function fetchMovies(endpoint, retries = 3) {
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`);
+   const response =
+await fetch(`${API_BASE}${endpoint}`,{
+    cache:"no-store"
+});
 
     if (!response.ok) throw new Error("API failed");
 
@@ -354,29 +353,26 @@ async function loadWatchlistRecommendations(reset = false) {
   const oldMsg = document.querySelector(".empty-msg");
   if (oldMsg) oldMsg.remove();
 
-  //  NO MOVIES
+  //  NO MOVIES (legacy fallback)
   if (data.status === "empty") {
     showWatchlistMessage("Add movies to your watchlist to get recommendations 🎯");
     if (text) text.classList.add("hidden");
     return;
   }
 
-  //  NOT ENOUGH DATA (<3)
-  if (data.status === "insufficient") {
-    showWatchlistMessage("Not enough data to recommend yet 🤖");
-    if (text) text.classList.add("hidden");
-    return;
-  }
-
   // NO MATCHES
   if (!data.results || data.results.length === 0) {
-    showWatchlistMessage("No strong matches found 😅");
+    if (data.status === "insufficient") {
+      showWatchlistMessage("Not enough data to recommend yet 🤖");
+    } else {
+      showWatchlistMessage("No strong matches found 😅");
+    }
     if (text) text.classList.add("hidden");
     return;
   }
 
-  //  VALID DATA → NETFLIX MODE
-  if (watchlistCache.length === 0) {
+  if (reset || watchlistCache.length === 0) {
+    watchlistRecRow.innerHTML = "";
     watchlistCache = data.results;
     watchlistPage = 1;
   }
@@ -397,7 +393,67 @@ function showWatchlistMessage(text) {
 
   watchlistRecRow.parentElement.appendChild(msg);
 }
+async function loadHistory() {
 
+    try {
+
+        const res = await authFetch(
+            `${API_BASE}/history`
+        );
+
+        if (!res) return;
+
+        const history = await res.json();
+
+        renderHistory(history);
+
+    } catch (err) {
+
+        console.error(
+            "History load failed",
+            err
+        );
+    }
+}
+function renderHistory(history) {
+
+    if (!historyRow || !historyBtn) return;
+
+    historyRow.innerHTML = "";
+
+    // Hide history button if no history
+    if (!history || history.length === 0) {
+
+        historyBtn.style.display = "none";
+
+        historySection.classList.add("hidden");
+
+        return;
+    }
+
+    // Show button if history exists
+    historyBtn.style.display = "block";
+
+    history.forEach(item => {
+
+        const chip =
+        document.createElement("button");
+
+        chip.className =
+        "history-chip";
+
+        chip.innerHTML =
+        `<i class="fas fa-history"></i>
+        ${item.query}`;
+
+        chip.onclick = () => {
+
+            searchMovie(item.query);
+        };
+
+        historyRow.appendChild(chip);
+    });
+}
 // MOVIE SEARCH ENGINE
 // Search Movies And Generate Recommendations
 async function searchMovie(query) {
@@ -407,18 +463,6 @@ async function searchMovie(query) {
   if (!query) return;
 
   currentQuery = query;
-  await authFetch(
-`${API_BASE}/history`,
-{
-    method: "POST",
-    headers: {
-        "Content-Type":
-        "application/json"
-    },
-    body: JSON.stringify({
-        query
-    })
-});
   currentPage = 1;
 
   searchResultsRow.innerHTML = "";
@@ -449,6 +493,35 @@ async function searchMovie(query) {
   // Valid search results
   searchResultsSection.classList.remove("hidden");
   displayMovies(data, searchResultsRow);
+   const historyRes = await authFetch(
+    `${API_BASE}/history`,
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            query
+        })
+    }
+);
+if (historyRes) {
+
+    const historyData =
+        await historyRes.json();
+
+    if (historyRes.ok) {
+
+        await loadHistory();
+
+    } else {
+
+        console.log(
+            "History not saved:",
+            historyData.error
+        );
+    }
+}
 
   // Fetch recommendations ONLY when results exist
   const rec = await fetchMovies(
@@ -488,18 +561,32 @@ function displayMovies(movies, container, replace = false) {
     const card = document.createElement('div');
     card.dataset.id = movie.id;
     card.classList.add('movie-card');
-   card.addEventListener("click", async () => {
+    card.addEventListener("click", async () => {
+      if (movie.explanations && movie.explanations.length > 0 && localStorage.getItem("token")) {
+        fetch(`${API_BASE}/achievements/track`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token")
+          },
+          body: JSON.stringify({ action: "open_recommendation" })
+        }).catch(err => console.log("Tracking open_recommendation failed", err));
+      }
 
-    if (typeof openModal === "function") {
-
+      if (typeof openModal === "function") {
         openModal(movie);
-
-    } else {
-
+      } else {
         console.error("openModal not loaded");
-    }
-});
+      }
+    });
+let aiReason = "";
 
+if (
+    movie.explanations &&
+    movie.explanations.length > 0
+) {
+    aiReason = movie.explanations[0];
+}
     const poster = movie.poster_path
       ? IMG_BASE + movie.poster_path
       : movie.backdrop_path
@@ -510,7 +597,20 @@ function displayMovies(movies, container, replace = false) {
   
   <div class="movie-info-overlay">
     <div class="movie-title">${movie.title}</div>
-    <div class="movie-rating">⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}</div>
+   <div class="movie-rating">
+⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}
+</div>
+
+${
+  aiReason
+  ? `
+  <div class="movie-ai-reason">
+      ${aiReason}
+  </div>
+  `
+  : ""
+}
+
    <button
   class="watch-btn"
   data-id="${movie.id}"
@@ -615,54 +715,31 @@ if (!res) {
 
   btn.disabled = false;
 }
-async function loadTrending() {
+async function initTrendingAndHero() {
   try {
-    const res = await fetch(`${API_BASE}/trending`);
-    const data = await res.json();
-
-    console.log("TRENDING DATA:", data); 
-
-    const movies = data.results || data;
-
-    if (!movies || movies.length === 0) {
-      console.warn("No trending movies");
-      return;
-    }
+    const movies = await fetchMovies('/trending');
+    if (!movies || movies.length === 0) return;
 
     displayMovies(movies, trendingRow);
 
+    heroMovies = movies.slice(0, 10);
+    heroIndex = 0;
+    updateHeroBackground();
+
+    clearInterval(heroInterval);
+    heroInterval = setInterval(() => {
+      heroIndex = (heroIndex + 1) % heroMovies.length;
+      updateHeroBackground();
+    }, 4000);
   } catch (err) {
-    console.error("Trending error:", err);
+    console.error("Trending/hero init error:", err);
   }
 }
+
 // HERO CAROUSEL
 // Dynamic Featured Movie Banner
 let heroMovies = [];
 let heroIndex = 0;
-
-async function loadHeroCarousel() {
-  try {
-    const movies = await fetchMovies('/trending');
-
-    if (!movies || movies.length === 0) return;
-
-    // take top 10 movies
-    heroMovies = movies.slice(0, 10);
-
-    updateHeroBackground();
-
-    // auto change every 4 sec
-   clearInterval(heroInterval);
-
-heroInterval = setInterval(() => {
-      heroIndex = (heroIndex + 1) % heroMovies.length;
-      updateHeroBackground();
-    }, 4000);
-
-  } catch (err) {
-    console.error("Hero carousel error:", err);
-  }
-}
 
 function updateHeroBackground() {
   const hero = document.getElementById('hero');
@@ -675,6 +752,8 @@ function updateHeroBackground() {
     url(https://image.tmdb.org/t/p/original${movie.backdrop_path})
   `;
 }
+
+window.addEventListener('beforeunload', () => clearInterval(heroInterval));
 function loadMore() {
   currentPage++;
   searchMovie(currentQuery);
@@ -758,7 +837,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   searchSpinner = document.getElementById('searchSpinner');
   noResultsMsg = document.getElementById('noResultsMsg');
   loadMoreBtn = document.getElementById('loadMoreBtn');
-  historyRow =document.getElementById("historyRow");
+
   trendingRow = document.getElementById('trendingRow');
   actionRow = document.getElementById('actionRow');
   comedyRow = document.getElementById('comedyRow');
@@ -766,6 +845,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   popularRow = document.getElementById('popularRow');
   scifiRow = document.getElementById('scifiRow');
   horrorRow = document.getElementById('horrorRow');
+  historyBtn =
+document.getElementById("historyBtn");
+
+historyDropdown =
+document.getElementById(
+    "historyDropdown"
+);
+historySection =
+document.getElementById(
+    "historySection"
+);
+
+historyRow =
+document.getElementById(
+    "historyRow"
+);
   watchlistRecRow = document.getElementById('watchlistRecRow');
 
   //  Auth Check
@@ -798,23 +893,60 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   //  Initial Data Fetching
   await loadUserWatchlist();
-  loadSearchHistory();
-  loadTrending();
-  loadHeroCarousel();
-  //  Specific Category Loads
-  const action = await fetchMovies('/search?q=action');
-  if (action) displayMovies(action, actionRow);
+  await loadHistory();
+  if (historyBtn) {
+historyBtn.addEventListener(
+    "click",
+    async () => {
 
-  const comedy = await fetchMovies('/search?q=comedy');
-  if (comedy) displayMovies(comedy, comedyRow);
+        await loadHistory();
 
-  await loadWatchlistRecommendations();
+        historySection
+        .classList
+        .toggle("hidden");
+    }
+);
+ 
+}
+
+document.addEventListener(
+    "click",
+    (e) => {
+
+       if (
+    historyDropdown &&
+    historyBtn &&
+    !historyDropdown.contains(e.target) &&
+    !historyBtn.contains(e.target)
+) {
+
+            historyDropdown
+            .classList
+            .add("hidden");
+        }
+    }
+);
+await Promise.all([
+
+    initTrendingAndHero(),
+
+    loadTopRated(),
+
+    loadPopular(),
+
+    loadScifi(),
+
+    loadHorror(),
+
+    loadUserWatchlist(),
+
+    loadWatchlistRecommendations(),
+
+    fetchInitialMovies()
+
+]);
+
   loadAnalyticsRecommendations();
-  //  Staggered Loads
-  setTimeout(() => loadTopRated(), 300);
-  setTimeout(() => loadPopular(), 600);
-  setTimeout(() => loadScifi(), 900);
-  setTimeout(() => loadHorror(), 1200);
 
   // Scroll Setup - Main Categories
   setupAutoScroll(trendingRow, loadMoreTrending, () => trendingPage);
@@ -859,39 +991,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ANALYTICS-BASED RECOMMENDATIONS
 // Generate Content Using User Behaviour Insights
-async function loadSearchHistory() {
-
-    const res =
-    await authFetch(
-      `${API_BASE}/history`
-    );
-
-    if (!res) return;
-
-    const history =
-    await res.json();
-
-    historyRow.innerHTML = "";
-
-    history.forEach(item => {
-
-        const btn =
-        document.createElement(
-          "button"
-        );
-
-        btn.className =
-        "history-chip";
-
-        btn.innerText =
-        item.query;
-
-        btn.onclick = () =>
-        searchMovie(item.query);
-
-        historyRow.appendChild(btn);
-    });
-}
 async function loadAnalyticsRecommendations() {
 
   try {
@@ -926,11 +1025,12 @@ if (
   `Because You Explore ${data.topGenre}`;
 
   // FETCH MOVIES
-  const genreMovies =
-  await fetchMovies(
-
-    `/search?q=${data.topGenre}`
-  );
+ const genreMovies =
+await fetchMovies(
+  `/search?q=${encodeURIComponent(
+      data.topGenre
+  )}`
+);
 
   if (genreMovies) {
 
@@ -942,24 +1042,42 @@ if (
         "genreAnalyticsRow"
       )
     );
-    setupAutoScroll(
-  document.getElementById("genreAnalyticsRow"),
-  async () => {
-
-    const moreMovies =
-    await fetchMovies(
-      `/search?q=${data.topGenre}&page=2`
-    );
-
-    if (moreMovies) {
-
-      displayMovies(
-        moreMovies,
-        document.getElementById("genreAnalyticsRow")
-      );
-    }
-  }
+   
+const genreRow =
+document.getElementById(
+  "genreAnalyticsRow"
 );
+
+if (
+  !genreRow.dataset.listenerAdded
+) {
+
+  genreRow.dataset.listenerAdded =
+  "true";
+
+  setupAutoScroll(
+    genreRow,
+    async () => {
+  analyticsGenrePage++;
+
+const moreMovies =
+await fetchMovies(
+  `/search?q=${encodeURIComponent(
+      data.topGenre
+  )}&page=${analyticsGenrePage}`
+);
+if (moreMovies) {
+
+  displayMovies(
+    moreMovies,
+    document.getElementById(
+      "genreAnalyticsRow"
+    )
+  );
+
+}
+  }
+);}
   }
 }
     // PROVIDER SECTION
@@ -987,42 +1105,60 @@ if (
   // FETCH MOVIES
 const providerMovies =
 await fetchMovies(
-
-  `/provider-content/${data.topProvider}`
+  `/provider-content/${encodeURIComponent(
+      data.topProvider
+  )}`
 );
-
-  if (providerMovies) {
+if (
+  providerMovies &&
+  providerMovies.length > 0
+) {
 
     displayMovies(
-
       providerMovies,
-
       document.getElementById(
         "providerAnalyticsRow"
       )
     );
-   setupAutoScroll(
-  document.getElementById("providerAnalyticsRow"),
-  async () => {
+   const providerRow =
+document.getElementById(
+  "providerAnalyticsRow"
+);
 
-    const moreMovies =
-    await fetchMovies(
-      `/provider-content/${data.topProvider}?page=2`
-    );
+if (
+  !providerRow.dataset.listenerAdded
+) {
 
-    if (moreMovies) {
+  providerRow.dataset.listenerAdded =
+  "true";
 
-      displayMovies(
-        moreMovies,
-        document.getElementById("providerAnalyticsRow")
-      );
-    }
-  }
-); 
-  }
+  setupAutoScroll(
+    providerRow,
+    async () => {
+
+  
+analyticsProviderPage++;
+
+const moreMovies =
+await fetchMovies(
+  `/provider-content/${encodeURIComponent(
+      data.topProvider
+  )}?page=${analyticsProviderPage}`
+);
+if (moreMovies) {
+displayMovies(
+    moreMovies,
+    document.getElementById(
+      "providerAnalyticsRow"
+    )
+);
 }
-
-  } catch (err) {
+}
+);
+}
+}
+}
+} catch (err) {
 
     console.error(
       "Analytics recommendation failed",
@@ -1030,6 +1166,8 @@ await fetchMovies(
     );
   }
 }
+ 
+
 
 // SCROLL NAVIGATION CONTROLS
 // Manage Horizontal Movie Row Navigation
@@ -1040,6 +1178,27 @@ function logout() {
   localStorage.removeItem("token");
   window.location.href = "login.html";
 }
+function updateScrollButtons(row, leftBtn, rightBtn) {
+  const maxScroll = row.scrollWidth - row.clientWidth;
+
+  // LEFT BUTTON
+  if (row.scrollLeft <= 2) {
+    leftBtn.style.opacity = "0";
+    leftBtn.style.pointerEvents = "none";
+  } else {
+    leftBtn.style.opacity = "1";
+    leftBtn.style.pointerEvents = "auto";
+  }
+
+  // RIGHT BUTTON
+  if (row.scrollLeft >= maxScroll - 2) {
+    rightBtn.style.opacity = "0";
+    rightBtn.style.pointerEvents = "none";
+  } else {
+    rightBtn.style.opacity = "1";
+    rightBtn.style.pointerEvents = "auto";
+  }
+}
 window.addEventListener('scroll', function () {
   const nav = document.querySelector('.navbar');
   if (window.scrollY > 50) {
@@ -1048,19 +1207,7 @@ window.addEventListener('scroll', function () {
     nav.classList.remove('scrolled');
   }
 });
-function updateScrollButtons(row, leftBtn, rightBtn) {
 
-    if (!row || !leftBtn || !rightBtn) return;
-
-    const maxScroll =
-        row.scrollWidth - row.clientWidth;
-
-    leftBtn.style.opacity =
-        row.scrollLeft <= 10 ? "0.3" : "1";
-
-    rightBtn.style.opacity =
-        row.scrollLeft >= maxScroll - 10 ? "0.3" : "1";
-}
 function hideError(){
 
     const errorBox =

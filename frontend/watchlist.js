@@ -175,6 +175,12 @@ async function renderWatchlistPage() {
     displayWatchlist(list, container);
 }
 
+function resolvePoster(poster) {
+  if (!poster) return 'https://via.placeholder.com/300x450';
+  if (poster.startsWith('http')) return poster;
+  return IMG_BASE + poster;
+}
+
 function displayWatchlist(list, container) {
     container.innerHTML = '';
     if (!list || list.length === 0) {
@@ -213,7 +219,7 @@ function displayWatchlist(list, container) {
   </button>
 
   <img class="watch-img" 
-       src="${poster ? IMG_BASE + poster : 'https://via.placeholder.com/300x450'}">
+       src="${resolvePoster(poster)}">
 
   <div class="watch-overlay">
     <div class="watch-title">${movie.title}</div>

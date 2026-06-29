@@ -2,27 +2,27 @@
 // TMDB Movie Data, Search, Discovery & Streaming APIs
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
 const tmdbApi = require("../config/tmdb");
-const TMDB_API_KEY =
-process.env.TMDB_API_KEY;
-
-const TMDB_BASE_URL =
-"https://api.themoviedb.org/3";
-
 router.get("/movie/:id", async (req, res) => {
-  const id = req.params.id;
 
-  try {
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}`
-    );
+    try {
 
-    res.json(response.data);
-  } catch (err) {
-    console.error("Error fetching movie:", err.message);
-    res.status(500).json({ error: "Failed to fetch movie" });
-  }
+        const response = await tmdbApi.get(
+            `/movie/${req.params.id}`
+        );
+
+        res.json(response.data);
+
+    } catch (err) {
+
+        console.error("MOVIE DETAILS ERROR:", err.message);
+
+        res.status(500).json({
+            error: "Failed to fetch movie"
+        });
+
+    }
+
 });
 
 // MOVIE SEARCH
@@ -35,17 +35,15 @@ router.get('/search', async (req, res) => {
   return res.json({ results: [] });
 }
 
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/search/movie`,
-      {
+const response = await tmdbApi.get(
+    "/search/movie",
+    {
         params: {
-          api_key: TMDB_API_KEY,
-          query: query,
-          page: req.query.page || 1   
+            query,
+            page: req.query.page || 1
         }
-      }
-    );
-
+    }
+);
     res.json({ results: response.data.results });
 
   } catch (err) {
@@ -108,22 +106,24 @@ router.get('/movie/:id/trailer', async (req, res) => {
 // Weekly Trending Movies From TMDB
 router.get('/trending', async (req, res) => {
   try {
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/trending/movie/week`,
-      {
-        params: {
-          api_key: TMDB_API_KEY,
-          page: req.query.page || 1   
-        }
-      }
-    );
+  const response = await tmdbApi.get(
+  "/trending/movie/week",
+  {
+    params: {
+      page: req.query.page || 1
+    }
+  }
+);
 
     res.json({ results: response.data.results });
 
   } catch (err) {
-    console.error("TRENDING ERROR:", err.message);
+    console.error("TRENDING ERROR");
+    console.error(err.response?.data);
+    console.error(err.response?.status);
+    console.error(err.message);
     res.json({ results: [] });
-  }
+}
 });
 // STREAMING PROVIDERS
 // Fetch OTT Platforms Available For A Movie
@@ -156,15 +156,14 @@ const providers = [
 // Highest Rated Movies From TMDB
 router.get('/top-rated', async (req, res) => {
   try {
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/movie/top_rated`,
-      {
-        params: {
-          api_key: TMDB_API_KEY,
-          page: req.query.page || 1  
-        }
-      }
-    );
+   const response = await tmdbApi.get(
+  "/movie/top_rated",
+  {
+    params: {
+      page: req.query.page || 1
+    }
+  }
+);
 
     res.json({ results: response.data.results });
 
@@ -177,15 +176,14 @@ router.get('/top-rated', async (req, res) => {
 // Most Popular Movies From TMDB
 router.get('/popular', async (req, res) => {
   try {
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/movie/popular`,
-      {
-        params: {
-          api_key: TMDB_API_KEY,
-          page: req.query.page || 1  
-        }
-      }
-    );
+    const response = await tmdbApi.get(
+  "/movie/popular",
+  {
+    params: {
+      page: req.query.page || 1
+    }
+  }
+);
 
     res.json({ results: response.data.results });
 
@@ -199,16 +197,15 @@ router.get('/popular', async (req, res) => {
 // Fetch Movies Belonging To Sci-Fi Genre
 router.get('/scifi', async (req, res) => {
   try {
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/discover/movie`,
-      {
-        params: {
-          api_key: TMDB_API_KEY,
-          with_genres: 878,
-          page: req.query.page || 1 
-        }
-      }
-    );
+  const response = await tmdbApi.get(
+  "/discover/movie",
+  {
+    params: {
+      with_genres: 878,
+      page: req.query.page || 1
+    }
+  }
+);
 
     res.json({ results: response.data.results });
 
@@ -222,16 +219,15 @@ router.get('/scifi', async (req, res) => {
 // Fetch Movies Belonging To Horror Genre
 router.get('/horror', async (req, res) => {
   try {
-    const response = await axios.get(
-      `${TMDB_BASE_URL}/discover/movie`,
-      {
-        params: {
-          api_key: TMDB_API_KEY,
-          with_genres: 27,
-          page: req.query.page || 1 
-        }
-      }
-    );
+    const response = await tmdbApi.get(
+  "/discover/movie",
+  {
+    params: {
+      with_genres: 27,
+      page: req.query.page || 1
+    }
+  }
+);
 
     res.json({ results: response.data.results });
 

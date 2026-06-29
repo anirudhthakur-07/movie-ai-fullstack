@@ -3,205 +3,221 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-    content="width=device-width, initial-scale=1.0">
-
-    <title>Analytics Dashboard</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Movie Insights & Analytics</title>
+    <!-- Outfit Font for Modern SaaS aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="dashboard.css">
-
-    <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="dashboard-navbar">
-<div class="logo">
+    <!-- STUNNING GLOW ACCENTS IN BACKGROUND -->
+    <div class="glow-accent glow-red"></div>
+    <div class="glow-accent glow-blue"></div>
 
-    <svg width="40"
-    height="40"
-    viewBox="0 0 100 100"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style="vertical-align: middle;">
-
-        <circle cx="50"
-        cy="50"
-        r="48"
-        stroke="#E32636"
-        stroke-width="3" />
-
-        <path
-        d="M42 35.5L64 50L42 64.5V35.5Z"
-        fill="#E32636" />
-
-        <path
-        d="M75 30C80 36.5 82 43.5 82 50C82 56.5 80 63.5 75 70"
-        stroke="#FFFFFF"
-        stroke-width="3.5"
-        stroke-linecap="round" />
-
-        <circle cx="75"
-        cy="30"
-        r="3.5"
-        fill="#FFFFFF" />
-
-        <circle cx="75"
-        cy="70"
-        r="3.5"
-        fill="#FFFFFF" />
-
-        <path
-        d="M66 38.5C69 42.5 70.5 46.5 70.5 50C70.5 53.5 69 57.5 66 61.5"
-        stroke="#FFFFFF"
-        stroke-width="3.5"
-        stroke-linecap="round" />
-
-        <circle cx="66"
-        cy="38.5"
-        r="3.5"
-        fill="#FFFFFF" />
-
-        <circle cx="66"
-        cy="61.5"
-        r="3.5"
-        fill="#FFFFFF" />
-
-    </svg>
-
-    <h1 class="logo">
-        Dark<span class="ai-text"></span>
-    </h1>
-
-</div>
-      
-
-        <button class="back-btn"
-        onclick="window.location.href='index.html'">
-
-            ← Back Home
-
-        </button>
-
+    <!-- NAVBAR (Identical to Homepage & Watchlist page) -->
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+                <circle cx="50" cy="50" r="48" stroke="#E32636" stroke-width="3" />
+                <path d="M42 35.5L64 50L42 64.5V35.5Z" fill="#E32636" />
+                <path d="M75 30C80 36.5 82 43.5 82 50C82 56.5 80 63.5 75 70" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+                <circle cx="75" cy="30" r="3.5" fill="#FFFFFF" />
+                <circle cx="75" cy="70" r="3.5" fill="#FFFFFF" />
+                <path d="M66 38.5C69 42.5 70.5 46.5 70.5 50C70.5 53.5 69 57.5 66 61.5" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+                <circle cx="66" cy="38.5" r="3.5" fill="#FFFFFF" />
+                <circle cx="66" cy="61.5" r="3.5" fill="#FFFFFF" />
+            </svg>
+            <h1 class="logo">Dark<span class="ai-text"></span></h1>
+        </div>
+        <div class="nav-right">
+            <button class="back-btn" onclick="window.location.href='index.html'">← Back Home</button>
+        </div>
     </nav>
 
-    <!-- DASHBOARD -->
-    <main class="dashboard-container">
+    <!-- MAIN CONTAINER -->
+    <main class="dashboard-wrapper">
 
-        <!-- CARD 1 -->
-        <div class="analytics-card">
+        <!-- 1. AI PROFILE HERO HEADER -->
+        <header class="profile-hero-card">
+            <div class="profile-header-top">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar" id="avatarInitials">U</div>
+                    <div class="glowing-avatar-ring"></div>
+                </div>
+                <div class="profile-meta-info">
+                    <div class="username-row">
+                        <h2 id="profileUsername">Movie Explorer</h2>
+                    </div>
+                    <div class="persona-tagline">
+                        Persona: <span id="personality" class="glowing-text">Analyzing...</span>
+                    </div>
+                </div>
+                <div class="profile-level-badge">
+                    <div class="lvl-label">Explorer Level</div>
+                    <div class="lvl-val" id="explorerLevel">Level 1</div>
+                </div>
+            </div>
+            
+            <!-- LEVEL PROGRESS BAR -->
+            <div class="profile-level-progress">
+                <div class="progress-labels">
+                    <span>Rank Progress</span>
+                    <span id="levelRemaining">0 movies remaining to next level</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar-fill" id="levelProgressBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
 
-    <h2>Movies Explored</h2>
+        <!-- 2. GRID LAYOUT FOR DNA, STATS, AND LOGS -->
+        <div class="dashboard-grid">
+            
+            <!-- COLUMN LEFT: MOVIE DNA & NEURAL SUMMARY -->
+            <div class="left-column-group">
+                <section class="glass-card dna-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-dna icon-gradient"></i> Movie DNA</h3>
+                        <p class="subtitle">Dynamic interest distribution matching your stats</p>
+                    </div>
+                    <div class="dna-progress-container" id="dnaContainer">
+                        <div class="skeleton-loader"></div>
+                        <div class="skeleton-loader"></div>
+                        <div class="skeleton-loader"></div>
+                    </div>
+                </section>
 
-    <p id="totalClicks">
-        Loading...
-    </p>
+                <!-- AI INSIGHTS & SUMMARY -->
+                <section class="glass-card summary-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-sparkles icon-gradient"></i> Neural Summary</h3>
+                        <p class="subtitle">AI generated overview of your streaming profile</p>
+                    </div>
+                    <div id="aiSummaryList" class="summary-insights-list">
+                        <!-- Dynamic AI insights will be rendered here as bullet items -->
+                    </div>
+                </section>
+            </div>
 
-    <div class="analytics-subtext">
+            <!-- COLUMN RIGHT: STATS SUB-GRID -->
+            <div class="stats-group">
+                <div class="stats-mini-grid">
+                    
+                    <!-- Movies Explored -->
+                    <div class="stat-widget card-hover">
+                        <div class="widget-icon red"><i class="fas fa-eye"></i></div>
+                        <div class="widget-data">
+                            <h4 id="totalClicks">0</h4>
+                            <span>Movies Explored</span>
+                        </div>
+                    </div>
 
-        Your streaming activity this month
+                    <!-- Favorite Streaming Home -->
+                    <div class="stat-widget card-hover">
+                        <div class="widget-icon blue"><i class="fas fa-tv"></i></div>
+                        <div class="widget-data">
+                            <h4 id="topProvider" class="small-text">No Data</h4>
+                            <span>Streaming Home</span>
+                        </div>
+                    </div>
 
-    </div>
+                    <!-- Favorite Genre -->
+                    <div class="stat-widget card-hover">
+                        <div class="widget-icon purple"><i class="fas fa-film"></i></div>
+                        <div class="widget-data">
+                            <h4 id="topGenre" class="small-text">No Data</h4>
+                            <span>Favorite Genre</span>
+                        </div>
+                    </div>
 
-</div>
+                    <!-- Profile Reliability -->
+                    <div class="stat-widget card-hover">
+                        <div class="widget-icon gold"><i class="fas fa-shield-halved"></i></div>
+                        <div class="widget-data">
+                            <h4 id="profileStrength">Low</h4>
+                            <span>Reliability</span>
+                        </div>
+                    </div>
 
-        <!-- CARD 2 -->
-     <div class="analytics-card">
-
-    <h2>Your Favorite Streaming Home</h2>
-
-    <p id="topProvider">
-        Loading...
-    </p>
-
-    <div class="analytics-subtext">
-
-        Most clicked streaming platform
-
-    </div>
-
-</div>
-
-      <div class="analytics-card">
-
-    <h2>Favorite Genre</h2>
-
-    <p id="topGenre">
-        Loading...
-    </p>
-
-    <div class="analytics-subtext">
-
-        Based on your viewing behavior
-
-    </div>
-
-</div>
-<div class="analytics-card">
-
-    <h2>Profile Strength</h2>
-
-    <p id="profileStrength">
-        Loading...
-    </p>
-
-    <div class="analytics-subtext">
-        Based on watchlist size
-    </div>
-
-</div>
-<div class="analytics-card">
-
-    <h2>Activity Level</h2>
-
-    <p id="activityLevel">
-        Loading...
-    </p>
-
-    <div class="analytics-subtext">
-        Based on movie interactions
-    </div>
-
-</div>
-<!-- FULL WIDTH CHARTS -->
-<div class="charts-grid">
-    <div class="chart-card">
-        <h2>Your Streaming Universe</h2>
-        <div class="chart-wrapper">
-            <canvas id="providerChart"></canvas>
+                    <!-- Activity Level -->
+                    <div class="stat-widget card-hover">
+                        <div class="widget-icon green"><i class="fas fa-bolt"></i></div>
+                        <div class="widget-data">
+                            <h4 id="activityLevel">Casual</h4>
+                            <span>Activity Level</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="chart-card">
-        <h2>Your Movie Personality</h2>
-        <div class="chart-wrapper">
-            <canvas id="genreChart"></canvas>
+        <!-- 3. GAMIFIED ACHIEVEMENTS SHOWCASE -->
+        <section class="glass-card achievements-section">
+            <div class="card-header achievements-header-row">
+                <div>
+                    <h3><i class="fas fa-trophy icon-gradient"></i> Unlocked Achievements</h3>
+                    <p class="subtitle">Gamified milestones earned through your movie discovery activity</p>
+                </div>
+                <button id="allAchievementsBtn" class="ach-action-btn">
+                    <i class="fas fa-list-ul"></i> All Achievements
+                </button>
+            </div>
+            <div class="achievements-grid" id="achievementsContainer">
+                <!-- Top 3 achievements will be dynamically rendered here -->
+            </div>
+        </section>
+
+        <!-- 4. VISUAL CHARTS ROW -->
+        <div class="charts-grid">
+            <section class="glass-card chart-card">
+                <h3><i class="fas fa-chart-pie icon-gradient"></i> Streaming Distribution</h3>
+                <p class="subtitle">Share of streaming provider clicks</p>
+                <div class="chart-wrapper">
+                    <canvas id="providerChart"></canvas>
+                </div>
+            </section>
+
+            <section class="glass-card chart-card">
+                <h3><i class="fas fa-chart-bar icon-gradient"></i> Genre Affinity Map</h3>
+                <p class="subtitle">Comparison of explored genre indexes</p>
+                <div class="chart-wrapper">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </section>
         </div>
-    </div>
-</div>
+
     </main>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- ALL ACHIEVEMENTS DETAIL MODAL -->
+    <div id="achievementsModal" class="modal hidden">
+        <div class="modal-content achievements-modal-content">
+            <span class="close-modal" id="closeAchievementsModal">&times;</span>
+            <div class="ach-modal-header">
+                <h2><i class="fas fa-trophy icon-gradient"></i> Cinematic Achievements</h2>
+                <p class="subtitle" id="modalAchievementsCount">Unlocked: 0 / 32</p>
+            </div>
+            <div class="achievements-modal-grid" id="modalAchievementsGrid">
+                <!-- All 32 achievements will be rendered here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+            <p>Movie data and images are provided by TMDB. Trailers are embedded from YouTube. Streaming availability may vary by region.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="config.js"></script>
-<script src="dashboard.js"></script>
-<footer class="site-footer">
-
-  <div class="footer-content">
-
-    <p>
-      This product uses the TMDB API but is not endorsed or certified by TMDB.
-    </p>
-
-    <p>
-      Movie data and images are provided by TMDB.
-      Trailers are embedded from YouTube.
-      Streaming availability may vary by region.
-    </p>
-
-  </div>
-
-</footer>
+    <script src="dashboard.js"></script>
 </body>
 
 </html>

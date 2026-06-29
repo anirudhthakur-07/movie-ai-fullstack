@@ -80,16 +80,21 @@ h4 {
 }
 
 .search-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 6px 14px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+
+  width: 350px;
+
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.2);
+
+  padding: 8px 14px;
+
+  border-radius: 8px;
+
   margin-right: 15px;
 }
-
 .search-wrapper:focus-within {
   width: 250px;
   border-color: #fff;
@@ -102,14 +107,17 @@ h4 {
   margin-right: 10px;
 }
 
-#searchInput {
-  background: transparent;
-  border: none;
-  color: white;
-  outline: none;
-  font-size: 0.85rem;
-  width: 140px;
-  /* Expands on focus via wrapper */
+#searchInput{
+    background: transparent;
+    border: none;
+    color: white;
+    outline: none;
+
+    width: 100%;
+
+    padding-right: 45px;
+
+    font-size: 0.9rem;
 }
 
 .nav-action-btn {
@@ -463,38 +471,49 @@ h4 {
   font-weight: bold;
 }
 
-.modal-scroll-content::-webkit-scrollbar {
+/* Target the specific container for the overview */
+.modal-overview::-webkit-scrollbar {
   width: 6px;
+  /* Keep it thin and minimalist */
 }
 
-.modal-scroll-content::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
+/* The track (background) of the scrollbar */
+.modal-overview::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  /* Very subtle transparent track */
   border-radius: 10px;
 }
 
-.modal-scroll-content::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
+/* The thumb (the draggable part) */
+.modal-overview::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  /* Muted white to match text */
   border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
-.modal-scroll-content::-webkit-scrollbar-thumb:hover {
+/* Hover effect for the thumb */
+.modal-overview::-webkit-scrollbar-thumb:hover {
   background: var(--primary-color);
+  /* Turns Netflix Red on hover */
 }
-.modal-scroll-content {
+
+/* Firefox Support */
+.modal-overview {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+.modal-overview {
   flex: 1;
   overflow-y: auto;
-  min-height: 0;
-
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.2)
-                   rgba(255,255,255,0.05);
-}
-
-.modal-overview{
   font-size: 1.1rem;
   line-height: 1.5;
   color: #ccc;
+  margin-bottom: 20px;
+  padding-right: 15px;
 }
+
 .message {
   max-width: 80%;
   padding: 10px 15px;
@@ -2062,101 +2081,149 @@ pointer-events: auto;
     text-align: center;
     width: 100%;
 }
-.recommendation-reasons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 15px;
-}
 
-.reason-tag {
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-/* SEARCH HISTORY */
-
-.search-history-section{
-    margin:40px 0;
+.history-section{
+    margin:35px 0 50px;
     padding:0 40px;
-}
-
-.search-history-section h2{
-    font-size:22px;
-    font-weight:600;
-    margin-bottom:15px;
-    position:relative;
-}
-
-.search-history-section h2::before{
-    content:"";
-    position:absolute;
-    left:-12px;
-    top:50%;
-    transform:translateY(-50%);
-    width:4px;
-    height:20px;
-    background:#e50914;
-    border-radius:2px;
 }
 
 .history-row{
     display:flex;
     gap:12px;
-    overflow-x:auto;
-    padding:10px 0 20px;
-    scrollbar-width:none;
-}
-
-.history-row::-webkit-scrollbar{
-    display:none;
+    flex-wrap:wrap;
+    margin-top:15px;
 }
 
 .history-chip{
-    flex-shrink:0;
-
-    background:linear-gradient(
-        135deg,
-        rgba(255,255,255,.05),
-        rgba(255,255,255,.02)
-    );
-
-    border:1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
 
     color:#fff;
 
-    padding:12px 22px;
+    padding:10px 18px;
 
-    border-radius:999px;
+    border-radius:30px;
 
     font-size:14px;
     font-weight:500;
 
-    backdrop-filter:blur(10px);
+    cursor:pointer;
 
-    transition:.3s ease;
+    backdrop-filter: blur(10px);
+
+    transition:all .25s ease;
 }
 
 .history-chip:hover{
-    transform:translateY(-3px);
 
-    background:linear-gradient(
-        135deg,
-        #e50914,
-        #ff2d55
+    background:
+    linear-gradient(
+      135deg,
+      #e50914,
+      #ff2a3d
     );
 
-    border-color:transparent;
+    border-color:
+    transparent;
+
+    transform:
+    translateY(-2px);
 
     box-shadow:
-        0 10px 25px rgba(229,9,20,.35);
-}
-.history-chip i{
-    margin-right:8px;
-    color:#aaa;
+    0 8px 20px rgba(229,9,20,.35);
 }
 
-.history-chip:hover i{
+.history-chip:active{
+    transform:scale(.96);
+}
+
+.search-wrapper{
+    position:relative;
+}
+
+.history-toggle{
+    position:absolute;
+
+    right:12px;
+    top:50%;
+
+    transform:translateY(-50%);
+
+    background:none;
+    border:none;
+
+    color:#999;
+    font-size:18px;
+
+    cursor:pointer;
+
+    z-index:50;
+}
+
+.history-toggle:hover{
+    color:#fff;
+}
+
+.history-dropdown{
+    position:absolute;
+    top:52px;
+    left:0;
+    width:100%;
+
+    background:#111;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    z-index:9999;
+
+    box-shadow:
+    0 15px 35px rgba(0,0,0,.5);
+}
+
+.history-item{
+    padding:12px 16px;
+    color:#ddd;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.history-item:hover{
+    background:#e50914;
     color:white;
+}
+.movie-ai-reason{
+
+    margin-top:4px;
+
+    font-size:11px;
+
+    color:#ff4d6d;
+
+    font-weight:600;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+}
+
+.recommendation-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.reason-tag {
+  background: rgba(229, 9, 20, 0.2);
+  border: 1px solid #e50914;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: #fff;
 }

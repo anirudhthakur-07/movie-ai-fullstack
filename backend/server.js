@@ -1,5 +1,18 @@
 // ENVIRONMENT CONFIGURATION & DEPENDENCIES
 require('dotenv').config();
+
+const requiredEnv = ['MONGO_URI', 'JWT_SECRET', 'TMDB_API_KEY'];
+for (const key of requiredEnv) {
+  if (!process.env[key]) {
+    console.error(`FATAL: Missing required env var: ${key}`);
+    process.exit(1);
+  }
+}
+if (process.env.JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET must be at least 32 characters');
+  process.exit(1);
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,13 +24,15 @@ const rateLimit =require("express-rate-limit");
 const morgan = require("morgan");
 
 // MIDDLEWARE & ROUTE IMPORTS
-const searchHistoryRoutes =require("./routes/searchHistoryRoutes");
+const searchHistoryRoutes =
+require("./routes/searchHistoryRoutes");
 const auth =require("./middleware/auth");
 const analyticsRoutes =require("./routes/analyticsRoutes");
 const watchlistRoutes =require("./routes/watchlistRoutes");
 const authRoutes =require("./routes/authRoutes");
 const recommendationRoutes =require("./routes/recommendationRoutes");
 const profileRoutes =require("./routes/profileRoutes");
+const achievementRoutes = require("./routes/achievementRoutes");
 // EXPRESS APPLICATION SETUP
 const app = express();
 const movieRoutes =require("./routes/movieRoutes");
@@ -61,7 +76,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use("/api", searchHistoryRoutes);
 app.use(mongoSanitize());
 
 // MOVIE DATABASE ROUTES
@@ -139,21 +153,27 @@ if (
         error: "Invalid data"
     });
 }
-        const click =
-        new ProviderClick({
+     const click =
+new ProviderClick({
 
-            userId: req.userId,
+    userId: req.userId,
 
-            movieId,
+    movieId,
 
-            movieTitle,
+    movieTitle,
 
-          provider: provider,
-genre: genre
-        });
+    provider: provider.trim().toLowerCase(),
+    genre: genre.trim().toLowerCase()
+});
 
         await click.save();
 
+        // Increment recommendation interactions on user model
+        const user = await User.findById(req.userId);
+        if (user) {
+            user.recommendationInteractionsCount = (user.recommendationInteractionsCount || 0) + 1;
+            await user.save();
+        }
 
         res.json({
             success: true
@@ -169,7 +189,12 @@ genre: genre
     }
 });
 
+
 // APPLICATION ROUTES
+app.use(
+    "/api",
+    searchHistoryRoutes
+);
 app.use(
     "/api",
     movieRoutes
@@ -193,6 +218,10 @@ app.use(
 app.use(
     "/api",
     profileRoutes
+);
+app.use(
+    "/api/achievements",
+    achievementRoutes
 );
 // SERVER STARTUP
 app.listen(PORT, () => {

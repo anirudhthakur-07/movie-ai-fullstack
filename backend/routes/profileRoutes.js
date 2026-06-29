@@ -13,6 +13,15 @@ router.get("/profile", auth, async (req, res) => {
 
         const profile =
             await buildUserProfile(req.userId);
+            if (!profile) {
+return res.json({
+    profileStrength: "Low",
+    activityLevel: "Casual",
+    personality: "Movie Fan",
+    status: "profile_missing"
+});
+
+}
         res.json(profile);
 
     } catch (err) {

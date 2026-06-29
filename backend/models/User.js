@@ -9,7 +9,12 @@ const userSchema = new mongoose.Schema({
             title: String,
             poster: String
         }
-    ]
+    ],
+    unlockedAchievements: { type: [String], default: [] },
+    recommendationViewsCount: { type: Number, default: 0 },
+    openedRecommendationsCount: { type: Number, default: 0 },
+    recommendationInteractionsCount: { type: Number, default: 0 },
+    dashboardViewsCount: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('User', userSchema);

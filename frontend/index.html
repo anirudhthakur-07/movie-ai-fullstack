@@ -32,11 +32,29 @@
     </div>
 
     <div class="nav-right">
-      <div class="search-wrapper">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" id="searchInput" placeholder="Titles, people, genres" autocomplete="off">
-        <div id="searchSpinner" class="spinner hidden"></div>
-      </div>
+     <div class="search-wrapper">
+
+  <i class="fas fa-search search-icon"></i>
+
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Titles, people, genres"
+    autocomplete="off"
+  >
+
+  <button
+    id="historyBtn"
+    class="history-toggle"
+    type="button">
+    <i class="fas fa-history"></i>
+  </button>
+  <div
+    id="searchSpinner"
+    class="spinner hidden">
+  </div>
+
+</div>
 
       <button class="nav-action-btn watchlist-btn" onclick="openWatchlistPage()">
         <i class="fas fa-list"></i> My List
@@ -64,15 +82,18 @@ onclick="window.location.href='dashboard.html'">
       </p>
     </div>
   </div>
-<section id="historySection" class="movie-section">
+  <section
+id="historySection"
+class="movie-section hidden">
 
-    <h3 class="section-title">
-        Recent Searches
-    </h3>
+<h3 class="section-title">
+Recent Searches
+</h3>
 
-    <div class="history-row"
-         id="historyRow">
-    </div>
+<div
+id="historyRow"
+class="history-row">
+</div>
 
 </section>
   <!-- Search Results Section -->
@@ -276,18 +297,10 @@ class="movie-section hidden">
             <span id="modalRating" class="rating-badge"><i class="fas fa-star"></i> 8.5</span>
             <span id="modalYear">2024</span>
           </div>
-            <div class="modal-scroll-content">
-
-    <p id="modalOverview"
-       class="modal-overview"></p>
-
-    <div id="recommendationReasons"
-         class="recommendation-reasons hidden">
-    </div>
-
-</div>
-
-<div class="modal-buttons">
+          <div id="recommendationReasons" class="recommendation-reasons hidden"></div>
+          <p id="modalOverview" class="modal-overview">Overview text goes here...</p>
+          <!--  TRAILER BUTTON -->
+          <div class="modal-buttons">
             <button id="playTrailerBtn" class="modal-btn trailer-btn">
               ▶ Watch Trailer
             </button>

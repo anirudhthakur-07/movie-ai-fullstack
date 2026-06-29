@@ -21,6 +21,8 @@ clickedAt: {
 }
 });
 
+providerClickSchema.index({ userId: 1 });
+
 module.exports =
 mongoose.model(
     "ProviderClick",
