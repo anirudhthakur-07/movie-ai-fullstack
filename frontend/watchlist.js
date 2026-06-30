@@ -393,7 +393,7 @@ function renderHeroCard(profile, watchlist) {
 
     heroCard.innerHTML = `
         <div class="watchlist-header-top">
-            <div class="watchlist-hero-avatar-container">
+            <div class="watchlist-hero-avatar-container" id="watchlistAvatarContainer" style="cursor: pointer;" title="Change Avatar Style">
                 <div class="watchlist-hero-avatar-ring"></div>
                 <div class="watchlist-hero-avatar">
                     <img src="${avatarImgUrl}" alt="${escapeHTML(mappedPersona)}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
@@ -409,6 +409,17 @@ function renderHeroCard(profile, watchlist) {
             </div>
         </div>
     `;
+
+    const avatarContainer = document.getElementById("watchlistAvatarContainer");
+    if (avatarContainer) {
+        avatarContainer.addEventListener("click", () => {
+            openAvatarSelector(profile.personality || "Movie Explorer", profile.gender || "male", profile.username, (newGender) => {
+                // Update profile gender and trigger re-render
+                profile.gender = newGender;
+                renderHeroCard(profile, watchlist);
+            });
+        });
+    }
 }
 
 function renderRecentlyAdded(watchlist) {

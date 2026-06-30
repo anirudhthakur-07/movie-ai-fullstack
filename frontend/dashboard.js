@@ -210,6 +210,25 @@ async function loadProfile() {
             <img src="${avatarImgUrl}" alt="${mappedPersona}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
         `;
 
+        const avatarContainer = document.querySelector(".profile-avatar-container");
+        if (avatarContainer) {
+            avatarContainer.style.cursor = "pointer";
+            avatarContainer.title = "Change Avatar Style";
+            
+            if (!avatarContainer.dataset.listenerBound) {
+                avatarContainer.addEventListener("click", () => {
+                    openAvatarSelector(profileData.personality || "Movie Fan", profileData.gender || "male", profileData.username, (newGender) => {
+                        profileData.gender = newGender;
+                        const newUrl = getAvatarPath(profileData.personality, newGender);
+                        document.getElementById("avatarInitials").innerHTML = `
+                            <img src="${newUrl}" alt="${mappedPersona}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
+                        `;
+                    });
+                });
+                avatarContainer.dataset.listenerBound = "true";
+            }
+        }
+
         // FIX BUG 1 + BUG 4: Bind activityLevel and profileStrength from profileData
         // These were never wired — causing the widgets to always show stale HTML defaults
         const activityLevelEl = document.getElementById("activityLevel");

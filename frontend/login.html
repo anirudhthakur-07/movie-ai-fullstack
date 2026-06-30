@@ -94,14 +94,7 @@
                     <label for="password">Password</label>
                 </div>
                 
-                <!-- Gender Selection (Applied on Sign Up) -->
-                <div class="input-group">
-                    <select id="gender" required>
-                        <option value="male" selected>Male Profile Avatar</option>
-                        <option value="female">Female Profile Avatar</option>
-                    </select>
-                    <label for="gender">Profile Gender</label>
-                </div>
+
                <div class="terms-box">
 
     <input type="checkbox" id="terms" >
@@ -271,7 +264,7 @@ error.classList.add("hidden");
         async function register() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
-            const gender = document.getElementById("gender").value;
+            const gender = "male";
             const accepted =
 document.getElementById("terms").checked;
 
