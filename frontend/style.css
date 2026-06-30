@@ -165,8 +165,10 @@ h4 {
 }
 
 .watchlist-container {
-  padding: 90px 4% 0 4%;
-  margin-top: 0;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 90px 6% 40px 6%;
+  box-sizing: border-box;
 }
 
 .watchlist-grid {
@@ -1289,6 +1291,9 @@ justify-content: center;
 }
 .watchlist-container {
     min-height: calc(100vh - 180px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .empty-icon {
@@ -2480,13 +2485,13 @@ pointer-events: auto;
 
 .watchlist-section {
   margin: 40px 0;
-  padding: 0 4%;
+  padding: 0;
   position: relative;
   animation: fadeIn 0.6s ease-out;
 }
 
 .watchlist-hero-card {
-  margin: 90px 4% 20px;
+  margin: 0 0 20px 0 !important;
   padding: 32px 38px;
   background: linear-gradient(145deg, rgba(227, 38, 54, 0.08) 0%, rgba(22, 22, 26, 0.6) 60%) !important;
   backdrop-filter: blur(24px);
@@ -2798,7 +2803,7 @@ pointer-events: auto;
     flex-direction: column;
     text-align: center;
     padding: 20px;
-    margin: 80px 15px 15px;
+    margin: 0 0 15px 0 !important;
   }
   .watchlist-hero-xp-bar-container {
     max-width: 100%;
