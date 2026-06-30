@@ -1012,3 +1012,128 @@ body {
     object-fit: cover !important;
     border-radius: 14px !important;
 }
+
+/* ==========================================================================
+   PREMIUM GLASSMORPHIC GLOWING ACHIEVEMENTS (OPTION 1)
+   ========================================================================== */
+.achievement-badge {
+    background: rgba(18, 18, 22, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 18px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    filter: grayscale(0.8) !important;
+    opacity: 0.45 !important;
+}
+
+/* Unlocked glows depending on badge tier/color */
+.achievement-badge.unlocked {
+    filter: grayscale(0) !important;
+    opacity: 1 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(22, 22, 26, 0.65) !important;
+}
+
+/* Gold Badge Glows */
+.achievement-badge.unlocked:has(.gold-badge) {
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.1), inset 0 0 10px rgba(245, 158, 11, 0.03) !important;
+}
+.achievement-badge.unlocked:has(.gold-badge):hover {
+    transform: translateY(-3px) scale(1.015) !important;
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.2), inset 0 0 12px rgba(245, 158, 11, 0.06) !important;
+}
+
+/* Red Badge Glows */
+.achievement-badge.unlocked:has(.red-badge) {
+    box-shadow: 0 8px 24px rgba(227, 38, 54, 0.1), inset 0 0 10px rgba(227, 38, 54, 0.03) !important;
+}
+.achievement-badge.unlocked:has(.red-badge):hover {
+    transform: translateY(-3px) scale(1.015) !important;
+    border-color: rgba(227, 38, 54, 0.35) !important;
+    box-shadow: 0 12px 30px rgba(227, 38, 54, 0.2), inset 0 0 12px rgba(227, 38, 54, 0.06) !important;
+}
+
+/* Blue Badge Glows */
+.achievement-badge.unlocked:has(.blue-badge) {
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1), inset 0 0 10px rgba(59, 130, 246, 0.03) !important;
+}
+.achievement-badge.unlocked:has(.blue-badge):hover {
+    transform: translateY(-3px) scale(1.015) !important;
+    border-color: rgba(59, 130, 246, 0.35) !important;
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.2), inset 0 0 12px rgba(59, 130, 246, 0.06) !important;
+}
+
+/* Purple Badge Glows */
+.achievement-badge.unlocked:has(.purple-badge) {
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.1), inset 0 0 10px rgba(139, 92, 246, 0.03) !important;
+}
+.achievement-badge.unlocked:has(.purple-badge):hover {
+    transform: translateY(-3px) scale(1.015) !important;
+    border-color: rgba(139, 92, 246, 0.35) !important;
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.2), inset 0 0 12px rgba(139, 92, 246, 0.06) !important;
+}
+
+/* Green Badge Glows */
+.achievement-badge.unlocked:has(.green-badge) {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1), inset 0 0 10px rgba(16, 185, 129, 0.03) !important;
+}
+.achievement-badge.unlocked:has(.green-badge):hover {
+    transform: translateY(-3px) scale(1.015) !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.2), inset 0 0 12px rgba(16, 185, 129, 0.06) !important;
+}
+
+/* Premium Icon Box styling with internal lighting */
+.ach-icon-box {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.15rem !important;
+    color: var(--text-muted) !important;
+    transition: all 0.3s ease !important;
+    box-sizing: border-box !important;
+}
+
+.achievement-badge.unlocked .ach-icon-box.gold-badge {
+    background: rgba(245, 158, 11, 0.08) !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
+    color: #f59e0b !important;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.5) !important;
+}
+
+.achievement-badge.unlocked .ach-icon-box.red-badge {
+    background: rgba(227, 38, 54, 0.08) !important;
+    border-color: rgba(227, 38, 54, 0.25) !important;
+    color: #e32636 !important;
+    text-shadow: 0 0 8px rgba(227, 38, 54, 0.5) !important;
+}
+
+.achievement-badge.unlocked .ach-icon-box.blue-badge {
+    background: rgba(59, 130, 246, 0.08) !important;
+    border-color: rgba(59, 130, 246, 0.25) !important;
+    color: #3b82f6 !important;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.5) !important;
+}
+
+.achievement-badge.unlocked .ach-icon-box.purple-badge {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border-color: rgba(139, 92, 246, 0.25) !important;
+    color: #8b5cf6 !important;
+    text-shadow: 0 0 8px rgba(139, 92, 246, 0.5) !important;
+}
+
+.achievement-badge.unlocked .ach-icon-box.green-badge {
+    background: rgba(16, 185, 129, 0.08) !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
+    color: #10b981 !important;
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.5) !important;
+}
