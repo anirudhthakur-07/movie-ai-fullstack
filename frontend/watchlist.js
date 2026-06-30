@@ -392,19 +392,21 @@ function renderHeroCard(profile, watchlist) {
     const totalSaved = watchlist ? watchlist.length : 0;
 
     heroCard.innerHTML = `
-        <div class="watchlist-hero-avatar-container">
-            <div class="watchlist-hero-avatar-ring"></div>
-            <div class="watchlist-hero-avatar">
-                <img src="${avatarImgUrl}" alt="${escapeHTML(mappedPersona)}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
+        <div class="watchlist-header-top">
+            <div class="watchlist-hero-avatar-container">
+                <div class="watchlist-hero-avatar-ring"></div>
+                <div class="watchlist-hero-avatar">
+                    <img src="${avatarImgUrl}" alt="${escapeHTML(mappedPersona)}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
+                </div>
             </div>
-        </div>
-        <div class="watchlist-hero-info">
-            <h2 class="watchlist-hero-username">${escapeHTML(profile.username || "anirudh")}</h2>
-            <div class="watchlist-hero-tagline">Persona: <span class="glowing-red">${escapeHTML(mappedPersona)}</span></div>
-        </div>
-        <div class="watchlist-hero-badge">
-            <div class="lvl-label">Saved Titles</div>
-            <div class="lvl-val">${totalSaved}</div>
+            <div class="watchlist-hero-info">
+                <h2 class="watchlist-hero-username">${escapeHTML(profile.username || "anirudh")}</h2>
+                <div class="watchlist-hero-tagline">Persona: <span class="glowing-red">${escapeHTML(mappedPersona)}</span></div>
+            </div>
+            <div class="watchlist-hero-badge">
+                <div class="lvl-label">Saved Titles</div>
+                <div class="lvl-val">${totalSaved}</div>
+            </div>
         </div>
     `;
 }
