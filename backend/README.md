@@ -1,287 +1,102 @@
+# 🎬 Dark AI Movie Recommendation Platform - Backend
 
-#  Movie Recommendation System - Backend
-A secure and scalable Node.js + Express.js backend powering a personalized movie recommendation platform with authentication, analytics, watchlists, and TMDB integration.
-## Overview
-The Movie Recommendation System Backend is a RESTful API built using Node.js, Express.js, and MongoDB. It provides movie discovery, personalized recommendations, watchlist management, analytics tracking, and secure user authentication.
+[![Backend](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?style=for-the-badge&logo=node.js)]()
+[![Database](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=for-the-badge&logo=mongodb)]()
+[![Security](https://img.shields.io/badge/Security-OWASP%20Audited-red?style=for-the-badge)]()
 
-The backend integrates with The Movie Database (TMDB) API to fetch real-time movie information while maintaining user-specific data such as watchlists, streaming preferences, and recommendation history in MongoDB.
+The server-side application powering the Movie AI Recommender platform. Built with Express.js and MongoDB, it implements secure authentication, detailed click tracking, and metadata curation engines.
 
+---
 
-##  Features
+## 🛠️ Technology Stack & Dependencies
 
-###  Authentication & Authorization
+*   **Runtime:** Node.js (v16+)
+*   **Web Framework:** Express.js
+*   **Database:** MongoDB Atlas (via Mongoose ODM)
+*   **Security & Guard Rails:**
+    *   `bcryptjs` - Password hashing
+    *   `jsonwebtoken` - Stateless authentication tokens
+    *   `helmet` - HTTP header security
+    *   `express-rate-limit` - DDoS protection
+    *   `express-mongo-sanitize` - NoSQL injection prevention
+*   **Logging:** Morgan middleware
 
-* User Registration
-* User Login
-* JWT-Based Authentication
-* Protected API Routes
-* Secure Password Hashing using bcrypt
+---
 
-###  Movie Discovery
+## 🌐 API Endpoint Registry
 
-* Search Movies
-* Trending Movies
-* Popular Movies
-* Top Rated Movies
-* Science Fiction Movies
-* Horror Movies
-* Movie Details
-* Movie Cast Information
-* Movie Trailer Information
-* OTT Provider Availability
+### 🔑 Authentication
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/register` | Registers a new user. | No |
+| `POST` | `/api/login` | Returns a signed JWT token on success. | No |
 
-###  Watchlist Management
+### 🎥 Discovery & TMDB Proxy
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/search` | Performs a TMDB search query. | Yes |
+| `GET` | `/api/trending` | Returns current trending titles. | Yes |
+| `GET` | `/api/popular` | Returns popular movie categories. | Yes |
+| `GET` | `/api/scifi` | Science fiction genre feed. | Yes |
+| `GET` | `/api/horror` | Horror genre feed. | Yes |
+| `GET` | `/api/movie/:id` | Returns complete details for a TMDB ID. | Yes |
+| `GET` | `/api/movie/:id/cast` | Returns cast members. | Yes |
+| `GET` | `/api/movie/:id/trailer` | Returns Youtube trailer links. | Yes |
+| `GET` | `/api/movie/:id/providers` | OTT provider availability check. | Yes |
 
-* Add Movies to Watchlist
-* Remove Movies from Watchlist
-* Fetch User Watchlist
-* Persistent Storage in MongoDB
+### 📝 Watchlist & Curation
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/watchlist` | Fetch user's saved watchlist. | Yes |
+| `POST` | `/api/watchlist` | Add/remove movie from watchlist. | Yes |
+| `GET` | `/api/recommend` | Search-based collaborative curation. | Yes |
+| `GET` | `/api/recommend/watchlist`| Watchlist-based customized recommendations.| Yes |
 
-###  Recommendation Engine
+### 📊 Analytics & Interaction
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/analytics/overview` | Returns total interactions and favorites. | Yes |
+| `GET` | `/api/analytics/providers`| Returns data for OTT provider click charts. | Yes |
+| `GET` | `/api/analytics/genres` | Returns data for genre map distribution. | Yes |
 
-* Search-Based Recommendations
-* Similar Movie Recommendations
-* Genre-Based Recommendations
-* Watchlist-Based Personalized Recommendations
-* Duplicate Filtering
-* Quality Ranking System
+---
 
-###  Analytics Dashboard
+## ⚙️ Core Engines
 
-* Total Movies Explored
-* Favorite OTT Provider
-* Favorite Genre
-* Provider Usage Analytics
-* Genre Preference Analytics
+### 1. User Profile & Persona Engine
+*   **Watchlist Genre Mapping:** The user's dynamic **Persona** (such as *Horror Seeker* or *Sci-Fi Explorer*) is calculated by counting and sorting the actual genres of movies saved in their watchlist.
+*   **Fallback Resolution:** If the watchlist is empty, the system falls back to analyzing the user's provider click logs and search history.
+*   **XP Progress System:** Automatically evaluates explorer levels, profile strengths, and user activities based on behavioral events.
 
-###  User Activity Tracking
+### 2. Self-Healing Watchlist Pipeline
+*   When retrieving a user profile, the server checks if any items in the user's watchlist are missing genre tags.
+*   If missing, it automatically queries the TMDB API in parallel, resolves the genres, and saves them to the database without slowing down the initial response.
 
-* OTT Provider Click Tracking
-* Search History Management
-* User Preference Analysis
+---
 
-## 🛠️ Technology Stack
+## 📂 Backend Architecture Layout
 
-### Backend Framework
-
-* Node.js
-* Express.js
-
-### Database
-
-* MongoDB Atlas
-* Mongoose ODM
-
-### Authentication
-
-* JSON Web Token (JWT)
-* bcrypt.js
-
-### External APIs
-
-* TMDB (The Movie Database) API
-
-### Security
-
-* Helmet
-* Express Rate Limit
-* Express Mongo Sanitize
-
-### Logging
-
-* Morgan
-
-## 🏗️ Backend Architecture
-
-```text
-               Client Application
-                       │
-                       ▼
-             Express.js API Server
-                       │
- ┌─────────────────────┼─────────────────────┐
- │                     │                     │
- ▼                     ▼                     ▼
-Authentication Recommendation Engine  Analytics Engine
-
-                       │
-                       ▼
-                 MongoDB Atlas
-                       │
-                       ▼
-                    TMDB API
-
-```
-## 📂 Project Structure
 ```text
 backend/
-│
 ├── config/
-│   └── tmdb.js
-│
+│   └── tmdb.js               # Centralized TMDB HTTP Client
 ├── middleware/
-│   └── auth.js
-│
+│   └── auth.js               # JWT security gatekeeper
 ├── models/
-│   ├── Movie.js
-│   ├── User.js
-│   └── ProviderClick.js
-│
+│   ├── User.js               # Account details, unlocked badges, watchlist
+│   ├── Movie.js              # Cached movie definitions
+│   ├── ProviderClick.js      # Click event analytics logs
+│   ├── SearchHistory.js      # Query history entries
+│   └── BehaviorEvent.js      # XP tracking logs
 ├── routes/
-│   ├── authRoutes.js
-│   ├── analyticsRoutes.js
-│   ├── movieRoutes.js
-│   ├── recommendationRoutes.js
-│   └── watchlistRoutes.js
-│
-├── .env
-├── package.json
-└── server.js
+│   ├── authRoutes.js         # Register / Login controllers
+│   ├── movieRoutes.js        # TMDB query handlers
+│   ├── watchlistRoutes.js    # Watchlist modification
+│   ├── recommendationRoutes.js # AI curation logic
+│   └── analyticsRoutes.js    # Chart statistics generators
+├── services/
+│   └── profileEngine.js      # Persona, Level, and Movie DNA calculators
+├── .env                      # Environment configurations (Protected)
+├── server.js                 # Entry point (Express configurations)
+└── package.json              # Node dependencies
 ```
-
----
-
-##  Security Features
-
-### JWT Authentication
-
-Protected routes require a valid JWT token.
-
-### Password Security
-
-Passwords are securely hashed using bcrypt before storage.
-
-### Rate Limiting
-
-API abuse prevention through request limiting.
-
-### HTTP Security Headers
-
-Helmet is used to enhance API security.
-
-### NoSQL Injection Protection
-
-Mongo Sanitize prevents malicious MongoDB queries.
-
----
-
-##  Recommendation Engine
-
-The recommendation engine combines multiple strategies to provide relevant movie suggestions.
-
-### Search-Based Recommendation
-
-1. User searches for a movie.
-2. Similar movies are fetched from TMDB.
-3. Related genres are identified.
-4. Additional genre-based recommendations are     generated.
-5. Low-quality results are filtered out.
-6. Duplicates are removed.
-7. Final recommendations are ranked and returned.
-
-### Watchlist-Based Recommendation
-
-1. Analyze user watchlist.
-2. Extract frequently watched genres.
-3. Identify user preferences.
-4. Fetch TMDB recommendations.
-5. Generate personalized suggestions.
-6. Remove already watched content.
-7. Return highly relevant movies.
-
-
-## 📊Analytics Module
-
-The analytics engine tracks user interactions and generates dashboard insights.
-
-### Overview Analytics
-
-* Total Movies Explored
-* Most Used OTT Provider
-* Favorite Genre
-
-### Provider Analytics
-
-* Netflix Usage
-* Prime Video Usage
-* JioHotstar Usage
-* Other Provider Distribution
-
-### Genre Analytics
-
-* Genre Preference Tracking
-* Genre Distribution Charts
-
-
-##  API Endpoints
-
-### Authentication
-
-| Method | Endpoint      |
-| ------ | ------------- |
-| POST   | /api/register |
-| POST   | /api/login    |
-
-### Movies
-
-| Method | Endpoint                        |
-| ------ | ------------------------------- |
-| GET    | /api/search                     |
-| GET    | /api/trending                   |
-| GET    | /api/top-rated                  |
-| GET    | /api/popular                    |
-| GET    | /api/scifi                      |
-| GET    | /api/horror                     |
-| GET    | /api/movie/:id                  |
-| GET    | /api/movie/:id/cast             |
-| GET    | /api/movie/:id/trailer          |
-| GET    | /api/movie/:id/providers        |
-| GET    | /api/provider-content/:provider |
-
-### Watchlist
-
-| Method | Endpoint       |
-| ------ | -------------- |
-| GET    | /api/watchlist |
-| POST   | /api/watchlist |
-
-### Recommendations
-
-| Method | Endpoint                 |
-| ------ | ------------------------ |
-| GET    | /api/recommend           |
-| GET    | /api/recommend/watchlist |
-
-### Analytics
-
-| Method | Endpoint                 |
-| ------ | ------------------------ |
-| GET    | /api/analytics/overview  |
-| GET    | /api/analytics/providers |
-| GET    | /api/analytics/genres    |
-
-
-##  Future Enhancements
-
-* Unit Testing with Jest
-* API Testing with Supertest
-* Redis Caching
-* Advanced Recommendation Algorithms
-* Docker Deployment
-* CI/CD Integration
-* User Reviews & Ratings
-* Real-Time Trending Analytics
-
-
-
-##  Developer
-
-Developed as a full-stack movie recommendation platform demonstrating:
-
-* REST API Development
-* MongoDB Integration
-* JWT Authentication
-* Recommendation System Design
-* Analytics Dashboard Development
-* External API Integration
-* Backend Security Best Practices
