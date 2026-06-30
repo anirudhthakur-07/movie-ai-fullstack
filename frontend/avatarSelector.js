@@ -38,8 +38,11 @@ function showAvatarNotification(message) {
 async function openAvatarSelector(currentPersonaRaw, currentGender, username, onSaveCallback) {
     // 1. Fetch achievements list to know which ones are unlocked
     let unlockedAchievements = [];
+    const token = sessionStorage.getItem("token");
     try {
-        const res = await authFetch(`${API_BASE}/achievements`);
+        const res = await fetch(`${API_BASE}/achievements`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
         if (res && res.ok) {
             const data = await res.json();
             unlockedAchievements = data.achievements.filter(m => m.unlocked).map(m => m.id);
@@ -165,9 +168,12 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
 
                 // Call Gender Update API
                 try {
-                    const updateRes = await authFetch(`${API_BASE}/profile/gender`, {
+                    const updateRes = await fetch(`${API_BASE}/profile/gender`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
                         body: JSON.stringify({ gender: g })
                     });
                     if (updateRes && updateRes.ok) {
