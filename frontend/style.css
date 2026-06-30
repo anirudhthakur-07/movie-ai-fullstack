@@ -3288,7 +3288,7 @@ pointer-events: auto;
 .movie-placeholder-glow {
   width: 100% !important;
   height: 100% !important;
-  display: flex !important;
+  display: flex;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
@@ -3324,6 +3324,10 @@ pointer-events: auto;
   font-weight: 600 !important;
   color: #ff9f43 !important;
   margin-top: 4px !important;
+}
+
+.movie-placeholder-glow.hidden {
+  display: none !important;
 }
 
 /* MOBILE VIEW CARD SCALE ALIGNMENT */
