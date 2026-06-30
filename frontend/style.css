@@ -2656,33 +2656,45 @@ pointer-events: auto;
 }
 
 .insight-card {
-  background: rgba(20, 20, 20, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
-  padding: 20px 24px;
+  background: rgba(18, 18, 22, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 20px !important;
+  padding: 22px !important;
   display: flex;
   flex-direction: column;
   gap: 14px;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
   box-sizing: border-box;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.insight-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
 }
 
 .insight-card h4 {
-  font-size: 0.9rem;
-  color: #aaa;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.95rem !important;
+  color: var(--text-secondary) !important;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 600 !important;
 }
 
 .insight-card h4 i {
-  color: #e50914;
+  background: var(--primary-gradient) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .insight-metrics {
