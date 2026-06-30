@@ -75,6 +75,7 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
     // Always store active persona in historic local list
     const currentConfig = PERSONAS_CONFIG.find(p => 
         activePersonaKey.includes(p.key) || 
+        activePersonaKey.includes(p.key.replace("_", " ")) ||
         activePersonaKey.includes(p.name.toLowerCase()) ||
         activePersonaKey.includes(p.genre)
     );
