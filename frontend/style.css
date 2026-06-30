@@ -1,9 +1,9 @@
 :root {
-  --bg-color: #141414;
+  --bg-color: #0c0c0e;
   --text-color: #fff;
   --primary-color: #e50914;
   /* Netflix Red */
-  --nav-bg: rgba(20, 20, 20, 0.95);
+  --nav-bg: rgba(12, 12, 14, 0.95);
   --card-bg: #2f2f2f;
   --hover-scale: 1.05;
   --transition-speed: 0.3s;
@@ -17,7 +17,7 @@ body {
   background:
     radial-gradient(circle at 15% 15%, rgba(229, 9, 20, 0.12), transparent 35%),
     radial-gradient(circle at 85% 85%, rgba(255, 75, 43, 0.08), transparent 35%),
-    #141414;
+    #0c0c0e;
   background-attachment: fixed;
   color: var(--text-color);
   overflow-x: hidden;
