@@ -174,7 +174,7 @@ function loadMoreAction(direction = 1) {
     return;
   }
 
-  fetchMovies(`/search?q=action&page=${actionPage}`)
+  fetchMovies(`/discover/genre/action?page=${actionPage}`)
     .then(data => {
       actionCache[actionPage] = data;
       displayMovies(data, row);
@@ -196,7 +196,7 @@ function loadMoreComedy(direction = 1) {
     return;
   }
 
-  fetchMovies(`/search?q=comedy&page=${comedyPage}`)
+  fetchMovies(`/discover/genre/comedy?page=${comedyPage}`)
     .then(data => {
       comedyCache[comedyPage] = data;
       displayMovies(data, row);
@@ -295,10 +295,10 @@ function loadMoreHorror(direction = 1) {
 // Populate Homepage Movie Sections
 async function fetchInitialMovies() {
   // Using Chat API to get action and comedy!
-  const action = await fetchMovies('/search?q=action');
+  const action = await fetchMovies('/discover/genre/action');
   if (action) displayMovies(action, actionRow);
 
-  const comedy = await fetchMovies('/search?q=comedy');
+  const comedy = await fetchMovies('/discover/genre/comedy');
   if (comedy) displayMovies(comedy, comedyRow);
 }
 
@@ -1090,12 +1090,12 @@ if (
   `Because You Explore ${data.topGenre}`;
 
   // FETCH MOVIES
- const genreMovies =
-await fetchMovies(
-  `/search?q=${encodeURIComponent(
-      data.topGenre
-  )}`
-);
+  const genreMovies =
+  await fetchMovies(
+    `/discover/genre/${encodeURIComponent(
+        data.topGenre
+    )}`
+  );
 
   if (genreMovies) {
 
@@ -1127,9 +1127,9 @@ if (
 
 const moreMovies =
 await fetchMovies(
-  `/search?q=${encodeURIComponent(
+  `/discover/genre/${encodeURIComponent(
       data.topGenre
-  )}&page=${analyticsGenrePage}`
+  )}?page=${analyticsGenrePage}`
 );
 if (moreMovies) {
 
@@ -1282,22 +1282,4 @@ function hideError(){
         errorBox.classList.add("hidden");
     }
 }
-const usernameInput =
-document.getElementById("username");
 
-if (usernameInput) {
-  usernameInput.addEventListener(
-    "input",
-    hideError
-  );
-}
-
-const passwordInput =
-document.getElementById("password");
-
-if (passwordInput) {
-  passwordInput.addEventListener(
-    "input",
-    hideError
-  );
-}

@@ -322,5 +322,61 @@ router.get(
     }
   }
 );
+// DYNAMIC GENRE DISCOVERY
+// Resolves genre names to TMDB genre IDs and retrieves matching content, falling back to search
+router.get("/discover/genre/:genreName", async (req, res) => {
+  try {
+    const genreName = req.params.genreName.toLowerCase().trim();
+    const page = req.query.page || 1;
+
+    const genreIdMap = {
+      action: 28,
+      adventure: 12,
+      animation: 16,
+      comedy: 35,
+      crime: 80,
+      documentary: 99,
+      drama: 18,
+      family: 10751,
+      fantasy: 14,
+      history: 36,
+      horror: 27,
+      music: 10402,
+      mystery: 9648,
+      romance: 10749,
+      "science fiction": 878,
+      "sci-fi": 878,
+      thriller: 53,
+      war: 10752,
+      western: 37
+    };
+
+    const genreId = genreIdMap[genreName];
+
+    if (genreId) {
+      const response = await tmdbApi.get("/discover/movie", {
+        params: {
+          with_genres: genreId,
+          page: page
+        }
+      });
+      return res.json({ results: response.data.results });
+    }
+
+    // Fallback to text query search if the genre name is not in the map
+    const response = await tmdbApi.get("/search/movie", {
+      params: {
+        query: genreName,
+        page: page
+      }
+    });
+    res.json({ results: response.data.results });
+
+  } catch (err) {
+    console.error("GENRE DISCOVER ERROR:", err.message);
+    res.json({ results: [] });
+  }
+});
+
 // EXPORT ROUTER
 module.exports = router;
