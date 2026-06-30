@@ -1,3 +1,14 @@
+// Helper to sanitize HTML content safely
+function escapeHTML(str) {
+    if (!str) return "";
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // PERSONAS specification mapping
 const PERSONAS_CONFIG = [
     { name: "Cinematic Explorer", key: "movie_fan", achievement: "new_movie_fan", genre: "default" },
