@@ -2253,7 +2253,7 @@ pointer-events: auto;
 @media (max-width: 768px) {
   /* Navigation adjustments */
   .navbar {
-    padding: 10px 15px !important;
+    padding: max(10px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) 10px max(15px, env(safe-area-inset-left)) !important;
     height: auto !important;
   }
   .nav-right {
@@ -2334,7 +2334,7 @@ pointer-events: auto;
 
   /* Watchlist Container padding adjustment */
   .watchlist-container {
-    padding: 80px 15px 30px 15px !important;
+    padding: calc(75px + env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) max(30px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left)) !important;
   }
 
   /* Ensure movie section horizontal margins are reduced on mobile */

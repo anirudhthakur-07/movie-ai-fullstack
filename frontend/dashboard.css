@@ -1125,3 +1125,20 @@ body {
     color: #10b981 !important;
     text-shadow: 0 0 8px rgba(16, 185, 129, 0.5) !important;
 }
+
+/* Mobile & Notch Safe Area Overrides */
+@media (max-width: 768px) {
+    .navbar {
+        height: auto !important;
+        padding: max(10px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) 10px max(15px, env(safe-area-inset-left)) !important;
+    }
+    .navbar .logo h1 {
+        font-size: 1.5rem !important;
+    }
+    .dashboard-wrapper {
+        padding-top: calc(75px + env(safe-area-inset-top)) !important;
+        padding-left: max(15px, env(safe-area-inset-left)) !important;
+        padding-right: max(15px, env(safe-area-inset-right)) !important;
+        padding-bottom: max(30px, env(safe-area-inset-bottom)) !important;
+    }
+}
