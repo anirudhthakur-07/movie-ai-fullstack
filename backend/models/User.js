@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
         {
             tmdbId: Number,
             title: String,
-            poster: String
+            poster: String,
+            genres: { type: [String], default: [] }
         }
     ],
     unlockedAchievements: { type: [String], default: [] },

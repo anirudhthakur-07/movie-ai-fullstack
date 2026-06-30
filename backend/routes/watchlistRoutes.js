@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const tmdbApi = require("../config/tmdb");
 
 router.post('/', auth, async (req, res) => {
   try {
@@ -34,6 +35,18 @@ router.post('/', auth, async (req, res) => {
       if (!movie.title) {
         return res.status(400).json({ error: "Movie title required" });
       }
+      
+      // Fetch genres from TMDB in background addition
+      let genres = [];
+      try {
+        const tmdbRes = await tmdbApi.get(`/movie/${movieId}`);
+        if (tmdbRes.data && tmdbRes.data.genres) {
+          genres = tmdbRes.data.genres.map(g => g.name);
+        }
+      } catch (err) {
+        console.error("Failed to fetch genres for watchlist movie:", err.message);
+      }
+
       await User.updateOne(
         { _id: req.userId },
         {
@@ -43,7 +56,8 @@ router.post('/', auth, async (req, res) => {
               title: movie.title,
               poster: movie.poster_path
                 ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : movie.poster || null
+                : movie.poster || null,
+              genres: genres
             }
           }
         }
