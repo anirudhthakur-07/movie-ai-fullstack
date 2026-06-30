@@ -999,19 +999,7 @@ body {
     transform: translateY(0) !important;
 }
 
-/* Custom image-based widget icons */
-.widget-icon.img-icon {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-}
 
-.widget-icon.img-icon img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    border-radius: 14px !important;
-}
 
 /* ==========================================================================
    PREMIUM GLASSMORPHIC GLOWING ACHIEVEMENTS (OPTION 1)
