@@ -186,11 +186,10 @@ h4 {
 }
 
 .section-title {
+  font-family: 'Outfit', sans-serif !important;
   font-size: 22px;
   font-weight: 600;
-
   margin: 40px 0 15px 20px;
-
   position: relative;
 }
 
@@ -259,6 +258,7 @@ h4 {
 }
 
 .section-title {
+  font-family: 'Outfit', sans-serif !important;
   font-size: 1.4rem;
   margin-bottom: 0.5rem;
   display: flex;
