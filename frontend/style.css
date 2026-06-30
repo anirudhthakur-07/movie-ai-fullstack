@@ -3246,3 +3246,104 @@ pointer-events: auto;
   height: 140px;
   border-radius: 20px;
 }
+
+/* ==========================================================================
+   UNIVERSAL MOVIE CARD SIZE LOCKS (HOMEPAGE & WATCHLIST)
+   ========================================================================== */
+.movie-card,
+.watch-card,
+.movie-card-skeleton {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 250px !important;
+  min-height: 250px !important;
+  max-height: 250px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.movie-card img,
+.watch-card img,
+.watch-img,
+.movie-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* Align Grid and Skeleton containers to center without stretching cards */
+.watchlist-grid,
+.movie-grid-skeleton {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, 170px) !important;
+  justify-content: center !important;
+  gap: 25px !important;
+}
+
+/* Ensure placeholder layout inside fallback cards fits perfectly */
+.movie-placeholder-glow {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #1c1c1c !important;
+  color: #555 !important;
+  font-size: 1.5rem !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  padding: 10px !important;
+}
+
+.movie-placeholder-glow i {
+  font-size: 2.2rem !important;
+  margin-bottom: 8px !important;
+  color: #ff3e52 !important;
+}
+
+.movie-placeholder-glow .placeholder-title {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  color: #eee !important;
+  margin-top: 4px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  padding: 0 5px !important;
+}
+
+.movie-placeholder-glow .placeholder-rating {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #ff9f43 !important;
+  margin-top: 4px !important;
+}
+
+/* MOBILE VIEW CARD SCALE ALIGNMENT */
+@media (max-width: 768px) {
+  .movie-card,
+  .watch-card,
+  .movie-card-skeleton {
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+    height: 195px !important;
+    min-height: 195px !important;
+    max-height: 195px !important;
+    border-radius: 12px !important;
+  }
+  
+  .watchlist-grid,
+  .movie-grid-skeleton {
+    grid-template-columns: repeat(2, 130px) !important;
+    justify-content: center !important;
+    gap: 15px !important;
+  }
+}

@@ -645,24 +645,29 @@ function displayWatchlist(list, container) {
 
         const poster = movie.poster || movie.poster_path;
 
+        const rating = movie.vote_average || movie.rating || 0;
+        const displayRating = rating ? rating.toFixed(1) : "N/A";
+
         card.innerHTML = `
-  <button class="remove-btn"
-    onclick="removeFromWatchlist(${movie.tmdbId || movie.id}, this, event)">
-    ✖
-  </button>
+          <button class="remove-btn" onclick="removeFromWatchlist(${movie.tmdbId || movie.id}, this, event)">
+            ✖
+          </button>
 
-  <img class="watch-img" 
-       src="${resolvePoster(poster)}"
-       onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-  
-  <div class="movie-placeholder-glow hidden">
-    <i class="fas fa-film"></i>
-  </div>
+          <img class="watch-img" 
+               src="${resolvePoster(poster)}"
+               onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+          
+          <div class="movie-placeholder-glow hidden">
+            <i class="fas fa-film"></i>
+            <div class="placeholder-title">${escapeHTML(movie.title)}</div>
+            <div class="placeholder-rating">⭐ ${displayRating}</div>
+          </div>
 
-  <div class="watch-overlay">
-    <div class="watch-title">${escapeHTML(movie.title)}</div>
-  </div>
-`;
+          <div class="movie-info-overlay">
+            <div class="movie-title">${escapeHTML(movie.title)}</div>
+            <div class="movie-rating">⭐ ${displayRating}</div>
+          </div>
+        `;
 
         container.appendChild(card);
     });
