@@ -291,12 +291,6 @@ async function renderWatchlistPage() {
             });
             displayWatchlist(initialList, container);
         } catch { }
-    } else {
-        container.innerHTML = `
-          <div class="loading-watchlist">
-            Loading your watchlist...
-          </div>
-        `;
     }
 
     // Parallel fetch profile, watchlist
@@ -432,9 +426,6 @@ async function renderAIPicks() {
     const section = document.getElementById("aiPicksSection");
     const row = document.getElementById("aiPicksRow");
     if (!section || !row) return;
-
-    row.innerHTML = `<div class="loading-watchlist">Curating your AI recommendations...</div>`;
-    section.classList.remove("hidden");
 
     const data = await fetchWatchlistRecommendations();
 

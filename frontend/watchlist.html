@@ -56,48 +56,95 @@
     </nav>
     <main class="watchlist-container">
         <!-- 1. PERSONALIZED HERO SUMMARY CARD -->
-        <header class="watchlist-hero-card hidden" id="watchlistHeroCard"></header>
+        <header class="watchlist-hero-card" id="watchlistHeroCard">
+            <div class="hero-skeleton-wrapper">
+                <div class="hero-skeleton-avatar skeleton-shimmer"></div>
+                <div class="hero-skeleton-info">
+                    <div class="hero-skeleton-title skeleton-shimmer"></div>
+                    <div class="hero-skeleton-subtitle skeleton-shimmer"></div>
+                </div>
+                <div class="hero-skeleton-badge skeleton-shimmer"></div>
+            </div>
+        </header>
 
         <!-- 2. RECENTLY SAVED ROW -->
-        <section class="watchlist-section hidden" id="recentlyAddedSection">
+        <section class="watchlist-section" id="recentlyAddedSection">
             <h3 class="section-title"><i class="fas fa-history icon-gradient"></i> Recently Saved</h3>
             <div class="row-container">
                 <button class="scroll-btn scroll-left" onclick="scrollWatchlistRow('recentlyAddedRow', -1)">❮</button>
-                <div class="movie-row" id="recentlyAddedRow"></div>
+                <div class="movie-row" id="recentlyAddedRow">
+                    <div class="movie-row-skeleton">
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    </div>
+                </div>
                 <button class="scroll-btn scroll-right" onclick="scrollWatchlistRow('recentlyAddedRow', 1)">❯</button>
             </div>
         </section>
 
         <!-- 3. AI PICK RECS ROW -->
-        <section class="watchlist-section hidden" id="aiPicksSection">
+        <section class="watchlist-section" id="aiPicksSection">
             <h3 class="section-title"><i class="fas fa-magic icon-gradient"></i> AI Curation Picks</h3>
             <div class="row-container">
                 <button class="scroll-btn scroll-left" onclick="scrollWatchlistRow('aiPicksRow', -1)">❮</button>
-                <div class="movie-row" id="aiPicksRow"></div>
+                <div class="movie-row" id="aiPicksRow">
+                    <div class="movie-row-skeleton">
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    </div>
+                </div>
                 <button class="scroll-btn scroll-right" onclick="scrollWatchlistRow('aiPicksRow', 1)">❯</button>
             </div>
         </section>
 
         <!-- 4. CONTINUE EXPLORING ROW -->
-        <section class="watchlist-section hidden" id="continueExploringSection">
+        <section class="watchlist-section" id="continueExploringSection">
             <h3 class="section-title"><i class="fas fa-compass icon-gradient"></i> Continue Exploring</h3>
             <div class="row-container">
                 <button class="scroll-btn scroll-left" onclick="scrollWatchlistRow('continueExploringRow', -1)">❮</button>
-                <div class="movie-row" id="continueExploringRow"></div>
+                <div class="movie-row" id="continueExploringRow">
+                    <div class="movie-row-skeleton">
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                        <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    </div>
+                </div>
                 <button class="scroll-btn scroll-right" onclick="scrollWatchlistRow('continueExploringRow', 1)">❯</button>
             </div>
         </section>
 
         <!-- 5. INSIGHTS METRICS GRID -->
-        <section class="watchlist-section hidden" id="collectionInsightsSection">
+        <section class="watchlist-section" id="collectionInsightsSection">
             <h3 class="section-title"><i class="fas fa-chart-pie icon-gradient"></i> Collection Insights</h3>
-            <div class="watchlist-insights-grid" id="collectionInsightsGrid"></div>
+            <div class="watchlist-insights-grid" id="collectionInsightsGrid">
+                <div class="insights-skeleton-grid">
+                    <div class="insight-card-skeleton skeleton-shimmer"></div>
+                    <div class="insight-card-skeleton skeleton-shimmer"></div>
+                </div>
+            </div>
         </section>
 
         <!-- 6. FULL SAVED COLLECTION GRID -->
         <section class="watchlist-section" id="fullCollectionSection">
             <h3 class="section-title" id="fullCollectionTitle"><i class="fas fa-folder-open icon-gradient"></i> Your Collection</h3>
-            <div id="watchlistPageRow" class="watchlist-grid"></div>
+            <div id="watchlistPageRow" class="watchlist-grid">
+                <div class="movie-grid-skeleton">
+                    <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    <div class="movie-card-skeleton skeleton-shimmer"></div>
+                    <div class="movie-card-skeleton skeleton-shimmer"></div>
+                </div>
+            </div>
         </section>
     </main>
    

@@ -3131,3 +3131,118 @@ pointer-events: auto;
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* ==========================================================================
+   PREMIUM SHIMMERING SKELETON LOADER SYSTEM
+   ========================================================================== */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.02) 25%, 
+    rgba(255, 255, 255, 0.07) 50%, 
+    rgba(255, 255, 255, 0.02) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-effect 1.6s infinite linear;
+  border-radius: 8px;
+}
+
+@keyframes shimmer-effect {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Hero Box Skeleton */
+.hero-skeleton-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.hero-skeleton-avatar {
+  width: 95px;
+  height: 95px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hero-skeleton-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero-skeleton-title {
+  width: 200px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.hero-skeleton-subtitle {
+  width: 150px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.hero-skeleton-badge {
+  width: 120px;
+  height: 70px;
+  border-radius: 18px;
+  flex-shrink: 0;
+}
+
+/* Movie Cards Row Skeleton */
+.movie-row-skeleton {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.movie-card-skeleton {
+  flex: 0 0 180px;
+  width: 180px;
+  height: 270px;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+/* Grid collection skeleton */
+.movie-grid-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 25px;
+  width: 100%;
+}
+
+/* Insights Card Skeleton */
+.insights-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .insights-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-skeleton-wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-skeleton-badge {
+    align-self: center;
+  }
+}
+
+.insight-card-skeleton {
+  height: 140px;
+  border-radius: 20px;
+}
