@@ -1,149 +1,234 @@
-# 🎬 Dark AI Movie Recommendation Platform
+# 🎬 Dark — Full-Stack Movie Recommendation & Gamified Curation Platform
 
-[![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=for-the-badge)]()
-[![Backend](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?style=for-the-badge&logo=node.js)]()
-[![Database](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=for-the-badge&logo=mongodb)]()
-[![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20JS-E34F26?style=for-the-badge&logo=html5)]()
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
-
-A world-class, gamified full-stack movie recommendation and curation companion. It combines responsive glassmorphic UI, real-time TMDB API integration, behavior-based user profile analytics, and interactive discovery features into a premium cinematic dashboard.
+A full-stack movie recommendation platform that combines intelligent movie discovery, personalized curation, watchlist management, streaming platform tracking, and user analytics into a modern, gamified Netflix-inspired experience.
 
 ---
 
-## 📌 Executive Overview
+# 📌 Overview
 
-The **Dark AI Movie Recommendation Platform** is engineered to eliminate content choice paralysis. By analyzing real-time search queries, active watchlists, and streaming provider interactions, the application dynamically constructs a user's **Movie DNA** and maps it to a custom **AI Persona**. 
+**Dark** is a full-stack web application designed to eliminate streaming fatigue. By building user behavior profiles, tracking streaming provider clicks, and analyzing watchlists, the platform dynamically computes user personas, unlocks gamified achievements, and builds visual taste graphs.
+
+The application uses pure HTML5, CSS3 (with notch/safe-area mobile responsiveness), and Vanilla JS on the client side, powered by a secure Node.js/Express REST API and a MongoDB Atlas data layer.
+
+---
+## Live Demo
+- **Frontend App:** [https://movie-ai-fullstack.vercel.app](https://movie-ai-fullstack.vercel.app)
+- **Backend API:** `https://movie-ai-fullstack.onrender.com/api`
 
 ---
 
-## ✨ Primary Features
+# ✨ Key Features
 
-### 🔐 1. Authentication & Security
-*   **JWT Token Authorization:** Fully stateless session management with HTTP headers.
-*   **Encrypted Secrets:** Strong password hashing via `bcrypt.js`.
-*   **API Rate Limiting:** Abuse prevention rate limiters.
-*   **Security Audited:** Enhanced headers via `helmet`, injection sanitation using `express-mongo-sanitize`.
+## 🔐 Authentication & Security
+- **Secure Logins:** Password hashing with `bcryptjs` and stateless session tracking with JWT.
+- **Tab-Scoped Sessions:** Session tokens stored securely in `sessionStorage` to prevent cross-tab reuse.
+- **Error Standardization:** Muted, generic authentication error messages to block username harvesting.
+- **API Defense:** Rate-limiting limits API abuse, `helmet` enforces strict HTTP headers, and input sanitization cleans database queries against NoSQL injection.
 
-### 🎯 2. Curation & Movie DNA
-*   **Movie DNA Visualization:** Dynamically rendered interest mapping using Chart.js.
-*   **Gamified Milestones:** Unlocked achievements (XP logs, status levels, rank progressions) based on platform exploration.
-*   **OTT Provider Tracking:** Tracks content click preferences across major networks (Netflix, Prime, Disney+, Hotstar, Apple TV, etc.).
+## 🎥 Movie Discovery
+- Curated horizontal movie rows: Weekly Trending, Popular, Top Rated, Sci-Fi, and Horror.
+- Full details modals showing runtime, synopsis, cast, and embedded YouTube trailers.
+- Real-time OTT streaming provider availability detection powered by TMDB.
 
-### 🤖 3. AI Curation Engine
-*   **Watchlist-Based Curation:** Recalculates user personas based on the actual genre composition of their saved watchlist items.
-*   **Search Curation:** Resolves and ranks similar movies dynamically from search triggers.
-*   **Self-Healing Databases:** Automatic background TMDB query syncing to resolve missing movie metadata.
+## 🤖 Personalized Curation
+- **Self-Healing Metadata:** Background pipeline automatically checks and fetches missing genre details for saved movies when profiles load.
+- **Movie DNA Mapping:** Aggregates user search history, genre distributions, and provider click events into weighted taste scores.
+- **Watchlist Recommendations:** Contextual recommendations showing matching explanation rows (e.g. *"Because you watched Inception"*).
+
+## 🏆 Gamification & Avatars
+- **User XP & Leveling:** Experience points awarded dynamically for user interactions (searches, profile views, provider clicks).
+- **Achievements System:** 11 unlockable badges tracking progress (e.g. *Collector*, *Genre Explorer*, *Cinephile*).
+- **Custom Avatars:** 40 custom, persona-mapped profile avatars available to unlock based on user levels.
+
+## 📊 Analytics Dashboard
+- **Favorite Genre & Provider:** Displays the user's top genre and most frequently clicked streaming platform.
+- **Dynamic Charts:** Genre Distribution (Donut Chart), Genre Affinity (Bar Chart), and Streaming Platform Usage (Donut Chart) rendered client-side using `Chart.js`.
 
 ---
 
-## 🏗️ System Architecture
+# 🛠️ Technology Stack
+
+### Frontend
+- **HTML5 & CSS3:** Responsive layouts optimized for mobile safe-areas (notches and home indicators).
+- **JavaScript (ES6):** Vanilla controller modules with debounced search queries and skeleton shim loaders.
+- **Chart.js:** Responsive canvas charts for dashboard visualizations.
+
+### Backend
+- **Node.js & Express.js:** Layered REST API routing requests through JWT middleware to services.
+- **MongoDB Atlas & Mongoose:** Persistent document database utilizing automatic 15-day TTL expiry indexes on cached movie metadata.
+
+---
+
+# 🏗️ System Architecture
 
 ```text
-                               ┌──────────────────┐
-                               │   Client Browser │
-                               └─────────┬────────┘
-                                         │ HTTPS / JSON
-                                         ▼
-                              ┌────────────────────┐
-                              │ Express API Server │
-                              └──────────┬─────────┘
-                                         │
-                 ┌───────────────────────┼────────────────────────┐
-                 ▼                       ▼                        ▼
-       ┌──────────────────┐    ┌────────────────────┐    ┌──────────────────┐
-       │   Auth Route     │    │ Curation Engine    │    │ Analytics Module │
-       │ (JWT, Bcrypt)    │    │   (TMDB Queries)   │    │  (Chart.js Data) │
-       └──────────────────┘    └─────────┬──────────┘    └──────────────────┘
-                                         │
-                                         ▼
-                               ┌────────────────────┐
-                               │   MongoDB Atlas    │
-                               └────────────────────┘
+                    User Browser (HTML5, Glassmorphic CSS3, Vanilla JS)
+                                              │
+                                              ▼
+                             Express API Gateway (Render.com)
+                       ┌──────────────────────┼──────────────────────┐
+                       │ (Helmet, Cors, Rate Limiters, Sanitizers)   │
+                       ▼                                             ▼
+                 Protected Routes                            Public Auth Routes
+             (JWT Auth Middleware Guard)                 (/api/login, /api/register)
+                       │
+       ┌───────────────┼───────────────┐
+       ▼               ▼               ▼
+Curation Services  Search Engine   Analytics Engine
+(profileEngine.js) (tmdbService.js) (Mongo Aggregations)
+       │               │               │
+       └───────────────┼───────────────┘
+                       │
+                       ├──────────────────────────────┐
+                       ▼                              ▼
+                 MongoDB Atlas                   TMDB API Proxy
+            (User Watchlists, Events)           (Metadata, OTT Details)
 ```
 
 ---
 
-## 📂 Repository Layout
+# 📂 Project Structure
 
 ```text
 movie-ai-fullstack/
-├── README.md                      # Primary Repository Documentation
+│
+├── README.md                   # Master project manual
+│
 ├── backend/
-│   ├── config/                    # Config files (TMDB client configurations)
-│   ├── middleware/                # Route security and auth guards
-│   ├── models/                    # MongoDB schemas (User, Click logs, Movie specs)
-│   ├── routes/                    # API endpoints
-│   ├── services/                  # Business logic & Curation calculators
-│   ├── server.js                  # Express setup
-│   └── README.md                  # Backend API Documentation
-└── frontend/
-    ├── assets/                    # Graphical assets and clean design logos
-    ├── index.html                 # Homepage layout
-    ├── login.html                 # Registration/login screen
-    ├── dashboard.html             # Profile, Movie DNA, and achievements dashboard
-    ├── watchlist.html             # Saved collection grid and insights
-    ├── *.js                       # Javascript logic modules
-    ├── style.css                  # Premium CSS design tokens & layouts
-    └── README.md                  # Frontend Architecture Documentation
+│   ├── .env.example            # Backend environment variables template
+│   ├── server.js               # API bootstrap and global middleware chains
+│   ├── package.json            # Node project configuration
+│   │
+│   ├── config/
+│   │   └── tmdb.js             # TMDB HTTP Client setup
+│   │
+│   ├── middleware/
+│   │   └── auth.js             # JWT verification middleware
+│   │
+│   ├── models/
+│   │   ├── User.js             # User data schema + watchlist subdocuments
+│   │   ├── Movie.js            # Cached movie documents (15-day TTL index)
+│   │   ├── ProviderClick.js    # OTT platform interaction logs
+│   │   ├── SearchHistory.js    # Search query records
+│   │   └── BehaviorEvent.js    # XP behavior weights
+│   │
+│   ├── routes/
+│   │   ├── achievementRoutes.js# Achievements status API
+│   │   ├── analyticsRoutes.js  # Chart aggregates and stats API
+│   │   ├── authRoutes.js       # Register and login API
+│   │   ├── behaviorRoutes.js   # XP interaction tracker API
+│   │   ├── movieRoutes.js      # TMDB search, detail, and provider proxy API
+│   │   ├── profileRoutes.js    # Dynamic user profile details API
+│   │   ├── recommendationRoutes.js # Search and watchlist curation API
+│   │   ├── searchHistoryRoutes.js # User query history API
+│   │   └── watchlistRoutes.js  # Add/remove watchlist items API
+│   │
+│   └── services/
+│       ├── profileEngine.js    # XP math, persona assignment, and self-healing
+│       └── tmdbService.js      # Raw external metadata parsing client
+│
+├── frontend/
+│   ├── index.html              # Discovery feed layout
+│   ├── login.html              # Sign-up and login gate
+│   ├── dashboard.html          # User profile analytics dashboard layout
+│   ├── watchlist.html          # Curation feed and grid layout
+│   │
+│   ├── config.js               # Global client API base configuration
+│   ├── script.js               # Discovery controllers and feed rendering
+│   ├── modal.js                # Detail modal, casts, and provider trackers
+│   ├── dashboard.js            # Chart.js rendering and achievements grid
+│   ├── watchlist.js            # LocalStorage caching loader and watchlist grids
+│   ├── avatarSelector.js       # Avatar selector UI and unlocks
+│   │
+│   ├── style.css               # Global responsive design tokens
+│   ├── dashboard.css           # Glowing glassmorphic widget styles
+│   │
+│   └── assets/
+│       ├── avatars/            # 40 persona-mapped avatar images
+│       └── videos/             # Background mp4 video loops
+│
+└── screenshots/                # Application demonstration screenshots
 ```
 
 ---
 
-## 🚀 Quick Setup & Configuration
+# 🚀 Installation & Local Development
 
-### Prerequisites
-*   [Node.js](https://nodejs.org/) (v16+ recommended)
-*   [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account
-*   [TMDB API Key](https://www.themoviedb.org/documentation/api)
-
-### 1. Setup Backend
-Navigate to the backend directory, install dependencies, and create a `.env` configuration file:
+### 1. Clone the Repository
 ```bash
-cd backend
-npm install
+git clone https://github.com/your-username/movie-ai-fullstack.git
+cd movie-ai-fullstack
 ```
 
-Configure `.env` using this secure placeholder template:
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/movie-ai
-JWT_SECRET=your_secure_jwt_passphrase_here
-TMDB_API_KEY=your_tmdb_api_key_here
-```
+### 2. Backend Setup
+1. Navigate to the backend directory and install dependencies:
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Create a `.env` file from the example:
+   ```bash
+   cp .env.example .env
+   ```
+3. Open `backend/.env` and configure your credentials:
+   - `MONGO_URI`: Your MongoDB connection string.
+   - `JWT_SECRET`: A secure key used for signing tokens (minimum 32 characters).
+   - `TMDB_API_KEY`: A free API key from [themoviedb.org](https://www.themoviedb.org).
+4. Start the server:
+   ```bash
+   npm start
+   ```
+   *The server runs by default on `http://localhost:5000`.*
 
-Start the service:
-```bash
-npm start
-```
-
-### 2. Setup Frontend
-Open `frontend/config.js` and set the API path (e.g. `http://localhost:5000/api` for local development):
-```javascript
-const API_BASE = "http://localhost:5000/api";
-```
-
-Serve `frontend/index.html` using any local server (e.g., Live Server in VS Code, or python simple server):
-```bash
-cd ../frontend
-python -m http.server 3000
-```
-Visit `http://localhost:3000` in your web browser.
+### 3. Frontend Setup
+1. Open `frontend/config.js` and set the `API_BASE` variable:
+   ```javascript
+   const API_BASE = "http://localhost:5000/api";
+   ```
+2. Serve the `frontend/` directory using a local web server (like VS Code Live Server) or via npm:
+   ```bash
+   cd ../frontend
+   npx serve -l 3000
+   ```
+3. Visit `http://localhost:3000` in your web browser.
 
 ---
 
-## 👨‍💻 Developer & Project Goals
+# 📸 Screenshots
 
-Designed to showcase:
-*   **Premium UX/UI Principles:** Dynamic safe-area padding for notch devices, momentum scrolling, and custom SVG styling.
-*   **Secure API Design:** Protected paths, data sanitation, and token handshakes.
-*   **Interactive Analytics:** Native Chart.js renderers mapped to responsive canvas grids.
-*   **Intelligent Profile Models:** Watchlist genre counting, automated persona states, and self-healing DB pipelines.
+### Home Page — Discovery Hub
+![Home](screenshots/HomePage.png)
+
+### Movie Detail Modal & Cast Details
+![Search](screenshots/Search.png)
+
+### Watchlist — Collection Manager
+![Watchlist](screenshots/Watchlist.png)
+
+### Analytics Dashboard — Movie DNA & Persona
+![Dashboard](screenshots/Dashboard.png)
 
 ---
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+# 🔮 Future Enhancements
+- **Adaptive Recommendations:** Machine Learning models trained on user watchlist genre weights.
+- **Redis Caching:** Memory cache layer for fast API response speeds on repeat details.
+- **Docker Support:** Dockerfile container setup for automated deployments.
+- **Social Features:** Co-viewing chatrooms and watchlist sharing profiles.
 
 ---
 
-⚠️ *Disclaimer: This product uses the TMDB API but is not officially endorsed or certified by TMDB.*
+# 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+
+---
+
+# 🙏 Acknowledgements
+- **TMDB (The Movie Database):** For providing rich media metadata.
+- **Chart.js:** For client-side dashboard charts.
+- **MongoDB Atlas:** For cloud database systems.
+
+---
+
+⚠️ *This product uses the TMDB API but is not officially endorsed or certified by TMDB.*

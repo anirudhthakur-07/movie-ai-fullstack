@@ -1,88 +1,135 @@
-# 🎬 Dark AI Movie Recommendation Platform - Frontend
+# 🎨 Movie Recommendation System - Frontend
 
-[![Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20JS-E34F26?style=for-the-badge&logo=html5)]()
-[![Responsive](https://img.shields.io/badge/Responsive-Mobile%20%7C%20Notch%20Ready-blueviolet?style=for-the-badge)]()
-[![Animations](https://img.shields.io/badge/UI--UX-Premium%20Glassmorphic-ff69b4?style=for-the-badge)]()
+[← Back to Root README](../README.md)
 
-The client-side interface for the Movie AI Recommender platform. It is engineered as a vanilla web application with zero heavy framework bloat, utilizing optimized layouts, transitions, and native rendering charts.
+## Overview
 
----
+The Movie Recommendation System Frontend is a modern web application built using HTML5, CSS3, and JavaScript (ES6+). It provides an interactive movie discovery experience with personalized recommendations, watchlists, streaming platform integration, analytics dashboards, gamified levels, and secure user authentication.
 
-## 🎨 Design System & Aesthetics
-
-The interface employs a high-end **Glassmorphism** theme configured via modular CSS variables:
-*   **Frosted Glass Cards:** Realized using `backdrop-filter: blur(20px)` and semi-transparent backgrounds (`rgba(18, 18, 22, 0.45)`).
-*   **Deep Shadowing:** Custom drop shadows creating an authentic Netflix/Apple TV layered look.
-*   **Micro-Animations:** Fluid transformations (`transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)`) on card hovers, button click states, and modal transitions.
+The frontend communicates with a Node.js and Express.js backend and retrieves movie data from TMDB API proxies to deliver real-time recommendations and movie details.
 
 ---
 
-## ✨ Features & Architecture
+# Features
 
-### 📱 1. Responsive & Notch Adaptive Grid
-*   **Notch Safe-Zones:** Integrates CSS safe-area boundaries (`env(safe-area-inset-top)`, etc.) to prevent clipping on iPhone Pro and modern Android display notches.
-*   **Snap-Grid Rows:** Rows utilize native CSS touch-scroll alignments (`scroll-snap-type: x mandatory`) for buttery-smooth horizontal swipe gestures on mobile devices.
+## 🔐 User Authentication
+- User Registration & Login switcher.
+- JWT Token Authentication.
+- **Session Management:** Secure tab-scoped token storage inside `sessionStorage` (automatic session termination on tab close).
+- **Protected Pages:** Auto-redirects unauthenticated sessions back to `login.html`.
 
-### 📊 2. Dynamic Charts & Gamification
-*   **Chart.js Integration:** Dashboard maps user provider clicks and genre interests dynamically to high-DPI canvases.
-*   **Unlocked Achievements:** Visual unlock grid displaying unique XP requirements, locks, progress tracks, and gradient badge icons.
+## 🎥 Movie Discovery
+- Curated categories: Trending, Popular, Top Rated, Sci-Fi, and Horror.
+- Interactive movie detail modals with casts list, trailers, and regional OTT providers.
+- Smooth horizontal carousels with swipe controls and scroll buttons.
 
-### 💾 3. Performance & Client Caching
-*   **Detail Caching:** Movie details (ratings, years, TMDB specs) are cached in the browser's `localStorage` (`movieDetailsCache`) to reduce repetitive backend API load.
-*   **Shimmer Skeletons:** High-end skeleton loaders replace basic loaders, offering continuous visual feedback while data fetches.
+## 🔍 Smart Search System
+- Debounced query handler (begins searching 500ms after user pauses typing).
+- Displays search results along with similar movie recommendations.
+- Saves query inputs to search history logs.
+
+## 🤖 Taste Curation Engine
+Curation widgets suggest titles based on multiple interaction signals:
+- **Search-Based Recommendations:** Movies similar to search query inputs.
+- **Watchlist-Based Recommendations:** Suggestions computed from watchlist genre profiles (complete with *"Because you watched"* explanation flags).
+
+## ❤️ Watchlist Management
+- Toggle movies in/out of watchlists instantly.
+- **Persistent Synchronization:** Synchronizes saved watchlists with MongoDB.
+- **Watchlist Persona Card:** Large hero card displaying computed taste personas (e.g. *Horror Seeker*, *Action Addict*).
+
+## 🏆 Gamification & Avatars
+- **XP Progression:** Track experience points and user levels on the profile card.
+- **Achievements:** 11 unlockable badges displayed as neon-glowing cards.
+- **Avatar Selector:** Interactive UI to unlock and save 40 custom persona-mapped profile avatars.
+
+## 📊 Analytics Dashboard
+Visualizes user tastes and click logs using responsive Chart.js canvases:
+- **Streaming platform distribution:** Donut chart mapping OTT usage.
+- **Genre preferences:** Bar chart displaying genre affinity scores.
+- **Genre distribution:** Donut chart summarizing watchlist compositions.
 
 ---
 
-## 📂 File Layout
+# User Interface Features
+
+- **Hero Banner:** Dynamic featured sections displaying backdrop graphics.
+- **Horizontal scrolling rows:** Smooth scroll containers with gradient overlays and button navigations.
+- **Glassmorphic Theme:** Dark design system featuring translucent cards and glowing accents.
+- **Responsive Layouts:** Mobile-optimized views containing safe-area padding adjustments for notches and home indicators.
+
+---
+
+# Performance Optimizations
+
+- **Client Caching:** 
+  - **Auth token:** Stored in `sessionStorage` (session scope) to secure connections.
+  - **Watchlist cache:** Stored in `localStorage` (`cachedWatchlist`) to render collection grids instantly.
+  - **Movie metadata:** Stored in `localStorage` (`movieDetailsCache`) to prevent redundant genre and rating lookups.
+- **API Retries:** Automatic request retry logic for failed watchlist updates.
+- **Progressive loading:** Offscreen images defer loading using the browser-native `loading="lazy"` attribute.
+- **Skeleton shimmers:** Shimmer loader animations render while awaiting API responses.
+
+---
+
+# 🛠️ Technology Stack
+
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+).
+- **Visualization:** Chart.js (v4.x).
+- **Authentication:** JWT (tab-scoped verification).
+- **Typography:** Google Fonts Outfit.
+
+---
+
+# 📂 Frontend Structure
 
 ```text
 frontend/
-├── index.html          # Core discovery homepage & search hub
-├── login.html          # Registration/login screen
-├── dashboard.html      # Gamified user profile dashboard & charts
-├── watchlist.html      # Collection grid & insights panel
 │
-├── script.js           # Homepage lists and search controls
-├── modal.js            # Video trailers and casts detail modal controller
-├── dashboard.js        # Analytics engine integration & chart builder
-├── watchlist.js        # Local cache enrichment & aggregation loader
+├── index.html                  # Discovery Feed and Search layout
+├── login.html                  # Registration and Login credentials form
+├── dashboard.html              # Analytics graphs and Achievements grid layout
+├── watchlist.html              # Watchlist grid and Insights panel layout
 │
-├── style.css           # Global typography, color schemes, and media queries
-├── dashboard.css       # Layout styles for dashboard analytics cards
-└── assets/             # Brand identity icons and local assets
+├── config.js                   # Client API base URL configuration
+├── script.js                   # Discovery rows logic and search debouncer
+├── modal.js                    # Movie detail modal, trailer player, and provider click logger
+├── dashboard.js                # Profile load, Chart.js integrations, and achievements grid
+├── watchlist.js                # LocalStorage cache loaders and watchlist rendering
+├── avatarSelector.js           # Avatar grid selection and unlocked persistence
+│
+├── style.css                   # Global responsive design tokens
+├── dashboard.css               # Glowing glassmorphic widget overlays
+│
+└── assets/
+    ├── avatars/                # 40 custom profile avatar images
+    └── videos/                 # Background mp4 video loops (bg.mp4)
 ```
 
 ---
 
-## 🔄 Client Application Flow
+# 🔄 Application Flow
 
 ```text
-               [ login.html ]
-                      │ (Valid Token)
-                      ▼
-               [ index.html ] ◄────────┐
-                      │                │
-      ┌───────────────┼──────────────┐ │ (Close Modal)
-      ▼               ▼              ▼ │
- [ Search Bar ]  [ Watchlist ]   [ Movie Details ]
-      │               │              │
-      ▼               ▼              ▼
- [ Curation ]   [ Insights ]    [ Video Preview ]
+                        User Login (login.html)
+                                 │
+                                 ▼
+                     Credentials Authentication
+                                 │
+                                 ▼
+                       Home Page (index.html)
+                                 │
+           ┌─────────────────────┼─────────────────────┐
+           │                     │                     │
+           ▼                     ▼                     ▼
+     Search Query        Watchlist Grid          Dashboard Profile
+  (script.js debouncer) (watchlist.js cache)   (dashboard.js charts)
+           │                     │                     │
+           ▼                     ▼                     ▼
+    Recommendations      Genre Insights        OTT Click Tracking
+   Similar Movie Row    (Genre Affinity)      (ProviderClick logs)
 ```
-
 ---
 
-## 🚀 Serving Locally
-
-To prevent CORS errors during client-server REST communication, serve the folder through a local HTTP server:
-
-Using Python 3:
-```bash
-python -m http.server 3000
-```
-
-Using Node.js static server:
-```bash
-npx serve -l 3000
-```
-Open `http://localhost:3000` to interact with the platform.
+## 👨‍💻 Developer
+Developed as a premium, highly responsive glassmorphic frontend for the Dark Movie Recommendation Platform.
