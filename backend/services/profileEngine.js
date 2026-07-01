@@ -114,8 +114,26 @@ async function buildUserProfile(userId) {
             }
         ]);
 
-    // Combine genre counts from both sources
+    // Calculate watchlist genres first to combine with click analytics and Movie DNA
+    const watchlistGenreCounts = {};
+    user.watchlist.forEach(movie => {
+        if (movie.genres && movie.genres.length > 0) {
+            movie.genres.forEach(genreName => {
+                const normalized = genreName.toLowerCase().trim();
+                watchlistGenreCounts[normalized] = (watchlistGenreCounts[normalized] || 0) + 1;
+            });
+        }
+    });
+
+    const sortedWatchlistGenres = Object.entries(watchlistGenreCounts)
+        .map(([genre, count]) => ({ _id: genre, count }))
+        .sort((a, b) => b.count - a.count);
+
+    // Combine genre counts from all three sources (watchlist, clicks, behaviors)
     const combinedGenres = {};
+    Object.entries(watchlistGenreCounts).forEach(([genre, count]) => {
+        combinedGenres[genre] = (combinedGenres[genre] || 0) + count;
+    });
     genreStats.forEach(g => {
         if (g._id) {
             combinedGenres[g._id] = (combinedGenres[g._id] || 0) + g.count;
@@ -174,20 +192,6 @@ async function buildUserProfile(userId) {
     else if (watchlistCount >= 10) {
         profileStrength = "Medium";
     }
-    // Calculate watchlist genres
-    const watchlistGenreCounts = {};
-    user.watchlist.forEach(movie => {
-        if (movie.genres && movie.genres.length > 0) {
-            movie.genres.forEach(genreName => {
-                const normalized = genreName.toLowerCase().trim();
-                watchlistGenreCounts[normalized] = (watchlistGenreCounts[normalized] || 0) + 1;
-            });
-        }
-    });
-
-    const sortedWatchlistGenres = Object.entries(watchlistGenreCounts)
-        .map(([genre, count]) => ({ _id: genre, count }))
-        .sort((a, b) => b.count - a.count);
 
     // Determine favorite genre: prioritize watchlist, fallback to analytics clicks
     const favoriteGenre = String(

@@ -1,231 +1,236 @@
-# 🎬 Movie Recommendation System - Backend
 
-A secure and scalable Node.js + Express.js backend powering a personalized movie recommendation platform with authentication, analytics dashboards, gamified watchlists, and TMDB integration.
-
-## Overview
-
-The Movie Recommendation System Backend is a RESTful API built using Node.js, Express.js, and MongoDB. It provides movie discovery, personalized recommendations, watchlist management, analytics tracking, achievements mapping, and secure user authentication.
-
-The backend integrates with The Movie Database (TMDB) API to fetch real-time movie information while maintaining user-specific data such as watchlists, streaming platform clicks, XP metrics, and search queries in MongoDB.
-
----
-
-## 🚀 Key Features
-
-### 🔐 Authentication & Authorization
-- User Registration & Login.
-- JWT-Based Stateless Authentication.
-- Protected API Routes using JWT validation guards.
-- Secure Password Hashing using `bcryptjs`.
-- Standardized authentication response codes to block user enumeration attacks.
-
-### 🎥 Movie Discovery
-- Debounced Search Queries.
-- Curated categories: Trending, Popular, Top Rated, Sci-Fi, and Horror.
-- Enriched metadata profiles: runtime, cast profiles, trailers, and regional OTT watch providers.
-
-### ❤️ Watchlist & Self-Healing
-- Add and remove movies to watchlists with MongoDB persistence.
-- Automatic self-healing background checks to fetch and resolve missing genre arrays from TMDB API.
-
-### 🤖 Recommendation Curation
-- **Search-Based Recommendations:** Generates recommendations similar to user search inputs, filtered for duplicates and ranked by rating.
-- **Watchlist-Based Recommendations:** Analyzes genre density arrays inside user watchlists to curate highly relevant suggestions.
-
-### 📊 Analytics Dashboard
-- Aggregates interaction signals (clicks, views, queries) into taste metrics.
-- Provides overview values (total saves, favorite genre, favorite platform, average ratings) via Mongo pipelines.
-- Supports frontend Chart.js components (Provider usage grids and Genre affinity maps).
-
-### 🏆 Gamification & XP System
-- User XP weights logged based on interactive behaviors (DDoS-protected behavior logs).
-- Handles profile levels ("Beginner", "Intermediate", "Advanced") and activity ranges ("Casual", "Active", "Power User").
-- Handles unlock states for achievements (11 unique badges) and custom user avatars.
-
----
-
-## 🛠️ Technology Stack
-
-### Backend Framework
-- Node.js (v18+)
-- Express.js (v4.x)
-
-### Database
-- MongoDB Atlas (Cloud Cluster)
-- Mongoose ODM (Data Validation & Modeling)
-
-### Authentication
-- JSON Web Token (JWT)
-- bcrypt.js (Password Salt-Hashing)
-
-### External APIs
-- TMDB (The Movie Database) API Client
-
-### Security Middleware
-- Helmet (HTTP Header Protection)
-- Express Rate Limit (IP-based Request Throttling)
-- Express Mongo Sanitize (NoSQL Query Injection Prevention)
-
-### Logging
-- Morgan (HTTP Request Logger)
-
----
-
-## 🏗️ Backend Architecture
-
-```text
-               Client Application (HTML5, CSS3, Vanilla JS)
-                                     │
-                                     ▼
-                        Express.js REST API Server
-                                     │
- ┌───────────────────┬───────────────┴───────────────┬───────────────────┐
- │                   │                               │                   │
- ▼                   ▼                               ▼                   ▼
-Authentication  Curation Engine (profileEngine.js)  Analytics Engine  Security Guard
-  Middleware     (Self-Healing Metadata API)        (Aggregations)     (Rate Limits)
-                     │                               │
-                     └───────────────┬───────────────┘
-                                     │
-                                     ▼
-                               MongoDB Atlas
-                                     │
-                                     ▼
-                            TMDB API Proxy Client
-```
-
----
-
-## 📂 Project Structure
+## 📂 Folder Structure
 
 ```text
 backend/
+├── server.js                   # Express app bootstrap & middleware chain
+├── package.json
+├── .env.example                # Env setup template
+├── .env                        # ← NEVER COMMIT (gitignored)
 │
 ├── config/
-│   └── tmdb.js                 # TMDB HTTP Client (Axios client setup)
+│   └── tmdb.js                 # Axios TMDB HTTP client (base URL + API key header)
 │
 ├── middleware/
-│   └── auth.js                 # JWT Authentication route protection middleware
+│   └── auth.js                 # JWT verification guard
 │
 ├── models/
-│   ├── BehaviorEvent.js        # User XP behaviors and weights schema
-│   ├── Movie.js                # Cached TMDB movie details (15-day TTL index)
-│   ├── ProviderClick.js        # User OTT platform click interaction schema
-│   ├── SearchHistory.js        # User search queries tracking schema
-│   └── User.js                 # User profile credentials and watchlist schema
+│   ├── User.js                 # Core user schema + watchlist subdocument
+│   ├── Movie.js                # Cached movie document (15-day TTL)
+│   ├── ProviderClick.js        # OTT provider interaction log
+│   ├── SearchHistory.js        # Search query history
+│   └── BehaviorEvent.js        # XP-weighted behavior events
 │
 ├── routes/
-│   ├── achievementRoutes.js    # Achievements checklist and claims endpoints
-│   ├── analyticsRoutes.js      # User taste profile metrics endpoints
-│   ├── authRoutes.js           # Register and Login endpoints
-│   ├── behaviorRoutes.js       # Dynamic XP updates endpoints
-│   ├── movieRoutes.js          # Search, Trending, Cast, Trailers, and OTT proxy endpoints
-│   ├── profileRoutes.js        # User details, gender, and level endpoints
-│   ├── recommendationRoutes.js # Contextual curation and watchlist recommendations endpoints
-│   ├── searchHistoryRoutes.js  # Search history log endpoints
-│   └── watchlistRoutes.js      # Watchlist items toggle and list endpoints
+│   ├── achievementRoutes.js    # GET /achievements/overview, /claim
+│   ├── analyticsRoutes.js      # GET /analytics/overview, providers, genres
+│   ├── authRoutes.js           # POST /register, POST /login
+│   ├── behaviorRoutes.js       # POST /behavior/event (XP adjustments)
+│   ├── movieRoutes.js          # GET /search, trending, popular, genres, movie details
+│   ├── profileRoutes.js        # GET /profile (user info and persona)
+│   ├── recommendationRoutes.js # GET /recommend, /recommend/watchlist
+│   ├── searchHistoryRoutes.js  # GET & DELETE /history
+│   └── watchlistRoutes.js      # GET & POST /watchlist
 │
-├── services/
-│   ├── profileEngine.js        # Dynamic taste math, levels, and self-healing loop
-│   └── tmdbService.js          # Raw TMDB parsing methods
-│
-├── .env                        # Local configurations (Gitignored)
-├── package.json                # Project dependencies and startup script
-└── server.js                   # Application bootstrap and global middleware config
+└── services/
+    ├── profileEngine.js        # Persona, Movie DNA, XP, self-healing pipeline
+    └── tmdbService.js          # Raw metadata retrieval layer
 ```
 
 ---
 
-## 🔐 Security Features
+## 🔒 Middleware Stack
 
-- **JWT Authentication:** Protected API routes require a valid header signature (`Authorization: Bearer <JWT_token>`).
-- **Password Security:** Credentials hashed using salt rounds prior to DB indexing.
-- **Rate Limiting:** Global limiter prevents API abuse (configured to block users at `700` calls per 15 minutes).
-- **HTTP Security Headers:** Helmet integrates header security flags to defend against framing and clickjacking.
-- **NoSQL Injection Protection:** Sanitize parser strips `$` and `.` characters from req parameter objects.
-
----
-
-## 🤖 Recommendation Engine
-
-### Search-Based Recommendation
-1. User types in a search query.
-2. Similar movies are fetched from TMDB.
-3. Matching genres are parsed to search for supplementary options.
-4. Duplicates and low-rating metadata records are filtered out.
-5. Suggestions are returned sorted by rating.
-
-### Watchlist-Based Recommendation
-1. Reads the user's saved watchlist.
-2. Background self-healing processes any entries missing genres.
-3. Computes the user's primary taste interest based on watchlist genre density.
-4. Queries TMDB recommendations using the computed genre profile.
-5. Filters out titles already saved to the user's watchlist.
-6. Returns highly personalized selections.
+| Middleware | Package | Purpose |
+| :--- | :--- | :--- |
+| Logger | `morgan` | HTTP request logging |
+| Security Headers | `helmet` | XSS, clickjack, MIME protection |
+| CORS | `cors` | Cross-origin request control |
+| Rate Limiter | `express-rate-limit` | IP-based request throttling |
+| Body Parser | `express.json()` | JSON request parsing |
+| Sanitizer | `express-mongo-sanitize` | NoSQL injection prevention |
+| Auth Guard | `middleware/auth.js` | JWT token verification |
 
 ---
 
-## 📊 Analytics Module
+## 🛣️ Routes
 
-The analytics engine processes database documents to render user taste graphs:
-- **Overview Analytics:** Calculates total movies, favorite genre, most-clicked streaming platform, average watchlist rating, and genre diversity scores.
-- **Provider Analytics:** Tracks clicks on OTT channels (Netflix, Prime Video, Disney+ Hotstar, ZEE5, SonyLIV, Apple TV, Crunchyroll) to build platform distributions.
-- **Genre Analytics:** Aggregates watchlist genres and user interaction behavior events to output genre affinity maps.
+### Authentication — `authRoutes.js`
+| Method | Path | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/register` | ❌ | Create new user account |
+| `POST` | `/api/login` | ❌ | Authenticate & receive JWT |
 
----
+### Movies — `movieRoutes.js`
+| Method | Path | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/search` | ✅ | TMDB title search |
+| `GET` | `/api/trending` | ✅ | Weekly trending titles |
+| `GET` | `/api/popular` | ✅ | Popular movies |
+| `GET` | `/api/top-rated` | ✅ | Top-rated titles |
+| `GET` | `/api/scifi` | ✅ | Science fiction genre |
+| `GET` | `/api/horror` | ✅ | Horror genre |
+| `GET` | `/api/movie/:id` | ✅ | Full movie details |
+| `GET` | `/api/movie/:id/cast` | ✅ | Cast members |
+| `GET` | `/api/movie/:id/trailer` | ✅ | YouTube trailer key |
+| `GET` | `/api/movie/:id/providers` | ✅ | OTT availability |
 
-## 📡 API Endpoints
+### Watchlist — `watchlistRoutes.js`
+| Method | Path | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/watchlist` | ✅ | Fetch user's saved list |
+| `POST` | `/api/watchlist` | ✅ | Toggle add/remove + save genres |
 
-### Authentication
-- `POST /api/register` — Create user account.
-- `POST /api/login` — Authenticate credentials and receive token.
+### Recommendations — `recommendationRoutes.js`
+| Method | Path | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/recommend` | ✅ | Search-context curation |
+| `GET` | `/api/recommend/watchlist` | ✅ | Watchlist-based curation |
 
-### Movies & Metadata
-- `GET /api/search?q=<query>` — Query movies by title.
-- `GET /api/trending` — Retrieve trending movies.
-- `GET /api/popular` — Retrieve popular movies.
-- `GET /api/top-rated` — Retrieve top-rated movies.
-- `GET /api/scifi` — Retrieve Science Fiction movies.
-- `GET /api/horror` — Retrieve Horror movies.
-- `GET /api/movie/:id` — Retrieve movie overview details.
-- `GET /api/movie/:id/cast` — Retrieve cast lists.
-- `GET /api/movie/:id/trailer` — Retrieve YouTube video trailers.
-- `GET /api/movie/:id/providers` — Retrieve available streaming networks.
-- `GET /api/provider-content/:provider` — Retrieve titles cached under a specific provider.
-- `GET /api/discover/genre/:genreName` — Retrieve titles from a specific genre.
-
-### Watchlist
-- `GET /api/watchlist` — Retrieve saved movie lists.
-- `POST /api/watchlist` — Toggle movie inside user watchlist.
-
-### Recommendations
-- `GET /api/recommend?movieId=<id>` — Contextual/similar suggestions.
-- `GET /api/recommend/watchlist` — Watchlist-based suggestions.
-
-### Analytics
-- `GET /api/analytics/overview` — Dynamic profile counts and levels.
-- `GET /api/analytics/providers` — Aggregated streaming click counts.
-- `GET /api/analytics/genres` — Aggregated genre interaction logs.
-
-### Profile & Gamification
-- `GET /api/profile` — Fetch user levels, XP, and computed personas.
-- `POST /api/profile/gender` — Set profile gender parameter.
-- `GET /api/achievements` — Fetch achievements unlock grid.
-- `POST /api/achievements/track` — Set achievement trigger signals.
-- `POST /api/behavior/event` — Log interaction behavior XP.
-- `GET /api/behavior/summary` — Read behavior log summary.
-- `GET /api/history` — Read search history queries.
-- `POST /api/history` — Write search history query.
+### Analytics — `analyticsRoutes.js`
+| Method | Path | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/analytics/overview` | ✅ | Totals: movies, favorite genre/provider |
+| `GET` | `/api/analytics/providers` | ✅ | Provider click distribution |
+| `GET` | `/api/analytics/genres` | ✅ | Genre affinity map data |
 
 ---
 
-## 🔮 Future Enhancements
-- Unit and integration testing suites (Jest, Supertest).
-- Server memory caching using Redis.
-- Automated container builds with Docker.
-- Real-time notification systems (WebSockets).
+## 🗄️ Database Schemas
+
+### `User.js`
+```js
+{
+  username:   String (unique, required),
+  password:   String (bcrypt hashed),
+  gender:     String (enum: male | female),
+  watchlist: [{
+    tmdbId:   Number,
+    title:    String,
+    poster:   String,
+    genres:   [String]          // ← Self-healed from TMDB on profile load
+  }],
+  unlockedAchievements:           [String],
+  recommendationViewsCount:       Number,
+  openedRecommendationsCount:     Number,
+  recommendationInteractionsCount:Number,
+  dashboardViewsCount:            Number
+}
+```
+
+### `ProviderClick.js`
+```js
+{ userId: ObjectId, provider: String, genre: String, createdAt: Date }
+```
+
+### `SearchHistory.js`
+```js
+{ userId: ObjectId, query: String, searchedAt: Date }
+```
+
+### `BehaviorEvent.js`
+```js
+{ userId: ObjectId, genre: String, weight: Number, createdAt: Date }
+```
+
+### `Movie.js`
+```js
+{ tmdbId: Number, title: String, poster: String, year: String,
+  createdAt: Date }   // TTL: 15 days auto-expiry
+```
 
 ---
 
-## 👨‍💻 Developer
-Developed as a robust, secure, and production-ready Express API backing the Dark movie curation dashboard.
+## 🤖 profileEngine.js — Core Service
+
+The central intelligence service. Called on every profile/dashboard/watchlist load.
+
+```mermaid
+flowchart TD
+    A[buildUserProfile userId] --> B[Fetch user from MongoDB]
+    B --> C{Any watchlist items missing genres?}
+    C -->|Yes| D[Parallel TMDB fetch via Promise.allSettled]
+    D --> E[Update genres in user.watchlist]
+    E --> F[user.save to MongoDB]
+    C -->|No| G[Continue]
+    F --> G
+    G --> H[Count genres across watchlist movies]
+    H --> I[Sort by frequency → favoriteGenre]
+    I --> J{Match genre to Persona}
+    J --> K[Horror → Horror Seeker]
+    J --> L[Action → Action Addict]
+    J --> M[Sci-Fi → Sci-Fi Explorer]
+    J --> N[...10 persona archetypes]
+    K & L & M & N --> O[Return full profile object]
+```
+
+### Persona Archetypes
+
+| Watchlist Top Genre | Assigned Persona |
+| :--- | :--- |
+| `horror` | Horror Seeker |
+| `action` | Action Addict |
+| `science fiction` | Sci-Fi Explorer |
+| `comedy` | Comedy Lover |
+| `drama` | Drama Enthusiast |
+| `thriller` | Thriller Hunter |
+| `adventure` | Adventure Explorer |
+| `fantasy` | Fantasy Dreamer |
+| `animation` | Animation Enthusiast |
+| `mystery` | Mystery Detective |
+| *(fallback)* | Movie Fan |
+
+---
+
+## 🔐 Security Configuration
+
+| Layer | Implementation | Protection |
+| :--- | :--- | :--- |
+| Passwords | `bcryptjs` (strong adaptive hashing) | Rainbow table attacks |
+| Sessions | JWT (signed, configurable expiry) | Stateless auth |
+| Headers | `helmet()` | XSS, clickjacking |
+| Requests | `express-rate-limit` (IP-based throttling, 700 reqs/15m) | DDoS mitigation |
+| DB Queries | `express-mongo-sanitize` | NoSQL query injection |
+| Secrets | `.env` (gitignored) | Key exposure |
+
+---
+
+## 📊 Analytics Engine
+
+### Event Sources
+```text
+User Activity
+     │
+     ├── OTT Provider Click → ProviderClick collection
+     ├── Search Query        → SearchHistory collection
+     └── Page Interaction    → BehaviorEvent collection
+                                    │
+                             profileEngine.js
+                                    │
+                             ┌──────┴──────┐
+                             ▼             ▼
+                       Movie DNA      Activity Level
+                       (topGenres)    (XP score sum)
+```
+
+---
+
+## 🚀 Startup
+
+```bash
+npm install
+cp .env.example .env   # Fill in credentials
+npm start              # node server.js on PORT=5000
+```
+
+---
+
+## 🔮 Future Improvements
+
+| Feature | Complexity | Impact |
+| :--- | :--- | :--- |
+| Redis response caching | Medium | ⬆⬆ API speed |
+| Jest unit test suite | Medium | ⬆ Code confidence |
+| Docker containerization | Low | ⬆ DevOps portability |
+| Vector embedding recommendations | High | ⬆⬆⬆ AI accuracy |
+| WebSocket real-time updates | Medium | ⬆ UX richness |
