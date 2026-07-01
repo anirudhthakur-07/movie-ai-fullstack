@@ -240,6 +240,12 @@ async function loadProfile() {
         // Load visual sub-cards (DNA bars)
         renderMovieDNA(data.topGenres || []);
 
+        // Hide skeleton and show content
+        const skeleton = document.getElementById("profileHeroSkeleton");
+        const content = document.getElementById("profileHeroContent");
+        if (skeleton) skeleton.classList.add("hidden");
+        if (content) content.classList.remove("hidden");
+
         // FIX BUG 3: If analytics already resolved first, render summary now;
         // otherwise loadAnalytics() will call updateSummaryList() when it finishes
         if (statsOverview.totalClicks > 0 || statsOverview.topProvider !== "No Data") {

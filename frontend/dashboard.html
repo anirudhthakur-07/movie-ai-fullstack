@@ -61,33 +61,46 @@
 
         <!-- 1. AI PROFILE HERO HEADER -->
         <header class="profile-hero-card">
-            <div class="profile-header-top">
-                <div class="profile-avatar-container">
-                    <div class="profile-avatar" id="avatarInitials">U</div>
-                    <div class="glowing-avatar-ring"></div>
+            <!-- Loading Skeleton -->
+            <div id="profileHeroSkeleton" class="hero-skeleton-wrapper" style="padding: 0; background: transparent; border: none; box-shadow: none; width: 100%;">
+                <div class="hero-skeleton-avatar skeleton-shimmer"></div>
+                <div class="hero-skeleton-info">
+                    <div class="hero-skeleton-title skeleton-shimmer" style="width: 150px; height: 20px;"></div>
+                    <div class="hero-skeleton-subtitle skeleton-shimmer" style="width: 100px; height: 14px; margin-top: 8px;"></div>
                 </div>
-                <div class="profile-meta-info">
-                    <div class="username-row">
-                        <h2 id="profileUsername">Movie Explorer</h2>
-                    </div>
-                    <div class="persona-tagline">
-                        Persona: <span id="personality" class="glowing-text">Analyzing...</span>
-                    </div>
-                </div>
-                <div class="profile-level-badge">
-                    <div class="lvl-label">Explorer Level</div>
-                    <div class="lvl-val" id="explorerLevel">Level 1</div>
-                </div>
+                <div class="hero-skeleton-badge skeleton-shimmer" style="width: 80px; height: 40px; margin-left: auto;"></div>
             </div>
-            
-            <!-- LEVEL PROGRESS BAR -->
-            <div class="profile-level-progress">
-                <div class="progress-labels">
-                    <span>Rank Progress</span>
-                    <span id="levelRemaining">0 movies remaining to next level</span>
+
+            <!-- Actual Content wrapper (hidden during load) -->
+            <div id="profileHeroContent" class="hidden">
+                <div class="profile-header-top">
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar" id="avatarInitials">U</div>
+                        <div class="glowing-avatar-ring"></div>
+                    </div>
+                    <div class="profile-meta-info">
+                        <div class="username-row">
+                            <h2 id="profileUsername">Movie Explorer</h2>
+                        </div>
+                        <div class="persona-tagline">
+                            Persona: <span id="personality" class="glowing-text">Analyzing...</span>
+                        </div>
+                    </div>
+                    <div class="profile-level-badge">
+                        <div class="lvl-label">Explorer Level</div>
+                        <div class="lvl-val" id="explorerLevel">Level 1</div>
+                    </div>
                 </div>
-                <div class="progress-track">
-                    <div class="progress-bar-fill" id="levelProgressBar" style="width: 0%"></div>
+                
+                <!-- LEVEL PROGRESS BAR -->
+                <div class="profile-level-progress">
+                    <div class="progress-labels">
+                        <span>Rank Progress</span>
+                        <span id="levelRemaining">0 movies remaining to next level</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-bar-fill" id="levelProgressBar" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -123,7 +136,7 @@
                         </div>
                         <div class="widget-icon red"><i class="fas fa-eye"></i></div>
                         <div class="widget-data">
-                            <h4 id="totalClicks">0</h4>
+                            <h4 id="totalClicks"><div class="skeleton-shimmer" style="width: 45px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Movies Explored</span>
                         </div>
                     </div>
@@ -139,7 +152,7 @@
                         </div>
                         <div class="widget-icon blue"><i class="fas fa-tv"></i></div>
                         <div class="widget-data">
-                            <h4 id="topProvider" class="small-text">No Data</h4>
+                            <h4 id="topProvider" class="small-text"><div class="skeleton-shimmer" style="width: 80px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Streaming Home</span>
                         </div>
                     </div>
@@ -155,7 +168,7 @@
                         </div>
                         <div class="widget-icon purple"><i class="fas fa-film"></i></div>
                         <div class="widget-data">
-                            <h4 id="topGenre" class="small-text">No Data</h4>
+                            <h4 id="topGenre" class="small-text"><div class="skeleton-shimmer" style="width: 80px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Favorite Genre</span>
                         </div>
                     </div>
@@ -171,7 +184,7 @@
                         </div>
                         <div class="widget-icon gold"><i class="fas fa-shield-halved"></i></div>
                         <div class="widget-data">
-                            <h4 id="profileStrength">Low</h4>
+                            <h4 id="profileStrength"><div class="skeleton-shimmer" style="width: 50px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Reliability</span>
                         </div>
                     </div>
@@ -187,7 +200,7 @@
                         </div>
                         <div class="widget-icon green"><i class="fas fa-bolt"></i></div>
                         <div class="widget-data">
-                            <h4 id="activityLevel">Casual</h4>
+                            <h4 id="activityLevel"><div class="skeleton-shimmer" style="width: 60px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Activity Level</span>
                         </div>
                     </div>
@@ -203,7 +216,7 @@
                         </div>
                         <div class="widget-icon red"><i class="fas fa-compass"></i></div>
                         <div class="widget-data">
-                            <h4 id="explorationScore">0</h4>
+                            <h4 id="explorationScore"><div class="skeleton-shimmer" style="width: 40px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Exploration Score</span>
                         </div>
                     </div>
@@ -219,7 +232,7 @@
                         </div>
                         <div class="widget-icon blue"><i class="fas fa-masks-theater"></i></div>
                         <div class="widget-data">
-                            <h4 id="genreDiversity">0</h4>
+                            <h4 id="genreDiversity"><div class="skeleton-shimmer" style="width: 35px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Genre Diversity</span>
                         </div>
                     </div>
@@ -235,7 +248,7 @@
                         </div>
                         <div class="widget-icon purple"><i class="fas fa-play"></i></div>
                         <div class="widget-data">
-                            <h4 id="trailerAffinity">0%</h4>
+                            <h4 id="trailerAffinity"><div class="skeleton-shimmer" style="width: 45px; height: 22px; border-radius: 4px; display: inline-block;"></div></h4>
                             <span>Trailer Affinity</span>
                         </div>
                     </div>
@@ -250,7 +263,9 @@
                 <p class="subtitle">AI generated overview of your streaming profile</p>
             </div>
             <div id="aiSummaryList" class="summary-insights-list">
-                <!-- Dynamic AI insights will be rendered here as bullet items -->
+                <div class="skeleton-loader" style="width: 90%; height: 16px; margin-bottom: 8px;"></div>
+                <div class="skeleton-loader" style="width: 75%; height: 16px; margin-bottom: 8px;"></div>
+                <div class="skeleton-loader" style="width: 85%; height: 16px;"></div>
             </div>
         </section>
 
@@ -266,7 +281,11 @@
                 </button>
             </div>
             <div class="achievements-grid" id="achievementsContainer">
-                <!-- Top 3 achievements will be dynamically rendered here -->
+                <div class="insights-skeleton-grid" style="grid-template-columns: repeat(3, 1fr); width: 100%; gap: 15px; grid-column: 1 / -1; display: grid;">
+                    <div class="insight-card-skeleton skeleton-shimmer" style="height: 120px; border-radius: 12px; width: 100%;"></div>
+                    <div class="insight-card-skeleton skeleton-shimmer" style="height: 120px; border-radius: 12px; width: 100%;"></div>
+                    <div class="insight-card-skeleton skeleton-shimmer" style="height: 120px; border-radius: 12px; width: 100%;"></div>
+                </div>
             </div>
         </section>
 
