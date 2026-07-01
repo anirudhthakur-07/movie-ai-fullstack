@@ -114,7 +114,7 @@ async function buildUserProfile(userId) {
             }
         ]);
 
-    // Calculate watchlist genres first to combine with click analytics and Movie DNA
+    // Calculate watchlist genres (strictly based on saved watchlist movies)
     const watchlistGenreCounts = {};
     user.watchlist.forEach(movie => {
         if (movie.genres && movie.genres.length > 0) {
@@ -129,11 +129,8 @@ async function buildUserProfile(userId) {
         .map(([genre, count]) => ({ _id: genre, count }))
         .sort((a, b) => b.count - a.count);
 
-    // Combine genre counts from all three sources (watchlist, clicks, behaviors)
+    // Combine genre counts from click and behavior sources only (strictly dashboard)
     const combinedGenres = {};
-    Object.entries(watchlistGenreCounts).forEach(([genre, count]) => {
-        combinedGenres[genre] = (combinedGenres[genre] || 0) + count;
-    });
     genreStats.forEach(g => {
         if (g._id) {
             combinedGenres[g._id] = (combinedGenres[g._id] || 0) + g.count;
@@ -193,42 +190,83 @@ async function buildUserProfile(userId) {
         profileStrength = "Medium";
     }
 
-    // Determine favorite genre: prioritize watchlist, fallback to analytics clicks
-    const favoriteGenre = String(
-      sortedWatchlistGenres[0]?._id || sortedGenreStats[0]?._id || ""
+    // Determine watchlist favorite genre (strictly based on saved watchlist movies)
+    const watchlistGenre = String(
+      sortedWatchlistGenres[0]?._id || ""
     ).toLowerCase().trim();
 
-    let personality = "Movie Fan";
+    // Determine dashboard active favorite genre (strictly based on provider clicks / behavior events)
+    const clickGenre = String(
+      sortedGenreStats[0]?._id || ""
+    ).toLowerCase().trim();
 
-    if (favoriteGenre === "science fiction" || favoriteGenre === "sci-fi") {
+    let watchlistPersonality = "Movie Fan";
+    if (watchlistGenre === "science fiction" || watchlistGenre === "sci-fi") {
+        watchlistPersonality = "Sci-Fi Explorer";
+    }
+    else if (watchlistGenre === "thriller") {
+        watchlistPersonality = "Thriller Hunter";
+    }
+    else if (watchlistGenre === "drama") {
+        watchlistPersonality = "Drama Enthusiast";
+    }
+    else if (watchlistGenre === "action") {
+        watchlistPersonality = "Action Addict";
+    }
+    else if (watchlistGenre === "horror") {
+        watchlistPersonality = "Horror Seeker";
+    }
+    else if (watchlistGenre === "comedy") {
+        watchlistPersonality = "Comedy Lover";
+    } 
+    else if (watchlistGenre === "adventure") {
+        watchlistPersonality = "Adventure Explorer";
+    }
+    else if (watchlistGenre === "fantasy") {
+        watchlistPersonality = "Fantasy Dreamer";
+    }
+    else if (watchlistGenre === "animation") {
+        watchlistPersonality = "Animation Enthusiast";
+    }
+    else if (watchlistGenre === "mystery") {
+        watchlistPersonality = "Mystery Detective";
+    }
+
+    let personality = "Movie Fan";
+    if (clickGenre === "science fiction" || clickGenre === "sci-fi") {
         personality = "Sci-Fi Explorer";
     }
-    else if (favoriteGenre === "thriller") {
+    else if (clickGenre === "thriller") {
         personality = "Thriller Hunter";
     }
-    else if (favoriteGenre === "drama") {
+    else if (clickGenre === "drama") {
         personality = "Drama Enthusiast";
     }
-    else if (favoriteGenre === "action") {
+    else if (clickGenre === "action") {
         personality = "Action Addict";
     }
-    else if (favoriteGenre === "horror") {
+    else if (clickGenre === "horror") {
         personality = "Horror Seeker";
     }
-    else if (favoriteGenre === "comedy") {
+    else if (clickGenre === "comedy") {
         personality = "Comedy Lover";
     } 
-    else if (favoriteGenre === "adventure") {
+    else if (clickGenre === "adventure") {
         personality = "Adventure Explorer";
     }
-    else if (favoriteGenre === "fantasy") {
+    else if (clickGenre === "fantasy") {
         personality = "Fantasy Dreamer";
     }
-    else if (favoriteGenre === "animation") {
+    else if (clickGenre === "animation") {
         personality = "Animation Enthusiast";
     }
-    else if (favoriteGenre === "mystery") {
+    else if (clickGenre === "mystery") {
         personality = "Mystery Detective";
+    }
+
+    // Default dashboard active fallback: if no clicks yet, use watchlist persona
+    if (clickGenre === "" && watchlistGenre !== "") {
+        personality = watchlistPersonality;
     }
   return {
 
@@ -236,6 +274,7 @@ async function buildUserProfile(userId) {
     user.username,
     watchlistCount,
     personality,
+    watchlistPersonality,
     profileStrength,
     activityLevel,
     totalInteractions,

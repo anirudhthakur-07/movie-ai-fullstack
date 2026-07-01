@@ -134,7 +134,12 @@
 
         <!-- 6. FULL SAVED COLLECTION GRID -->
         <section class="watchlist-section" id="fullCollectionSection">
-            <h3 class="section-title" id="fullCollectionTitle"><i class="fas fa-folder-open icon-gradient"></i> Your Collection</h3>
+            <h3 class="section-title" id="fullCollectionTitle" style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fas fa-folder-open icon-gradient"></i> Your Collection</span>
+                <button id="clearWatchlistBtn" class="clear-watchlist-btn" onclick="clearAllWatchlist()">
+                    <i class="fas fa-trash-alt"></i> Remove All
+                </button>
+            </h3>
             <div id="watchlistPageRow" class="watchlist-grid">
                 <div class="movie-grid-skeleton">
                     <div class="movie-card-skeleton skeleton-shimmer"></div>

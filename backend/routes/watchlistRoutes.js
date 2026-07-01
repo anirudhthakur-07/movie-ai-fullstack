@@ -87,4 +87,24 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// DELETE ALL ITEMS FROM WATCHLIST
+router.delete('/', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await User.updateOne(
+      { _id: req.userId },
+      { $set: { watchlist: [] } }
+    );
+
+    res.json([]);
+  } catch (err) {
+    console.error("WATCHLIST DELETE ERROR:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;

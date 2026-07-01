@@ -223,7 +223,7 @@ async function loadProfile() {
                         document.getElementById("avatarInitials").innerHTML = `
                             <img src="${newUrl}" alt="${mappedPersona}" onerror="this.style.display='none'; this.parentElement.innerText='${fallbackInitial}'">
                         `;
-                    });
+                    }, profileData.watchlistPersonality || "");
                 });
                 avatarContainer.dataset.listenerBound = "true";
             }

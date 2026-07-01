@@ -46,7 +46,7 @@ function showAvatarNotification(message) {
 }
 
 // Open the selection modal
-async function openAvatarSelector(currentPersonaRaw, currentGender, username, onSaveCallback) {
+async function openAvatarSelector(currentPersonaRaw, currentGender, username, onSaveCallback, watchlistPersonaRaw) {
     // 1. Fetch achievements list to know which ones are unlocked
     let unlockedAchievements = [];
     const token = sessionStorage.getItem("token");
@@ -98,6 +98,36 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
         return currentConfig ? currentConfig.name : "Cinematic Explorer";
     })();
 
+    // Map raw watchlist persona correctly to match config keys returned by the profile engine
+    const watchlistPersonaName = (() => {
+        const raw = (watchlistPersonaRaw || "").toLowerCase().trim();
+        let targetKey = "";
+        if (raw === "sci-fi explorer" || raw === "science fiction" || raw === "sci-fi") {
+            targetKey = "space_explorer";
+        } else if (raw === "thriller hunter" || raw === "thriller") {
+            targetKey = "thriller_hunter";
+        } else if (raw === "drama enthusiast" || raw === "drama") {
+            targetKey = "drama_enthusiast";
+        } else if (raw === "action addict" || raw === "action") {
+            targetKey = "action_addict";
+        } else if (raw === "horror seeker" || raw === "horror") {
+            targetKey = "horror_seeker";
+        } else if (raw === "comedy lover" || raw === "comedy") {
+            targetKey = "comedy_lover";
+        } else if (raw === "adventure explorer" || raw === "adventure") {
+            targetKey = "adventure_explorer";
+        } else if (raw === "fantasy dreamer" || raw === "fantasy") {
+            targetKey = "fantasy_dreamer";
+        } else if (raw === "animation enthusiast" || raw === "animation") {
+            targetKey = "animation_enthusiast";
+        } else if (raw === "mystery detective" || raw === "mystery") {
+            targetKey = "mystery_detective";
+        }
+        if (!targetKey) return "";
+        const config = PERSONAS_CONFIG.find(p => p.key === targetKey);
+        return config ? config.name : "";
+    })();
+
     if (!localUnlocked.includes(activePersonaName)) {
         localUnlocked.push(activePersonaName);
         localStorage.setItem(localKey, JSON.stringify(localUnlocked));
@@ -144,6 +174,7 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
     PERSONAS_CONFIG.forEach(p => {
         const isCurrent = (p.name === activePersonaName);
         const isUnlocked = isCurrent || 
+                           (watchlistPersonaName && p.name === watchlistPersonaName) ||
                            unlockedAchievements.includes(p.achievement) || 
                            localUnlocked.includes(p.name) ||
                            p.genre === "default"; // cinematic explorer always unlocked

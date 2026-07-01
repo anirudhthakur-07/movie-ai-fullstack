@@ -378,11 +378,12 @@ function renderHeroCard(profile, watchlist) {
     heroCard.classList.remove("hidden");
 
     // Resolve Mapped Persona
-    const rawPersonality = (profile.personality || "Movie Explorer").toLowerCase();
-    const mappedPersona = PERSONA_TITLES[rawPersonality] || profile.personality || "Movie Explorer";
+    const watchlistPersonaName = profile.watchlistPersonality || profile.personality || "Movie Explorer";
+    const rawPersonality = watchlistPersonaName.toLowerCase();
+    const mappedPersona = PERSONA_TITLES[rawPersonality] || watchlistPersonaName;
 
     // Resolve Avatar Path
-    const avatarImgUrl = getAvatarPath(profile.personality, profile.gender);
+    const avatarImgUrl = getAvatarPath(watchlistPersonaName, profile.gender);
     const fallbackInitial = (profile.username || "U").charAt(0).toUpperCase();
 
     const totalSaved = watchlist ? watchlist.length : 0;
@@ -413,7 +414,8 @@ function renderRecentlyAdded(watchlist) {
     if (!section || !row) return;
 
     if (!watchlist || watchlist.length === 0) {
-        section.classList.add("hidden");
+        section.classList.remove("hidden");
+        row.innerHTML = `<div class="watchlist-empty-message"><i class="fas fa-history"></i> No recently saved movies found. Save movies to see them here!</div>`;
         return;
     }
 
@@ -432,7 +434,8 @@ async function renderAIPicks() {
     const data = await fetchWatchlistRecommendations();
 
     if (!data.results || data.results.length === 0 || data.status === "empty" || data.status === "cold_start") {
-        section.classList.add("hidden");
+        section.classList.remove("hidden");
+        row.innerHTML = `<div class="watchlist-empty-message"><i class="fas fa-magic"></i> AI requires at least 1 saved movie to customize your recommendations.</div>`;
         return;
     }
 
@@ -498,7 +501,8 @@ function renderCollectionInsights(watchlist, profile) {
     if (!section || !grid) return;
 
     if (!watchlist || watchlist.length === 0) {
-        section.classList.add("hidden");
+        section.classList.remove("hidden");
+        grid.innerHTML = `<div class="watchlist-empty-message" style="grid-column: 1 / -1;"><i class="fas fa-chart-pie"></i> Add movies to your watchlist to unlock DNA insights and statistics.</div>`;
         return;
     }
 
@@ -587,47 +591,20 @@ function displayWatchlist(list, container) {
     container.innerHTML = '';
     const heroCard = document.getElementById("watchlistHeroCard");
     const fullCollectionSection = document.getElementById("fullCollectionSection");
-
     if (!list || list.length === 0) {
-        if (heroCard) heroCard.classList.add("hidden");
-        if (fullCollectionSection) fullCollectionSection.style.display = "none";
+        if (heroCard) heroCard.classList.remove("hidden");
+        if (fullCollectionSection) fullCollectionSection.style.display = "block";
         
         container.innerHTML = `
-          <div class="empty-universe-state">
-            <div class="empty-icon-glow"><i class="fas fa-clapperboard"></i></div>
-            <h2>Universe Initializing</h2>
-            <p>Your Movie Universe is empty. Construct your taste profile by saving titles and unlocking custom AI recommendations.</p>
-            <div class="empty-universe-actions">
-                <button class="browse-btn" onclick="goHome()">
-                    <i class="fas fa-compass"></i> Discover Movies
-                </button>
-            </div>
-            
-            <div class="empty-universe-previews">
-                <div class="preview-chip">
-                    <span class="title">Taste DNA</span>
-                    <span class="desc">Awaiting Data</span>
-                </div>
-                <div class="preview-chip">
-                    <span class="title">Persona Affinity</span>
-                    <span class="desc">Dormant</span>
-                </div>
-                <div class="preview-chip">
-                    <span class="title">Achievements</span>
-                    <span class="desc">Locked</span>
-                </div>
-            </div>
-            
-            <div class="empty-universe-suggestions">
-                <h3>Suggested for Discovery</h3>
-                <div class="suggestions-row" id="emptySuggestionsRow">
-                    <div class="loading-watchlist">Loading suggestions...</div>
-                </div>
-            </div>
+          <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 50px 20px;">
+            <i class="fas fa-clapperboard" style="font-size: 2.2rem; opacity: 0.5; margin-bottom: 10px;"></i>
+            <h3 style="margin: 0; font-size: 1.15rem; color: #fff;">Your Collection is Empty</h3>
+            <p style="opacity: 0.7; margin: 10px 0 20px 0; max-width: 320px; font-size: 0.85rem; line-height: 1.4;">Construct your movie universe by saving titles from the Home catalog and unlocking custom recommendations.</p>
+            <button class="clear-watchlist-btn" onclick="goHome()" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; box-shadow: none;">
+                <i class="fas fa-compass"></i> Discover Movies
+            </button>
           </div>
         `;
-        
-        fetchSuggestions();
         return;
     }
 
@@ -771,4 +748,41 @@ window.addEventListener('scroll', () => {
 window.logout = function () {
     sessionStorage.removeItem("token");
     window.location.href = "login.html";
+};
+
+// Clear entire watchlist
+window.clearAllWatchlist = async function() {
+    if (!confirm("Are you sure you want to remove all movies from your watchlist? This action cannot be undone.")) {
+        return;
+    }
+    
+    const clearBtn = document.getElementById("clearWatchlistBtn");
+    if (clearBtn) {
+        clearBtn.disabled = true;
+        clearBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Clearing...`;
+    }
+    
+    try {
+        const res = await authFetch(`${API_BASE}/watchlist`, {
+            method: "DELETE"
+        });
+        
+        if (res && res.ok) {
+            localStorage.removeItem("cachedWatchlist");
+            await renderWatchlistPage();
+        } else {
+            alert("Failed to clear watchlist. Please try again.");
+            if (clearBtn) {
+                clearBtn.disabled = false;
+                clearBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Remove All`;
+            }
+        }
+    } catch (err) {
+        console.error("Failed to clear watchlist:", err);
+        alert("An error occurred while clearing the watchlist.");
+        if (clearBtn) {
+            clearBtn.disabled = false;
+            clearBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Remove All`;
+        }
+    }
 };

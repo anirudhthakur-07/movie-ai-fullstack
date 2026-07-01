@@ -28,25 +28,6 @@ router.get("/overview", auth, async (req, res) => {
         ]);
         const topProvider = providerAgg.length > 0 ? providerAgg[0]._id : "No Data";
 
-        const User = require("../models/User");
-        const user = await User.findById(req.userId);
-        
-        // Calculate watchlist top genre to align dashboard stats with profile persona
-        const watchlistGenreCounts = {};
-        if (user && user.watchlist) {
-            user.watchlist.forEach(movie => {
-                if (movie.genres && movie.genres.length > 0) {
-                    movie.genres.forEach(genreName => {
-                        const normalized = genreName.toLowerCase().trim();
-                        watchlistGenreCounts[normalized] = (watchlistGenreCounts[normalized] || 0) + 1;
-                    });
-                }
-            });
-        }
-        const sortedWatchlistGenres = Object.entries(watchlistGenreCounts)
-            .map(([genre, count]) => ({ _id: genre, count }))
-            .sort((a, b) => b.count - a.count);
-
         const genreAgg = await ProviderClick.aggregate([
             { $match: { userId: uid } },
             { $project: { lowerGenre: { $toLower: "$genre" } } },
@@ -54,8 +35,7 @@ router.get("/overview", auth, async (req, res) => {
             { $sort: { count: -1 } },
             { $limit: 1 }
         ]);
-        const topClickGenre = genreAgg.length > 0 ? genreAgg[0]._id : "";
-        const topGenre = sortedWatchlistGenres[0]?._id || topClickGenre || "No Data";
+        const topGenre = genreAgg.length > 0 ? genreAgg[0]._id : "No Data";
 
         // ── NEW: BehaviorEvent metrics ───────────────────────────────────────
         // Run all behavioral aggregations in parallel for performance
