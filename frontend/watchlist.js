@@ -20,6 +20,8 @@ function getAvatarPath(persona, gender) {
     const cleanGender = (gender || "male").toLowerCase();
 
     const mapping = {
+        "sci-fi explorer": "space_explorer",
+        "science fiction": "space_explorer",
         "action addict": "action_addict",
         "action": "action_addict",
         "thriller hunter": "thriller_hunter",
