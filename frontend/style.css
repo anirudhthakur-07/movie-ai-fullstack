@@ -393,30 +393,40 @@ h4 {
   }
 }
 
+.close-modal, .remove-btn, .avatar-modal-close, .close-trailer {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+  z-index: 1001 !important;
+  text-shadow: none !important;
+}
+
+.close-modal:hover, .remove-btn:hover, .avatar-modal-close:hover, .close-trailer:hover {
+  background: linear-gradient(45deg, #e50914, #ff2a3d) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.5) !important;
+}
+
 .close-modal {
   position: absolute;
   top: 15px;
   right: 20px;
-  width: 30px;
-  height: 30px;
-
-  border-radius: 50%;
-  border: none;
-
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-
-  color: white;
-  font-size: 24px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
- font-weight: bold;
-  line-height: 1;
-  z-index: 1001;
-  cursor: pointer;
-  transition: 0.25s;
 }
 
 .modal-body {
@@ -918,26 +928,8 @@ h4 {
   position: absolute;
   top: 10px;
   right: 10px;
-
-  width: 32px;
-  height: 32px;
-
-  background: rgba(255, 0, 0, 0.7);
-  border: none;
-  border-radius: 50%;
-
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  z-index: 20;
   opacity: 0;
-  transition: 0.3s;
+  z-index: 20;
 }
 
 .watch-card:hover .remove-btn {
@@ -1528,28 +1520,6 @@ justify-content: center;
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  color: #ffffff;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
-}
-
-.close-trailer:hover {
-  background: #e50914;
-  color: white;
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(173, 0, 9, 0.7);
 }
 
 .section-header {
@@ -3019,17 +2989,6 @@ pointer-events: auto;
   position: absolute;
   top: 20px;
   right: 24px;
-  font-size: 1.8rem;
-  color: #64748b;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s, transform 0.2s;
-}
-
-.avatar-modal-close:hover {
-  color: #ff3e52;
-  transform: scale(1.1);
 }
 
 .avatar-modal-header h3 {

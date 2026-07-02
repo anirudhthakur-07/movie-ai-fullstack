@@ -803,15 +803,6 @@ body {
     position: absolute;
     top: 20px;
     right: 25px;
-    color: var(--text-muted);
-    font-size: 32px;
-    font-weight: bold;
-    cursor: pointer !important;
-    transition: color 0.2s ease;
-}
-
-.close-modal:hover {
-    color: var(--primary);
 }
 
 .achievements-modal-content {
