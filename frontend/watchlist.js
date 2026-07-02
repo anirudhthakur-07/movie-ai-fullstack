@@ -904,6 +904,19 @@ window.triggerGroupMatch = async function() {
         return;
     }
     
+    // Show skeleton row during loading
+    container.classList.remove("hidden");
+    row.innerHTML = `
+      <div class="movie-row-skeleton" style="width: 100%;">
+          <div class="movie-card-skeleton skeleton-shimmer"></div>
+          <div class="movie-card-skeleton skeleton-shimmer"></div>
+          <div class="movie-card-skeleton skeleton-shimmer"></div>
+          <div class="movie-card-skeleton skeleton-shimmer"></div>
+          <div class="movie-card-skeleton skeleton-shimmer"></div>
+      </div>
+    `;
+    container.scrollIntoView({ behavior: "smooth" });
+    
     try {
         const res = await fetch(`${API_BASE}/recommend/group`, {
             method: "POST",
@@ -917,9 +930,13 @@ window.triggerGroupMatch = async function() {
         const data = await res.json();
         
         if (!res.ok) {
-            errorEl.innerText = data.error || "Failed to find match.";
-            errorEl.classList.remove("hidden");
-            container.classList.add("hidden");
+            row.innerHTML = `
+              <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 45px 20px; width: 100%; box-sizing: border-box; margin: 10px 0;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem; color: #ff3b30; margin-bottom: 8px;"></i>
+                <h3 style="margin: 0; font-size: 1rem; color: #fff;">Taste Match Failed</h3>
+                <p style="opacity: 0.7; margin: 6px 0 0 0; font-size: 0.82rem;">${escapeHTML(data.error || "Failed to find taste match.")}</p>
+              </div>
+            `;
             return;
         }
         
@@ -934,17 +951,23 @@ window.triggerGroupMatch = async function() {
             
             document.getElementById("groupRecsTitle").innerHTML = `<i class="fas fa-heart icon-gradient"></i> Joint Curation Picks for You & ${escapeHTML(data.friendUsername)}`;
             displayRowMovies(mappedMovies, row, true);
-            container.classList.remove("hidden");
-            container.scrollIntoView({ behavior: "smooth" });
         } else {
-            errorEl.innerText = "No joint recommendations found. Save more movies to both watchlists!";
-            errorEl.classList.remove("hidden");
-            container.classList.add("hidden");
+            row.innerHTML = `
+              <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 45px 20px; width: 100%; box-sizing: border-box; margin: 10px 0;">
+                <i class="fas fa-compass" style="font-size: 1.8rem; color: rgba(255,255,255,0.4); margin-bottom: 8px;"></i>
+                <h3 style="margin: 0; font-size: 1rem; color: #fff;">No Matches Found</h3>
+                <p style="opacity: 0.7; margin: 6px 0 0 0; font-size: 0.82rem;">Save more movies to both watchlists to compute overlap curation.</p>
+              </div>
+            `;
         }
     } catch (err) {
         console.error("Group matching error:", err);
-        errorEl.innerText = "Connection error. Failed to execute taste matching.";
-        errorEl.classList.remove("hidden");
-        container.classList.add("hidden");
+        row.innerHTML = `
+          <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 45px 20px; width: 100%; box-sizing: border-box; margin: 10px 0;">
+            <i class="fas fa-wifi" style="font-size: 1.8rem; color: #ff3b30; margin-bottom: 8px;"></i>
+            <h3 style="margin: 0; font-size: 1rem; color: #fff;">Connection Error</h3>
+            <p style="opacity: 0.7; margin: 6px 0 0 0; font-size: 0.82rem;">Failed to connect to the recommendation matching engine.</p>
+          </div>
+        `;
     }
 };
