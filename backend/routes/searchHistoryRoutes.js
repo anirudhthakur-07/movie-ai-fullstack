@@ -50,7 +50,7 @@ await SearchHistory.findOneAndUpdate(
         console.error(err);
 
         res.status(500).json({
-            error: err.message
+            error: "Failed to save search history"
         });
     }
 });

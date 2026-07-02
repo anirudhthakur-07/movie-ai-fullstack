@@ -7,7 +7,14 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const JWT_SECRET =process.env.JWT_SECRET;
 
-router.post('/register', async (req, res) => {
+const rateLimit = require("express-rate-limit");
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 requests per window
+  message: { error: "Too many authentication attempts, please try again after 15 minutes" }
+});
+
+router.post('/register', authLimiter, async (req, res) => {
   const { username, password, gender } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: "All fields required" });
@@ -50,7 +57,7 @@ router.post('/register', async (req, res) => {
     res.status(400).json({ error: "User already exists" });
   }
 });
- router.post('/login', async (req, res) => {
+ router.post('/login', authLimiter, async (req, res) => {
   try {
 
     const { username, password } = req.body;
