@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    coViewingCode: { type: String, default: () => "DARK-" + Math.floor(1000 + Math.random() * 9000) },
     watchlist: [
         {
             tmdbId: Number,

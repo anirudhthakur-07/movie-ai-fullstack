@@ -434,24 +434,28 @@ res.json({
 // CO-VIEWING GROUP RECOMMENDATIONS
 router.post('/recommend/group', auth, async (req, res) => {
   try {
-    const { friendUsername } = req.body;
-    if (!friendUsername) {
-      return res.status(400).json({ error: "Friend username required" });
+    const { friendUsername, friendCoViewingCode } = req.body;
+    if (!friendUsername || !friendCoViewingCode) {
+      return res.status(400).json({ error: "Friend username and co-viewing code are required" });
     }
 
     const cleanFriendUsername = String(friendUsername).trim();
+    const cleanCoViewingCode = String(friendCoViewingCode).trim().toUpperCase();
     
     // Find users
     const [user, friend] = await Promise.all([
       User.findById(req.userId),
-      User.findOne({ username: { $regex: new RegExp(`^${cleanFriendUsername}$`, "i") } })
+      User.findOne({ 
+        username: { $regex: new RegExp(`^${cleanFriendUsername}$`, "i") },
+        coViewingCode: cleanCoViewingCode
+      })
     ]);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
     if (!friend) {
-      return res.status(404).json({ error: `User "${friendUsername}" not found` });
+      return res.status(404).json({ error: "Invalid username or co-viewing code combination" });
     }
     if (friend._id.toString() === user._id.toString()) {
       return res.status(400).json({ error: "Cannot co-view with yourself" });

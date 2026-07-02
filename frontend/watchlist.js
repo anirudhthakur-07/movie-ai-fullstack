@@ -314,6 +314,11 @@ async function renderWatchlistPage() {
     renderCollectionInsights(list, profile);
     displayWatchlist(list, container);
 
+    const desc = document.getElementById("coViewingDescription");
+    if (desc && profile && profile.coViewingCode) {
+        desc.innerHTML = `Enter a friend's username and their Co-Viewing Code to merge your Movie DNA profiles and discover the perfect joint watch selection! <strong style="color: #ff2d55; display: block; margin-top: 8px;">Your Co-Viewing Code: ${escapeHTML(profile.coViewingCode)}</strong>`;
+    }
+
     // Fetch recommendations and explore log asynchronously
     renderAIPicks();
     renderContinueExploring();
@@ -439,7 +444,7 @@ async function renderAIPicks() {
     const items = data.results.slice(0, 15).map(m => {
         let reason = m.reason;
         if (!reason) {
-            reason = "Recommended based on your taste profile";
+            reason = "AI Taste Match";
         }
         return {
             ...m,
@@ -592,7 +597,7 @@ function renderFolderFiltersShelf(list) {
     const customFolders = Array.from(new Set(list.map(m => m.folder || "Uncategorized")));
     
     // Core folders list
-    const coreFolders = ["All", "Favorites", "Watch Later", "Uncategorized"];
+    const coreFolders = ["All", "Favorites", "Uncategorized"];
     const allFolders = Array.from(new Set([...coreFolders, ...customFolders]));
     
     shelf.innerHTML = "";
@@ -619,30 +624,28 @@ function renderFolderFiltersShelf(list) {
     });
 }
 
-window.changeMovieFolder = async function(tmdbId, folderName) {
-    if (folderName === "__custom__") {
-        const customName = prompt("Enter new folder name (e.g. Action Curation):");
-        if (!customName || !customName.trim()) {
-            localStorage.removeItem("cachedWatchlist");
-            await renderWatchlistPage();
-            return;
-        }
-        folderName = customName.trim();
-    }
+window.toggleFavoriteFolder = async function(event, tmdbId) {
+    event.stopPropagation();
+    
+    const movie = window.fullWatchlistCache.find(m => (m.tmdbId || m.id) === tmdbId);
+    if (!movie) return;
+    
+    const currentFolder = movie.folder || "Uncategorized";
+    const targetFolder = currentFolder === "Favorites" ? "Uncategorized" : "Favorites";
     
     try {
         const res = await fetch(`${API_BASE}/watchlist/${tmdbId}/folder`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ folderName })
+            body: JSON.stringify({ folderName: targetFolder })
         });
         if (res.ok) {
             localStorage.removeItem("cachedWatchlist");
             await renderWatchlistPage();
         }
     } catch (err) {
-        console.error("Failed to move movie to folder:", err);
+        console.error("Failed to toggle movie favorite folder:", err);
     }
 };
 
@@ -727,14 +730,12 @@ function displayWatchlist(list, container, isFilterSubCall = false) {
 
           <div class="movie-info-overlay">
             <div class="movie-title">${escapeHTML(movie.title)}</div>
-            <div class="movie-rating">⭐ ${displayRating}</div>
-            <select class="folder-select" onclick="event.stopPropagation()" onchange="changeMovieFolder(${movie.tmdbId || movie.id}, this.value)">
-              <option value="Uncategorized" ${(!movie.folder || movie.folder === "Uncategorized") ? "selected" : ""}>Uncategorized</option>
-              <option value="Favorites" ${movie.folder === "Favorites" ? "selected" : ""}>Favorites</option>
-              <option value="Watch Later" ${movie.folder === "Watch Later" ? "selected" : ""}>Watch Later</option>
-              ${(movie.folder && movie.folder !== "Uncategorized" && movie.folder !== "Favorites" && movie.folder !== "Watch Later") ? `<option value="${escapeHTML(movie.folder)}" selected>${escapeHTML(movie.folder)}</option>` : ""}
-              <option value="__custom__" style="color: #ff2d55;">+ Custom...</option>
-            </select>
+            <div class="movie-rating">⭐ ${displayRating}<button
+                class="watch-btn"
+                onclick="toggleFavoriteFolder(event, ${movie.tmdbId || movie.id})">${movie.folder === "Favorites"
+                  ? '<svg class="heart-icon heart-filled" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                  : '<svg class="heart-icon heart-empty" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                }</button></div>
           </div>
         `;
 
@@ -884,18 +885,21 @@ window.clearAllWatchlist = async function() {
 
 window.triggerGroupMatch = async function() {
     const input = document.getElementById("friendUsernameInput");
+    const codeInput = document.getElementById("friendCodeInput");
     const errorEl = document.getElementById("groupMatchError");
     const container = document.getElementById("groupRecsRowContainer");
     const row = document.getElementById("groupRecsRow");
     
-    if (!input || !errorEl || !container || !row) return;
+    if (!input || !codeInput || !errorEl || !container || !row) return;
     
     const friendUsername = input.value.trim();
+    const friendCoViewingCode = codeInput.value.trim().toUpperCase();
+    
     errorEl.classList.add("hidden");
     errorEl.innerText = "";
     
-    if (!friendUsername) {
-        errorEl.innerText = "Please enter a friend's username.";
+    if (!friendUsername || !friendCoViewingCode) {
+        errorEl.innerText = "Please enter both username and co-viewing code.";
         errorEl.classList.remove("hidden");
         return;
     }
@@ -907,7 +911,7 @@ window.triggerGroupMatch = async function() {
                 "Content-Type": "application/json"
             },
             credentials: "include",
-            body: JSON.stringify({ friendUsername })
+            body: JSON.stringify({ friendUsername, friendCoViewingCode })
         });
         
         const data = await res.json();

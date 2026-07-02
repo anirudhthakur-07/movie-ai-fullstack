@@ -272,6 +272,7 @@ async function buildUserProfile(userId) {
 
     username:
     user.username,
+    coViewingCode: user.coViewingCode,
     watchlistCount,
     personality,
     watchlistPersonality,

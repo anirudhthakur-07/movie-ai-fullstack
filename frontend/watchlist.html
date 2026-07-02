@@ -91,9 +91,10 @@
                 <i class="fas fa-users icon-gradient"></i> Co-Viewing Room
             </h3>
             <div class="co-viewing-control-card">
-                <p class="co-viewing-desc">Enter a friend's username to merge your Movie DNA profiles and discover the perfect joint watch selection!</p>
-                <div class="co-viewing-input-group">
-                    <input type="text" id="friendUsernameInput" placeholder="Friend's username..." class="co-viewing-input">
+                <p class="co-viewing-desc" id="coViewingDescription">Enter a friend's username and their Co-Viewing Code to merge your Movie DNA profiles and discover the perfect joint watch selection!</p>
+                <div class="co-viewing-input-group" style="flex-wrap: wrap;">
+                    <input type="text" id="friendUsernameInput" placeholder="Friend's username..." class="co-viewing-input" style="min-width: 180px;">
+                    <input type="text" id="friendCodeInput" placeholder="Friend's Code (e.g. DARK-1234)..." class="co-viewing-input" style="min-width: 180px;">
                     <button id="findGroupMatchBtn" class="co-viewing-btn" onclick="triggerGroupMatch()">
                         <i class="fas fa-play"></i> Match Tastes
                     </button>
