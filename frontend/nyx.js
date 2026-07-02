@@ -117,10 +117,53 @@ document.addEventListener("DOMContentLoaded", () => {
     chatWindow.classList.add("hidden");
   });
 
+  // Simple validation for gibberish and profanity to protect API key usage
+  function isValidQuery(text) {
+    const normalized = text.toLowerCase().trim();
+    if (normalized.length < 2) {
+      return { valid: false, reason: "The inquiry is too brief." };
+    }
+
+    // 1. Profanity filter
+    const badWords = ["fuck", "shit", "bitch", "cunt", "asshole", "bastard", "dick"];
+    const hasProfanity = badWords.some(word => {
+      const regex = new RegExp(`\\b${word}\\b`, "i");
+      return regex.test(normalized);
+    });
+    if (hasProfanity) {
+      return { valid: false, reason: "The archive maintains strict decorum. Please query with meaningful terms." };
+    }
+
+    // 2. Gibberish check (e.g. "ajhsfkafkjasf")
+    const words = normalized.split(/\s+/);
+    for (let word of words) {
+      if (word.length > 7) {
+        const hasVowels = /[aeiouy]/.test(word);
+        if (!hasVowels) {
+          return { valid: false, reason: "Incomprehensible pattern. Please query with meaningful terms." };
+        }
+        // If has more than 5 consecutive consonants
+        if (/[bcdfghjklmnpqrstvwxz]{5,}/.test(word)) {
+          return { valid: false, reason: "Incomprehensible pattern. Please query with meaningful terms." };
+        }
+      }
+    }
+    return { valid: true };
+  }
+
   // Handle message sending
   async function sendMessage() {
     const text = input.value.trim();
     if (!text || isProcessing) return;
+
+    // Validate Input Quality (Spam / Gibberish / Profanity filter)
+    const check = isValidQuery(text);
+    if (!check.valid) {
+      input.value = "";
+      appendMessage(text, "user", false);
+      appendMessage(check.reason, "system", false);
+      return;
+    }
 
     input.value = "";
     isProcessing = true;
