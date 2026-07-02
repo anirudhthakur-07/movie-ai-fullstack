@@ -21,6 +21,10 @@ The JSON structure MUST follow this schema:
   "persona": "Archetype Name", // optional taste persona if referencing profile state
   "dna": ["Mystery", "Psychological"] // optional array of taste matches
 }
+
+CRITICAL RULES:
+1. Do NOT include any actions in the "actions" array unless the user explicitly requested a task that requires it (like navigating pages, scrolling, or opening a movie card details view).
+2. For simple greetings, casual statements, general chats, or generic welcomes (e.g. "hi", "hello", "who are you"), the "actions" array MUST be empty: [].
 `;
 
 const INTENT_PROMPTS = {
