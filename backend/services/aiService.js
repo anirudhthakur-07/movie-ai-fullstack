@@ -52,4 +52,54 @@ async function generateProfileSummary(username, persona, watchlistCount, topGenr
   }
 }
 
-module.exports = { generateProfileSummary };
+async function generateRecommendationExplanations(username, favoriteGenres, watchlistTitles, recommendedMovies) {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return null;
+    }
+
+    const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const genresList = favoriteGenres.join(", ");
+    const watchlistList = watchlistTitles.join(", ");
+    
+    const recsListText = recommendedMovies.map(m => `- ${m.title} (ID: ${m.id}): ${m.overview?.substring(0, 100)}...`).join("\n");
+
+    const prompt = `
+      You are an expert AI movie recommendation engine for a platform called "Dark".
+      For the user "${username}" who likes genres [${genresList}] and has watched [${watchlistList}],
+      generate a highly personalized, compelling, single-sentence explanation (under 12-15 words) for why they would love each of the following recommended movies.
+      Write in the second person ("you"), be punchy, and highlight why it fits their taste.
+      Use standard HTML <strong> tags for key thematic matching concepts (e.g. <strong>sci-fi survival</strong>, <strong>cyberpunk thriller</strong>).
+      
+      Recommended Movies:
+      ${recsListText}
+      
+      Return ONLY a JSON object mapping the movie ID string to the generated explanation string. Example:
+      {
+        "603": "Matches your affinity for <strong>mind-bending cyberpunk</strong> realities.",
+        "577922": "A complex <strong>temporal puzzle</strong> that aligns with your love for sci-fi."
+      }
+    `;
+
+    const result = await model.generateContent(prompt);
+    let text = result.response.text().trim();
+    
+    if (text.startsWith("```json")) {
+      text = text.substring(7);
+    }
+    if (text.endsWith("```")) {
+      text = text.substring(0, text.length - 3);
+    }
+    text = text.trim();
+    
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Gemini API recommendations explanation generation failed:", err.message);
+    return null;
+  }
+}
+
+module.exports = { generateProfileSummary, generateRecommendationExplanations };

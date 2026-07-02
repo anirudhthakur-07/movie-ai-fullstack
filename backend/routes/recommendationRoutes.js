@@ -6,6 +6,7 @@ const User = require("../models/User");
 const auth = require("../middleware/auth");
 const tmdbApi = require("../config/tmdb");
 const {buildUserProfile} = require("../services/profileEngine");
+const { generateRecommendationExplanations } = require("../services/aiService");
 const genreMap = {
   28: "Action",
   12: "Adventure",
@@ -398,10 +399,34 @@ const scoreB =
   return scoreB - scoreA;
 });
 
+const results = refined.slice(0, 20);
+const top3 = results.slice(0, 3);
+if (top3.length > 0) {
+  try {
+    const watchlistTitles = user.watchlist.map(w => w.title);
+    const favoriteGenres = profile.topGenres?.map(tg => tg.genre) || [];
+    const aiExplanations = await generateRecommendationExplanations(
+      user.username,
+      favoriteGenres,
+      watchlistTitles,
+      top3.map(m => ({ id: m.id, title: m.title, overview: m.overview }))
+    );
+    if (aiExplanations) {
+      top3.forEach(m => {
+        if (aiExplanations[m.id]) {
+          m.explanations = [aiExplanations[m.id], ...(m.explanations || [])].slice(0, 3);
+        }
+      });
+    }
+  } catch (aiErr) {
+    console.warn("Gemini explanations generation failed, falling back to rule-based:", aiErr.message);
+  }
+}
+
 res.json({
-  results: refined.slice(0, 20),
+  results,
   status: "ok"
-    });
+});
   } catch (err) {
     console.error("WATCHLIST RECOMMEND ERROR:", err.message);
     res.json({ results: [] });
