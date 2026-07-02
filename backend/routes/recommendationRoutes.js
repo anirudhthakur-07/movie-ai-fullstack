@@ -431,6 +431,170 @@ res.json({
     console.error("WATCHLIST RECOMMEND ERROR:", err.message);
     res.json({ results: [] });
   }
+// CO-VIEWING GROUP RECOMMENDATIONS
+router.post('/recommend/group', auth, async (req, res) => {
+  try {
+    const { friendUsername } = req.body;
+    if (!friendUsername) {
+      return res.status(400).json({ error: "Friend username required" });
+    }
+
+    const cleanFriendUsername = String(friendUsername).trim();
+    
+    // Find users
+    const [user, friend] = await Promise.all([
+      User.findById(req.userId),
+      User.findOne({ username: { $regex: new RegExp(`^${cleanFriendUsername}$`, "i") } })
+    ]);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (!friend) {
+      return res.status(404).json({ error: `User "${friendUsername}" not found` });
+    }
+    if (friend._id.toString() === user._id.toString()) {
+      return res.status(400).json({ error: "Cannot co-view with yourself" });
+    }
+
+    // Build user profiles
+    const [userProfile, friendProfile] = await Promise.all([
+      buildUserProfile(user._id),
+      buildUserProfile(friend._id)
+    ]);
+
+    // Build combined genres weights
+    const combinedGenresMap = {};
+    const userGenreScores = {};
+    const friendGenreScores = {};
+
+    userProfile.topGenres.forEach(tg => {
+      const g = tg.genre.toLowerCase();
+      combinedGenresMap[g] = (combinedGenresMap[g] || 0) + tg.count;
+      userGenreScores[g] = tg.count;
+    });
+
+    friendProfile.topGenres.forEach(tg => {
+      const g = tg.genre.toLowerCase();
+      combinedGenresMap[g] = (combinedGenresMap[g] || 0) + tg.count;
+      friendGenreScores[g] = tg.count;
+    });
+
+    const sortedCombinedGenres = Object.entries(combinedGenresMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(g => g[0]);
+
+    const genreNameToId = {
+      "action": 28, "adventure": 12, "animation": 16, "comedy": 35, "crime": 80,
+      "documentary": 99, "drama": 18, "family": 10751, "fantasy": 14, "history": 36,
+      "horror": 27, "music": 10402, "mystery": 9648, "romance": 10749,
+      "science fiction": 878, "sci-fi": 878, "tv movie": 10770, "thriller": 53,
+      "war": 10752, "western": 37
+    };
+
+    const topCombinedGenreIds = sortedCombinedGenres.slice(0, 2)
+      .map(name => genreNameToId[name])
+      .filter(Boolean);
+
+    // Merge watchlists to avoid recommending already watched items
+    const userWatchlistIds = (user.watchlist || []).map(m => m.tmdbId);
+    const friendWatchlistIds = (friend.watchlist || []).map(m => m.tmdbId);
+    const watchedIds = Array.from(new Set([...userWatchlistIds, ...friendWatchlistIds]));
+
+    // Fetch movie recommendations from joint watchlist items
+    const combinedWatchlist = [...(user.watchlist || []), ...(friend.watchlist || [])];
+    const selectedIds = Array.from(new Set(combinedWatchlist.map(m => m.tmdbId))).slice(-6); // last 6 items
+    
+    let recommendations = [];
+    
+    // Fetch similarity lists in parallel
+    const promises = selectedIds.map(id => tmdbApi.get(`/movie/${id}/recommendations`).catch(() => null));
+    const responses = await Promise.all(promises);
+
+    responses.forEach(res => {
+      if (res && res.data && res.data.results) {
+        recommendations.push(...res.data.results);
+      }
+    });
+
+    // Also fetch discover list for top combined genres
+    if (topCombinedGenreIds.length > 0) {
+      try {
+        const discoverRes = await tmdbApi.get('/discover/movie', {
+          params: {
+            with_genres: topCombinedGenreIds.join(','),
+            sort_by: 'vote_average.desc',
+            'vote_count.gte': 250
+          }
+        });
+        if (discoverRes.data && discoverRes.data.results) {
+          recommendations.push(...discoverRes.data.results);
+        }
+      } catch (discoverErr) {
+        console.error("Group discover call failed:", discoverErr.message);
+      }
+    }
+
+    const scoreMap = new Map();
+    recommendations.forEach(m => {
+      if (!watchedIds.includes(m.id) && m.poster_path && m.vote_average >= 5 && m.vote_count > 100) {
+        const explanations = [];
+        
+        // Find matching genres to show tag reasoning
+        (m.genre_ids || []).forEach(id => {
+          const name = genreMap[id];
+          if (name) {
+            const lowerName = name.toLowerCase();
+            if (userGenreScores[lowerName] && friendGenreScores[lowerName]) {
+              explanations.push(`👥 Joint Match: ${name}`);
+            } else if (userGenreScores[lowerName]) {
+              explanations.push(`👤 Your Match: ${name}`);
+            } else if (friendGenreScores[lowerName]) {
+              explanations.push(`👤 Friend's Match: ${name}`);
+            }
+          }
+        });
+
+        explanations.push("🍿 Recommended for Co-Viewing");
+        const uniqueExplanations = [...new Set(explanations)].slice(0, 3);
+
+        if (!scoreMap.has(m.id)) {
+          scoreMap.set(m.id, {
+            ...m,
+            recommendationScore: 5,
+            explanations: uniqueExplanations
+          });
+        } else {
+          scoreMap.get(m.id).recommendationScore += 5;
+        }
+      }
+    });
+
+    const refined = Array.from(scoreMap.values());
+    refined.sort((a, b) => {
+      const getGenreBonus = (movie) => {
+        return (movie.genre_ids || []).reduce((score, id) => {
+          const name = genreMap[id];
+          if (name && combinedGenresMap[name.toLowerCase()]) {
+            return score + combinedGenresMap[name.toLowerCase()];
+          }
+          return score;
+        }, 0);
+      };
+      const scoreA = a.recommendationScore + getGenreBonus(a) + (a.vote_average * 3) + (a.popularity / 100);
+      const scoreB = b.recommendationScore + getGenreBonus(b) + (b.vote_average * 3) + (b.popularity / 100);
+      return scoreB - scoreA;
+    });
+
+    res.json({
+      results: refined.slice(0, 20),
+      friendUsername: friend.username
+    });
+
+  } catch (err) {
+    console.error("GROUP RECOMMENDATION ERROR:", err.message);
+    res.status(500).json({ error: "Group recommendation failed" });
+  }
 });
-// EXPORT ROUTER
+
 module.exports = router;

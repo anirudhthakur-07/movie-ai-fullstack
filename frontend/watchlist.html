@@ -85,6 +85,28 @@
             </div>
         </section>
 
+        <!-- CO-VIEWING MATCH SECTION -->
+        <section class="watchlist-section" id="coViewingSection">
+            <h3 class="section-title">
+                <i class="fas fa-users icon-gradient"></i> Co-Viewing Room
+            </h3>
+            <div class="co-viewing-control-card">
+                <p class="co-viewing-desc">Enter a friend's username to merge your Movie DNA profiles and discover the perfect joint watch selection!</p>
+                <div class="co-viewing-input-group">
+                    <input type="text" id="friendUsernameInput" placeholder="Friend's username..." class="co-viewing-input">
+                    <button id="findGroupMatchBtn" class="co-viewing-btn" onclick="triggerGroupMatch()">
+                        <i class="fas fa-play"></i> Match Tastes
+                    </button>
+                </div>
+                <div id="groupMatchError" class="co-viewing-error hidden"></div>
+            </div>
+            
+            <div class="row-container group-recs-row-container hidden" id="groupRecsRowContainer">
+                <h4 class="group-recs-title" id="groupRecsTitle">Joint Curation Picks</h4>
+                <div class="movie-row" id="groupRecsRow"></div>
+            </div>
+        </section>
+
         <!-- 3. AI PICK RECS ROW -->
         <section class="watchlist-section" id="aiPicksSection">
             <h3 class="section-title"><i class="fas fa-magic icon-gradient"></i> AI Curation Picks</h3>

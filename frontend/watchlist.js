@@ -785,3 +785,66 @@ window.clearAllWatchlist = async function() {
         }
     }
 };
+
+window.triggerGroupMatch = async function() {
+    const input = document.getElementById("friendUsernameInput");
+    const errorEl = document.getElementById("groupMatchError");
+    const container = document.getElementById("groupRecsRowContainer");
+    const row = document.getElementById("groupRecsRow");
+    
+    if (!input || !errorEl || !container || !row) return;
+    
+    const friendUsername = input.value.trim();
+    errorEl.classList.add("hidden");
+    errorEl.innerText = "";
+    
+    if (!friendUsername) {
+        errorEl.innerText = "Please enter a friend's username.";
+        errorEl.classList.remove("hidden");
+        return;
+    }
+    
+    try {
+        const res = await fetch(`${API_BASE}/recommend/group`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ friendUsername })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            errorEl.innerText = data.error || "Failed to find match.";
+            errorEl.classList.remove("hidden");
+            container.classList.add("hidden");
+            return;
+        }
+        
+        if (data.results && data.results.length > 0) {
+            const mappedMovies = data.results.map(m => {
+                const primaryReason = m.explanations?.[0] || "Joint Recommendation";
+                return {
+                    ...m,
+                    reason: primaryReason
+                };
+            });
+            
+            document.getElementById("groupRecsTitle").innerHTML = `<i class="fas fa-heart icon-gradient"></i> Joint Curation Picks for You & ${escapeHTML(data.friendUsername)}`;
+            displayRowMovies(mappedMovies, row, true);
+            container.classList.remove("hidden");
+            container.scrollIntoView({ behavior: "smooth" });
+        } else {
+            errorEl.innerText = "No joint recommendations found. Save more movies to both watchlists!";
+            errorEl.classList.remove("hidden");
+            container.classList.add("hidden");
+        }
+    } catch (err) {
+        console.error("Group matching error:", err);
+        errorEl.innerText = "Connection error. Failed to execute taste matching.";
+        errorEl.classList.remove("hidden");
+        container.classList.add("hidden");
+    }
+};
