@@ -3587,7 +3587,7 @@ pointer-events: auto;
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: radial-gradient(circle, #a78bfa, #6d28d9, #4c1d95);
+  background: radial-gradient(circle, #ff2a3d, #6d28d9, #0c0c0e);
   cursor: pointer;
   box-shadow: 0 0 24px rgba(139, 92, 246, 0.7);
   display: flex;
@@ -3595,11 +3595,29 @@ pointer-events: auto;
   justify-content: center;
   position: relative;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.nyx-orb.processing {
+  animation: breathe 1.2s ease-in-out infinite !important;
 }
 
 .nyx-orb:hover {
   transform: scale(1.08);
   box-shadow: 0 0 32px rgba(139, 92, 246, 0.9);
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.6);
+    background: radial-gradient(circle, #8b5cf6, #5b21b6, #0c0c0e);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 28px rgba(229, 9, 20, 0.8);
+    background: radial-gradient(circle, #ff2a3d, #6d28d9, #0c0c0e);
+  }
 }
 
 .nyx-pulse {

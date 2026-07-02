@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     input.value = "";
     isProcessing = true;
     sendBtn.disabled = true;
+    orb.classList.add("processing");
 
     // Render User message
     appendMessage(text, "user");
@@ -86,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       isProcessing = false;
       sendBtn.disabled = false;
+      orb.classList.remove("processing");
       input.focus();
     }
   }
