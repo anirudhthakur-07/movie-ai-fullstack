@@ -431,6 +431,7 @@ res.json({
     console.error("WATCHLIST RECOMMEND ERROR:", err.message);
     res.json({ results: [] });
   }
+});
 // CO-VIEWING GROUP RECOMMENDATIONS
 router.post('/recommend/group', auth, async (req, res) => {
   try {
