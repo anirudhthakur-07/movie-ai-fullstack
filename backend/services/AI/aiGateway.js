@@ -8,11 +8,15 @@ async function callLLM(prompt, retries = 1, timeoutMs = 8000) {
   }
 
   const ai = new GoogleGenerativeAI(apiKey);
-  // Using stable gemini-3.1-flash-lite model to leverage higher RPD limits (500 RPD vs 20 RPD)
-  const model = ai.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+  // Supported models listed in order of preference (prioritizing high-RPD lite models)
+  const MODELS = ["gemini-3.1-flash-lite", "gemini-2.0-flash-lite", "gemini-2.5-flash-lite"];
 
   let attempt = 0;
   while (attempt <= retries) {
+    // Dynamically switch to backup model on retry attempts if the first one fails
+    const modelName = MODELS[attempt] || MODELS[0];
+    const model = ai.getGenerativeModel({ model: modelName });
+    console.log(`[NYX GATEWAY] Call attempt ${attempt + 1} using model: ${modelName}`);
     try {
       const apiCall = model.generateContent(prompt);
       
