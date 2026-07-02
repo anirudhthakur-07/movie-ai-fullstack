@@ -3,6 +3,10 @@ function detectLocalIntent(query) {
   if (!query) return null;
   const normalized = query.toLowerCase().trim();
 
+  const hasAction = normalized.includes("go to") || normalized.includes("open") || normalized.includes("show") || normalized.includes("navigate");
+  const hasWatchlist = normalized.includes("watchlist") || normalized.includes("my list") || normalized.includes("saved");
+  const hasDashboard = normalized.includes("dashboard") || normalized.includes("home") || normalized.includes("control");
+
   // Watchlist Count check
   if (
     normalized.includes("how many movies") || 
@@ -17,11 +21,7 @@ function detectLocalIntent(query) {
   }
 
   // Page Navigation checks
-  if (
-    normalized.includes("go to dashboard") || 
-    normalized.includes("open dashboard") || 
-    normalized.includes("show dashboard")
-  ) {
+  if (hasAction && hasDashboard) {
     return {
       type: "navigation",
       target: "dashboard",
@@ -29,12 +29,7 @@ function detectLocalIntent(query) {
       message: "Directing you to the main control center."
     };
   }
-  if (
-    normalized.includes("go to watchlist") || 
-    normalized.includes("open watchlist") || 
-    normalized.includes("show watchlist") ||
-    normalized.includes("open my list")
-  ) {
+  if (hasAction && hasWatchlist) {
     return {
       type: "navigation",
       target: "watchlist",
