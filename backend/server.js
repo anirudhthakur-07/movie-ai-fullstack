@@ -35,6 +35,7 @@ const recommendationRoutes =require("./routes/recommendationRoutes");
 const profileRoutes =require("./routes/profileRoutes");
 const achievementRoutes = require("./routes/achievementRoutes");
 const behaviorRoutes    = require("./routes/behaviorRoutes");
+const nyxRoutes         = require("./routes/nyxRoutes");
 // EXPRESS APPLICATION SETUP
 const app = express();
 const movieRoutes =require("./routes/movieRoutes");
@@ -243,6 +244,10 @@ app.use(
 app.use(
     "/api/behavior",
     behaviorRoutes
+);
+app.use(
+    "/api/nyx",
+    nyxRoutes
 );
 // SERVER STARTUP
 app.listen(PORT, () => {
