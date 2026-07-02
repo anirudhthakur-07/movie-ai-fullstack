@@ -330,7 +330,10 @@ h4 {
   font-size: 0.8rem;
   color: #46d369;
   font-weight: bold;
-  margin-top: 5px;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .no-results {
@@ -692,27 +695,17 @@ h4 {
 
 
 
-.movie-rating-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 2px;
-}
-
 .watch-btn {
   position: relative;
   top: auto;
   right: auto;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
+  border: none;
+  background: transparent;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
@@ -721,6 +714,9 @@ h4 {
   padding: 0;
   line-height: 1;
   overflow: visible;
+  margin-left: auto;
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .watch-btn .heart-icon {
@@ -744,10 +740,7 @@ h4 {
 }
 
 .watch-btn:hover {
-  background: rgba(255, 45, 85, 0.2);
-  border-color: rgba(255, 45, 85, 0.4);
-  transform: scale(1.15);
-  box-shadow: 0 0 16px rgba(255, 45, 85, 0.3);
+  transform: scale(1.2);
 }
 
 .watch-btn:hover .heart-icon.heart-empty {
