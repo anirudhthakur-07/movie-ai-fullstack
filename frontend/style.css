@@ -3571,3 +3571,66 @@ pointer-events: auto;
   font-weight: 500;
   padding-left: 2px;
 }
+
+/* Folder Filter Shelf Styles */
+.folder-filters-shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 5px 2px;
+}
+
+.folder-filter-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.folder-filter-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.folder-filter-chip.active {
+  background: linear-gradient(135deg, #ff2d55, #ff375f);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(255, 45, 85, 0.35);
+}
+
+/* Movie Card Dropdown Styles */
+.watch-card .folder-select {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 110px;
+  z-index: 10;
+}
+
+.watch-card .folder-select:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: #ff2d55;
+}
+
+.watch-card .folder-select option {
+  background: #111;
+  color: #fff;
+}

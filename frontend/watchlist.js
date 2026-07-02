@@ -581,13 +581,86 @@ function resolvePoster(poster) {
   return IMG_BASE + poster;
 }
 
-function displayWatchlist(list, container) {
+window.activeFolderFilter = window.activeFolderFilter || "All";
+window.fullWatchlistCache = null;
+
+function renderFolderFiltersShelf(list) {
+    const shelf = document.getElementById("folderFiltersShelf");
+    if (!shelf) return;
+    
+    // Find all custom folders
+    const customFolders = Array.from(new Set(list.map(m => m.folder || "Uncategorized")));
+    
+    // Core folders list
+    const coreFolders = ["All", "Favorites", "Watch Later", "Uncategorized"];
+    const allFolders = Array.from(new Set([...coreFolders, ...customFolders]));
+    
+    shelf.innerHTML = "";
+    
+    allFolders.forEach(folder => {
+        const count = folder === "All" ? list.length : list.filter(m => (m.folder || "Uncategorized") === folder).length;
+        
+        const chip = document.createElement("button");
+        chip.className = `folder-filter-chip ${window.activeFolderFilter === folder ? "active" : ""}`;
+        chip.innerHTML = `${escapeHTML(folder)} <span style="opacity:0.6; font-size:0.75rem; margin-left:4px;">(${count})</span>`;
+        
+        chip.addEventListener("click", () => {
+            window.activeFolderFilter = folder;
+            document.querySelectorAll(".folder-filter-chip").forEach(el => el.classList.remove("active"));
+            chip.classList.add("active");
+            
+            const container = document.getElementById("watchlistPageRow");
+            if (container) {
+                displayWatchlist(window.fullWatchlistCache, container, true);
+            }
+        });
+        
+        shelf.appendChild(chip);
+    });
+}
+
+window.changeMovieFolder = async function(tmdbId, folderName) {
+    if (folderName === "__custom__") {
+        const customName = prompt("Enter new folder name (e.g. Action Curation):");
+        if (!customName || !customName.trim()) {
+            localStorage.removeItem("cachedWatchlist");
+            await renderWatchlistPage();
+            return;
+        }
+        folderName = customName.trim();
+    }
+    
+    try {
+        const res = await fetch(`${API_BASE}/watchlist/${tmdbId}/folder`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ folderName })
+        });
+        if (res.ok) {
+            localStorage.removeItem("cachedWatchlist");
+            await renderWatchlistPage();
+        }
+    } catch (err) {
+        console.error("Failed to move movie to folder:", err);
+    }
+};
+
+function displayWatchlist(list, container, isFilterSubCall = false) {
     container.innerHTML = '';
     const heroCard = document.getElementById("watchlistHeroCard");
     const fullCollectionSection = document.getElementById("fullCollectionSection");
-    if (!list || list.length === 0) {
+    
+    if (!isFilterSubCall) {
+        window.fullWatchlistCache = list;
+    }
+    
+    if (!window.fullWatchlistCache || window.fullWatchlistCache.length === 0) {
         if (heroCard) heroCard.classList.remove("hidden");
         if (fullCollectionSection) fullCollectionSection.style.display = "block";
+        
+        const shelf = document.getElementById("folderFiltersShelf");
+        if (shelf) shelf.innerHTML = "";
         
         container.innerHTML = `
           <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 50px 20px;">
@@ -603,8 +676,25 @@ function displayWatchlist(list, container) {
     }
 
     if (fullCollectionSection) fullCollectionSection.style.display = "block";
+    
+    renderFolderFiltersShelf(window.fullWatchlistCache);
 
-    list.forEach(movie => {
+    const activeFilter = window.activeFolderFilter;
+    const filteredList = activeFilter === "All" 
+        ? window.fullWatchlistCache 
+        : window.fullWatchlistCache.filter(m => (m.folder || "Uncategorized") === activeFilter);
+
+    if (filteredList.length === 0) {
+        container.innerHTML = `
+          <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 40px 20px;">
+            <i class="fas fa-folder-open" style="font-size: 1.8rem; opacity: 0.4;"></i>
+            <h3 style="margin: 0; font-size: 1rem; color: #fff;">No items in folder "${escapeHTML(activeFilter)}"</h3>
+          </div>
+        `;
+        return;
+    }
+
+    filteredList.forEach(movie => {
         const card = document.createElement('div');
         card.classList.add('watch-card');
 
@@ -617,7 +707,6 @@ function displayWatchlist(list, container) {
         });
 
         const poster = movie.poster || movie.poster_path;
-
         const rating = movie.vote_average || movie.rating || 0;
         const displayRating = rating ? rating.toFixed(1) : "N/A";
 
@@ -639,6 +728,13 @@ function displayWatchlist(list, container) {
           <div class="movie-info-overlay">
             <div class="movie-title">${escapeHTML(movie.title)}</div>
             <div class="movie-rating">⭐ ${displayRating}</div>
+            <select class="folder-select" onclick="event.stopPropagation()" onchange="changeMovieFolder(${movie.tmdbId || movie.id}, this.value)">
+              <option value="Uncategorized" ${(!movie.folder || movie.folder === "Uncategorized") ? "selected" : ""}>Uncategorized</option>
+              <option value="Favorites" ${movie.folder === "Favorites" ? "selected" : ""}>Favorites</option>
+              <option value="Watch Later" ${movie.folder === "Watch Later" ? "selected" : ""}>Watch Later</option>
+              ${(movie.folder && movie.folder !== "Uncategorized" && movie.folder !== "Favorites" && movie.folder !== "Watch Later") ? `<option value="${escapeHTML(movie.folder)}" selected>${escapeHTML(movie.folder)}</option>` : ""}
+              <option value="__custom__" style="color: #ff2d55;">+ Custom...</option>
+            </select>
           </div>
         `;
 

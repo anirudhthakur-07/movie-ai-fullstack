@@ -57,7 +57,8 @@ router.post('/', auth, async (req, res) => {
               poster: movie.poster_path
                 ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
                 : movie.poster || null,
-              genres: genres
+              genres: genres,
+              folder: "Uncategorized"
             }
           }
         }
@@ -103,6 +104,38 @@ router.delete('/', auth, async (req, res) => {
     res.json([]);
   } catch (err) {
     console.error("WATCHLIST DELETE ERROR:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// MOVE WATCHLIST ITEM TO FOLDER
+router.put('/:tmdbId/folder', auth, async (req, res) => {
+  try {
+    const { folderName } = req.body;
+    if (!folderName) {
+      return res.status(400).json({ error: "Folder name required" });
+    }
+
+    const tmdbId = Number(req.params.tmdbId);
+    if (isNaN(tmdbId)) {
+      return res.status(400).json({ error: "Invalid TMDB ID" });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update the folder field inside the specific watchlist array item matching tmdbId
+    await User.updateOne(
+      { _id: req.userId, "watchlist.tmdbId": tmdbId },
+      { $set: { "watchlist.$.folder": String(folderName).trim() } }
+    );
+
+    const updatedUser = await User.findById(req.userId);
+    res.json(updatedUser.watchlist);
+  } catch (err) {
+    console.error("WATCHLIST FOLDER UPDATE ERROR:", err.message);
     res.status(500).json({ error: "Server error" });
   }
 });
