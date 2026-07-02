@@ -11,7 +11,7 @@ async function generateProfileSummary(username, persona, watchlistCount, topGenr
 
     // Initialize the client
     const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const genresList = topGenres.map(g => g.genre).join(", ");
     
@@ -60,7 +60,7 @@ async function generateRecommendationExplanations(username, favoriteGenres, watc
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const genresList = favoriteGenres.join(", ");
     const watchlistList = watchlistTitles.join(", ");
