@@ -350,6 +350,27 @@ class="movie-section hidden">
 
 </footer>
 
+  <!-- Floating Nyx Orb UI -->
+  <div id="nyxOrbContainer" class="nyx-orb-container">
+    <div id="nyxOrb" class="nyx-orb">
+      <div class="nyx-pulse"></div>
+    </div>
+    <div id="nyxChatWindow" class="nyx-chat-window hidden">
+      <div class="nyx-chat-header">
+        <span class="nyx-header-title">Nyx Operating System</span>
+        <button class="close-modal" id="closeNyxChat">&times;</button>
+      </div>
+      <div class="nyx-chat-body" id="nyxChatBody">
+        <div class="nyx-message system">
+          <div class="nyx-text">The archive awaits. What patterns do we seek?</div>
+        </div>
+      </div>
+      <div class="nyx-chat-input-area">
+        <input type="text" id="nyxInput" placeholder="Interrogate the shadows..." autocomplete="off">
+        <button id="nyxSendBtn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+  <script src="nyx.js"></script>
 </body>
-
 </html>
