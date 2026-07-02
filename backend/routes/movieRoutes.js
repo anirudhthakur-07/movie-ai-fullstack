@@ -8,7 +8,8 @@ router.get("/movie/:id", async (req, res) => {
     try {
 
         const response = await tmdbApi.get(
-            `/movie/${req.params.id}`
+            `/movie/${req.params.id}`,
+            { params: { append_to_response: "credits" } }
         );
 
         res.json(response.data);
