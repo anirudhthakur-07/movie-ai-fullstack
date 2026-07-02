@@ -3638,7 +3638,7 @@ pointer-events: auto;
   width: 350px;
   height: 480px;
   background: rgba(12, 12, 16, 0.96);
-  border: 1px solid rgba(229, 9, 20, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   display: flex;
   flex-direction: column;

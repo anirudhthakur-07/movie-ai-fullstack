@@ -162,4 +162,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Close chat window when clicking anywhere outside the chat window and the floating orb
+  document.addEventListener("click", (e) => {
+    if (!chatWindow.classList.contains("hidden")) {
+      if (!chatWindow.contains(e.target) && !container.contains(e.target)) {
+        chatWindow.classList.add("hidden");
+      }
+    }
+  });
 });
