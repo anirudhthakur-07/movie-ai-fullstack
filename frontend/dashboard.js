@@ -424,12 +424,11 @@ async function loadAchievements() {
 }
 
 // 5. UPDATE COHESIVE AI TEXT INSIGHTS
-function updateSummaryList() {
+async function updateSummaryList() {
     if (!profileData) return;
 
     const summaryListEl = document.getElementById("aiSummaryList");
     if (!summaryListEl) return;
-    summaryListEl.innerHTML = "";
 
     const rawPersonality = (profileData.personality || "Movie Fan").toLowerCase();
     const mappedPersona = PERSONA_TITLES[rawPersonality] || profileData.personality || "Movie Fan";
@@ -437,23 +436,43 @@ function updateSummaryList() {
     const totalClicks = statsOverview.totalClicks || 0;
 
     let insights = [];
-    if (watchlistCount === 0 && totalClicks === 0) {
-        insights = [
-            "Welcome to your neural dashboard! Your movie profile is currently a blank slate.",
-            "Start searching and adding movies to your watchlist to enable taste mapping.",
-            "Click on streaming links on movie cards to discover your streaming platform statistics."
-        ];
-    } else {
-        insights.push(`Your profile highlights a distinct taste affinity for <strong>${mappedPersona}</strong> style narratives.`);
-        if (statsOverview.topProvider !== "No Data") {
-            insights.push(`You spend a significant portion of your exploration time browsing titles on <strong>${statsOverview.topProvider.replace(/\b\w/g, c => c.toUpperCase())}</strong>.`);
+
+    // Attempt to load AI-generated summary from Gemini
+    try {
+        const res = await fetch(`${API_BASE}/profile/ai-summary?t=` + Date.now(), {
+            credentials: "include"
+        });
+        if (res && res.ok) {
+            const data = await res.json();
+            if (data.summary && Array.isArray(data.summary) && data.summary.length > 0) {
+                insights = data.summary;
+            }
         }
-        if (totalClicks > 0) {
-            insights.push(`With <strong>${totalClicks}</strong> total movie interactions, your activity tier is classified as <strong>${profileData.activityLevel || "Casual"}</strong>.`);
-        }
-        insights.push(`Your taste profile reliability index is currently rated <strong>${profileData.profileStrength || "Low"}</strong> based on watchlist volume.`);
+    } catch (err) {
+        console.warn("Failed to load Gemini AI summary, falling back to rule-based summary:", err);
     }
 
+    // Fallback to rule-based summary if Gemini failed or returned null
+    if (insights.length === 0) {
+        if (watchlistCount === 0 && totalClicks === 0) {
+            insights = [
+                "Welcome to your neural dashboard! Your movie profile is currently a blank slate.",
+                "Start searching and adding movies to your watchlist to enable taste mapping.",
+                "Click on streaming links on movie cards to discover your streaming platform statistics."
+            ];
+        } else {
+            insights.push(`Your profile highlights a distinct taste affinity for <strong>${mappedPersona}</strong> style narratives.`);
+            if (statsOverview.topProvider !== "No Data") {
+                insights.push(`You spend a significant portion of your exploration time browsing titles on <strong>${statsOverview.topProvider.replace(/\b\w/g, c => c.toUpperCase())}</strong>.`);
+            }
+            if (totalClicks > 0) {
+                insights.push(`With <strong>${totalClicks}</strong> total movie interactions, your activity tier is classified as <strong>${profileData.activityLevel || "Casual"}</strong>.`);
+            }
+            insights.push(`Your taste profile reliability index is currently rated <strong>${profileData.profileStrength || "Low"}</strong> based on watchlist volume.`);
+        }
+    }
+
+    summaryListEl.innerHTML = "";
     insights.forEach(insight => {
         const itemHtml = `
             <div class="summary-insight-item">
