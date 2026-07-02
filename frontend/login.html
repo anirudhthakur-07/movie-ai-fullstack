@@ -175,7 +175,7 @@ Please review and accept before continuing.
     <!-- SCRIPT -->
     <script>
         // 🔐 Redirect if already logged in
-        if (sessionStorage.getItem("token")) {
+        if (sessionStorage.getItem("sessionActive")) {
             window.location.href = "index.html";
         }
 
@@ -247,18 +247,19 @@ error.classList.add("hidden");
            const res = await fetch(`${API_BASE}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                credentials: "include"
             });
 
             const data = await res.json();
 
-            if (!data.token) {
+            if (data.error) {
                 document.getElementById("error-msg").innerText = data.error || "Login failed";
                 document.getElementById("error-msg").classList.remove("hidden");
                 return;
             }
 
-            sessionStorage.setItem("token", data.token);
+            sessionStorage.setItem("sessionActive", "true");
             window.location.href = "index.html";
         }
         async function register() {
@@ -285,7 +286,8 @@ document.getElementById("termsError");
             const res = await fetch(`${API_BASE}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password, gender })
+                body: JSON.stringify({ username, password, gender }),
+                credentials: "include"
             });
 
             const data = await res.json();
@@ -300,7 +302,7 @@ document.getElementById("termsError");
             }
 
             //  AUTO LOGIN
-            sessionStorage.setItem("token", data.token);
+            sessionStorage.setItem("sessionActive", "true");
 
             window.location.href = "index.html";
         }

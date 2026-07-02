@@ -39,7 +39,13 @@ router.post('/register', async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    res.json({ success: true });
   } catch {
     res.status(400).json({ error: "User already exists" });
   }
@@ -72,7 +78,13 @@ router.post('/register', async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    res.json({ success: true });
 
   } catch (err) {
 
@@ -82,6 +94,16 @@ router.post('/register', async (req, res) => {
       error: "Server error"
     });
   }
+});
+
+// LOGOUT ROUTE
+router.post('/logout', (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none"
+  });
+  res.json({ success: true });
 });
 
 module.exports = router;

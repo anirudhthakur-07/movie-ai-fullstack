@@ -4,30 +4,27 @@
 // Attach JWT Token To Protected Requests
 async function authFetch(url, options = {}) {
 
-  const token = sessionStorage.getItem("token");
+  const sessionActive = sessionStorage.getItem("sessionActive");
 
-  //  NO TOKEN
-  if (!token) {
+  //  NO SESSION
+  if (!sessionActive) {
     window.location.href = "login.html";
     return null;
   }
 
-  // DEFAULT HEADERS
-  options.headers = {
-    ...(options.headers || {}),
-    "Authorization": "Bearer " + token
-  };
+  // Pass credentials for HTTP-only cookies
+  options.credentials = "include";
 
   try {
 
     const response = await fetch(url, options);
 
-    //  TOKEN EXPIRED / INVALID
+    //  SESSION EXPIRED / INVALID
     if (response.status === 401) {
 
       console.warn("Session expired");
 
-      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("sessionActive");
 
       alert("Session expired. Please login again.");
 
@@ -48,15 +45,15 @@ async function authFetch(url, options = {}) {
 
 // Global Behavioral Tracking System
 window.trackBehaviorEvent = function(eventType, movieId, movieTitle, genre) {
-  const token = sessionStorage.getItem("token");
-  if (!token) return;
+  const sessionActive = sessionStorage.getItem("sessionActive");
+  if (!sessionActive) return;
 
   fetch(`${API_BASE}/behavior/event`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
+      "Content-Type": "application/json"
     },
+    credentials: "include",
     body: JSON.stringify({ eventType, movieId, movieTitle, genre })
   }).catch(err => console.warn("Failed to track behavior event:", err));
 };
@@ -635,13 +632,13 @@ function displayMovies(movies, container, replace = false) {
     card.dataset.id = movie.id;
     card.classList.add('movie-card');
     card.addEventListener("click", async () => {
-      if (movie.explanations && movie.explanations.length > 0 && sessionStorage.getItem("token")) {
+      if (movie.explanations && movie.explanations.length > 0 && sessionStorage.getItem("sessionActive")) {
         fetch(`${API_BASE}/achievements/track`, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Content-Type": "application/json"
           },
+          credentials: "include",
           body: JSON.stringify({ action: "open_recommendation" })
         }).catch(err => console.log("Tracking open_recommendation failed", err));
       }
@@ -938,8 +935,8 @@ document.getElementById(
   watchlistRecRow = document.getElementById('watchlistRecRow');
 
   //  Auth Check
-  const token = sessionStorage.getItem("token");
-  if (!token) {
+  const sessionActive = sessionStorage.getItem("sessionActive");
+  if (!sessionActive) {
     window.location.href = "login.html";
     return;
   }
@@ -1246,8 +1243,13 @@ displayMovies(
 function openWatchlistPage() {
   window.location.href = "watchlist.html";
 }
-function logout() {
-  sessionStorage.removeItem("token");
+async function logout() {
+  try {
+    await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
+  } catch (err) {
+    console.warn("Logout request failed:", err);
+  }
+  sessionStorage.removeItem("sessionActive");
   window.location.href = "login.html";
 }
 function updateScrollButtons(row, leftBtn, rightBtn) {

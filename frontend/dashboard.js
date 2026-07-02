@@ -4,9 +4,9 @@
 // and full 40-Tier Gamified Achievements Modal
 // ==========================================================================
 
-const token = sessionStorage.getItem("token");
+const sessionActive = sessionStorage.getItem("sessionActive");
 
-if (!token) {
+if (!sessionActive) {
     window.location.href = "login.html";
 }
 
@@ -99,7 +99,7 @@ const ACHIEVEMENT_META = {
 async function loadAnalytics() {
     try {
         const res = await fetch(`${API_BASE}/analytics/overview?t=` + Date.now(), {
-            headers: { Authorization: "Bearer " + token }
+            credentials: "include"
         });
 
         if (!res.ok) throw new Error("Overview statistics fetch failed");
@@ -187,7 +187,7 @@ function getAvatarPath(personality, gender) {
 async function loadProfile() {
     try {
         const res = await fetch(`${API_BASE}/profile?t=` + Date.now(), {
-            headers: { Authorization: "Bearer " + token }
+            credentials: "include"
         });
 
         if (!res.ok) throw new Error("Profile details fetch failed");
@@ -305,7 +305,7 @@ function renderMovieDNA(genres) {
 async function loadAchievements() {
     try {
         const res = await fetch(`${API_BASE}/achievements?t=` + Date.now(), {
-            headers: { Authorization: "Bearer " + token }
+            credentials: "include"
         });
 
         if (!res.ok) throw new Error("Achievements fetch failed");
@@ -469,7 +469,7 @@ function updateSummaryList() {
 async function loadProviderChart() {
     try {
         const res = await fetch(`${API_BASE}/analytics/providers?t=` + Date.now(), {
-            headers: { Authorization: "Bearer " + token }
+            credentials: "include"
         });
 
         if (!res.ok) throw new Error("Provider statistics failed");
@@ -546,7 +546,7 @@ async function loadProviderChart() {
 async function loadGenreChart() {
     try {
         const res = await fetch(`${API_BASE}/analytics/genres?t=` + Date.now(), {
-            headers: { Authorization: "Bearer " + token }
+            credentials: "include"
         });
 
         if (!res.ok) throw new Error("Genre statistics failed");
@@ -674,7 +674,12 @@ loadProviderChart();
 loadGenreChart();
 setupAchievementsModal();
 
-window.logout = function () {
-    sessionStorage.removeItem("token");
+window.logout = async function () {
+    try {
+        await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
+    } catch (err) {
+        console.warn("Logout request failed:", err);
+    }
+    sessionStorage.removeItem("sessionActive");
     window.location.href = "login.html";
 };

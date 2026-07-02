@@ -60,7 +60,7 @@ function escapeHTML(str) {
 // PAGE INITIALIZATION
 // Verify Authentication And Load Watchlist
 window.addEventListener("DOMContentLoaded", () => {
-    if (!sessionStorage.getItem("token")) {
+    if (!sessionStorage.getItem("sessionActive")) {
         window.location.href = "login.html";
         return;
     }
@@ -70,10 +70,10 @@ window.addEventListener("DOMContentLoaded", () => {
 // Attach JWT Token To Protected Requests
 async function authFetch(url, options = {}) {
 
-    const token =
-    sessionStorage.getItem("token");
+    const sessionActive =
+    sessionStorage.getItem("sessionActive");
 
-    if (!token) {
+    if (!sessionActive) {
 
         window.location.href =
         "login.html";
@@ -81,20 +81,14 @@ async function authFetch(url, options = {}) {
         return null;
     }
 
-    options.headers = {
-
-        ...(options.headers || {}),
-
-        Authorization:
-        "Bearer " + token
-    };
+    options.credentials = "include";
 
     const res =
     await fetch(url, options);
 
     if (res.status === 401) {
 
-        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("sessionActive");
 
         window.location.href =
         "login.html";
@@ -745,8 +739,13 @@ window.addEventListener('scroll', () => {
     }
 });
 
-window.logout = function () {
-    sessionStorage.removeItem("token");
+window.logout = async function () {
+    try {
+        await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
+    } catch (err) {
+        console.warn("Logout request failed:", err);
+    }
+    sessionStorage.removeItem("sessionActive");
     window.location.href = "login.html";
 };
 

@@ -49,10 +49,10 @@ function showAvatarNotification(message) {
 async function openAvatarSelector(currentPersonaRaw, currentGender, username, onSaveCallback, watchlistPersonaRaw) {
     // 1. Fetch achievements list to know which ones are unlocked
     let unlockedAchievements = [];
-    const token = sessionStorage.getItem("token");
+    const sessionActive = sessionStorage.getItem("sessionActive");
     try {
         const res = await fetch(`${API_BASE}/achievements`, {
-            headers: { "Authorization": "Bearer " + token }
+            credentials: "include"
         });
         if (res && res.ok) {
             const data = await res.json();
@@ -232,9 +232,9 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
                     const updateRes = await fetch(`${API_BASE}/profile/gender`, {
                         method: "POST",
                         headers: { 
-                            "Content-Type": "application/json",
-                            "Authorization": "Bearer " + token
+                            "Content-Type": "application/json"
                         },
+                        credentials: "include",
                         body: JSON.stringify({ gender: g })
                     });
                     if (updateRes && updateRes.ok) {

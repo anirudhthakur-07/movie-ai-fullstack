@@ -80,6 +80,21 @@ app.use(cors({
 app.use(express.json());
 app.use(mongoSanitize());
 
+// Custom Cookie Parser Middleware
+app.use((req, res, next) => {
+  const cookieHeader = req.headers.cookie;
+  req.cookies = {};
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach(cookie => {
+      const parts = cookie.split('=');
+      if (parts[0]) {
+        req.cookies[parts[0].trim()] = (parts[1] || '').trim();
+      }
+    });
+  }
+  next();
+});
+
 // MOVIE DATABASE ROUTES
 // Fetch Stored Movies From MongoDB
 app.get('/movies', async (req, res) => {
