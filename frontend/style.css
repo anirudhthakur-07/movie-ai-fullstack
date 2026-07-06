@@ -359,7 +359,7 @@ h4 {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
-  z-index: 200;
+  z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
