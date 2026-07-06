@@ -1844,21 +1844,13 @@ body.modal-open {
   margin-left: 2px;
 }
 
-/*  FLOATING OTT DOCK */
-
 .floating-providers {
   position: absolute;
-
   right: -72px;
-
   top: 50%;
-
   transform: translateY(-50%);
-
-  z-index: 80;
-pointer-events: auto;
-z-index: 9999;
-  pointer-events: none;
+  z-index: 9999;
+  pointer-events: auto;
 }
 
 
@@ -1911,26 +1903,27 @@ pointer-events: auto;
 
   background: rgba(35,35,35,0.96);
 }
-.floating-providers {
-  opacity: 1;
-
-  transform:
-    translateY(-50%) translateX(0);
-
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
-}
-.floating-providers {
-  opacity: 1;
-
-
-  transform:
-    translateY(-50%) translateX(0);
-
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+@media (max-width: 768px) {
+  .floating-providers {
+    position: relative !important;
+    right: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    margin: 15px 0 5px 0 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    z-index: 100 !important;
+    pointer-events: auto !important;
+  }
+  .floating-provider-icons {
+    flex-direction: row !important;
+    gap: 10px !important;
+  }
+  .provider-logo {
+    width: 40px !important;
+    height: 40px !important;
+  }
 }
 .site-footer {
   width: 100%;
