@@ -49,6 +49,8 @@ async function fetchProviders(movieId) {
 }
 // MOVIE DETAILS MODAL
 // Display Complete Movie Information
+let modalRetryCount = 0;
+
 window.openModal = async function (movie) {
     const requestId = Date.now();
     currentModalRequest = requestId;
@@ -59,7 +61,19 @@ window.openModal = async function (movie) {
     const modalRating = document.getElementById('modalRating');
     const modalYear = document.getElementById('modalYear');
     const modalOverview = document.getElementById('modalOverview');
-    const reasonsBox =document.getElementById("recommendationReasons");
+    const reasonsBox = document.getElementById("recommendationReasons");
+    const metaExtra = document.getElementById("modalMetaExtra");
+    const watchlistBtn = document.getElementById("modalWatchlistBtn");
+    
+    if (metaExtra) {
+        metaExtra.innerHTML = '<div class="skeleton-meta-loader"></div>';
+    }
+    if (watchlistBtn) {
+        watchlistBtn.disabled = true;
+        watchlistBtn.innerHTML = 'Loading...';
+        watchlistBtn.className = 'modal-btn watchlist-btn';
+    }
+
     const movieId = movie.id || movie.tmdbId;
     currentOpenMovieId = movieId;
     let fullMovie = movie;
@@ -88,7 +102,10 @@ window.openModal = async function (movie) {
     modalTitle.innerHTML = `<div class="skeleton skeleton-title"></div>`;
     modalRating.innerHTML = "";
     modalYear.textContent = "";
-    modalOverview.innerHTML = `
+    if (reasonsBox) {
+        reasonsBox.innerHTML = "";
+        reasonsBox.classList.add("hidden");
+    }  modalOverview.innerHTML = `
   <div class="skeleton skeleton-text"></div>
   <div class="skeleton skeleton-text"></div>
   <div class="skeleton skeleton-text"></div>
@@ -123,53 +140,80 @@ window.openModal = async function (movie) {
             modalImg.classList.remove("skeleton", "skeleton-img");
             modalImg.style.opacity = 1;
         }
-    }
-    const trailerBtn = document.getElementById("playTrailerBtn");
+    }    const trailerBtn = document.getElementById("playTrailerBtn");
     // Reset trailer button before loading new data
     trailerBtn.innerText = "Loading...";
     trailerBtn.disabled = true;
     trailerBtn.onclick = null;
     try {
-     // Retrieve latest movie details from backend
-const res =
-await fetch(`${API_BASE}/movie/${movieId}`);
+      // Retrieve latest movie details from backend (which includes credits)
+      const res = await fetch(`${API_BASE}/movie/${movieId}`);
 
-if (!res.ok) {
-    throw new Error("Movie fetch failed");
-}
+      if (!res.ok) {
+          throw new Error("Movie fetch failed");
+      }
 
-fullMovie =
-await res.json();
+      fullMovie = await res.json();
 
-if (fullMovie.error) {
-    throw new Error(fullMovie.error);
-}
-        const rating = fullMovie.vote_average ?? fullMovie.rating ?? 'N/A';
-        const year =
-fullMovie.release_date ||
-fullMovie.first_air_date ||
-'';
-        const cast = await fetchCast(movieId);
-        if (currentModalRequest !== requestId) return;
+      if (fullMovie.error) {
+          throw new Error(fullMovie.error);
+      }
+      modalRetryCount = 0; // reset retry counter
 
-        // Fire behavioral intelligence movie_detail event
-        if (typeof window.trackBehaviorEvent === "function") {
-            const firstGenre = fullMovie.genres?.[0]?.name || "";
-            window.trackBehaviorEvent("movie_detail", movieId, fullMovie.title, firstGenre);
+      const rating = fullMovie.vote_average ?? fullMovie.rating ?? 'N/A';
+      const year = fullMovie.release_date || fullMovie.first_air_date || '';
+      const cast = await fetchCast(movieId);
+      if (currentModalRequest !== requestId) return;
+
+      // Extract Director
+      const directorMember = fullMovie.credits && fullMovie.credits.crew 
+        ? fullMovie.credits.crew.find(c => c.job === "Director") 
+        : null;
+      const directorName = directorMember ? directorMember.name : "Unknown";
+
+      // Extract Language
+      const langName = getLanguageName(fullMovie.original_language || 'en');
+
+      // Extract Runtime
+      const runtimeVal = fullMovie.runtime ? `${fullMovie.runtime} min` : "N/A";
+
+      // Render extra catalog metadata
+      if (metaExtra) {
+        metaExtra.textContent = `${runtimeVal} | Director: ${directorName} | ${langName}`;
+      }
+
+      // Check Watchlist status
+      const watchBtn = document.getElementById("modalWatchlistBtn");
+      if (watchBtn) {
+        try {
+          const wlRes = await fetch(`${API_BASE}/watchlist`, { credentials: "include" });
+          if (wlRes.ok) {
+            const wlData = await wlRes.json();
+            const isAdded = wlData.some(m => Number(m.tmdbId) === Number(movieId) || Number(m.id) === Number(movieId));
+            updateWatchlistButtonState(watchBtn, isAdded, fullMovie);
+          } else {
+            updateWatchlistButtonState(watchBtn, false, fullMovie);
+          }
+        } catch (e) {
+          updateWatchlistButtonState(watchBtn, false, fullMovie);
         }
+      }
 
-        modalTitle.textContent = fullMovie.title || "Unknown";
-        modalRating.innerHTML =
-rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
-        modalYear.textContent = year ? year.split('-')[0] : 'Unknown';
-        modalOverview.innerHTML = `
-      ${fullMovie.overview ?? fullMovie.description ?? 'No overview available.'}
-      <br><br>
-      <strong>Cast:</strong> ${cast}
-    `;
-const isWatchlistRecommendation =
-    movie.explanations &&
-    movie.explanations.length;
+      // Fire behavioral intelligence movie_detail event
+      if (typeof window.trackBehaviorEvent === "function") {
+          const firstGenre = fullMovie.genres?.[0]?.name || "";
+          window.trackBehaviorEvent("movie_detail", movieId, fullMovie.title, firstGenre);
+      }
+
+      modalTitle.textContent = fullMovie.title || "Unknown";
+      modalRating.innerHTML = rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
+      modalYear.textContent = year ? year.split('-')[0] : 'Unknown';
+      modalOverview.innerHTML = `
+        ${fullMovie.overview ?? fullMovie.description ?? 'No overview available.'}
+        <br><br>
+        <strong>Cast:</strong> ${cast}
+      `;
+      const isWatchlistRecommendation = movie.explanations && movie.explanations.length;
 
 if (reasonsBox) {
 
@@ -462,23 +506,31 @@ await authFetch(`${API_BASE}/provider-click`, {
         }
 
     } catch (err) {
+        console.error("MODAL ERROR:", err);
+        if (modalRetryCount < 2) {
+            modalRetryCount++;
+            console.log(`Retrying fetch for movie ${movieId}. Attempt: ${modalRetryCount}`);
+            setTimeout(() => {
+                window.openModal(movie);
+            }, 1000);
+            return;
+        }
 
-    console.error("MODAL ERROR:", err);
-
-    modalTitle.textContent = "Movie unavailable";
-
-    modalRating.innerHTML = "⭐ N/A";
-
-    modalYear.textContent = "";
-
-    modalOverview.innerHTML =
-        "Failed to load movie details.";
-
-    trailerBtn.innerText =
-        "Trailer unavailable";
-
-    trailerBtn.disabled = true;
-}
+        modalTitle.textContent = "Movie unavailable";
+        modalRating.innerHTML = "⭐ N/A";
+        modalYear.textContent = "";
+        modalOverview.innerHTML = "Failed to load movie details after multiple retries.";
+        if (metaExtra) {
+            metaExtra.textContent = "Please try again later.";
+        }
+        trailerBtn.innerText = "Trailer unavailable";
+        trailerBtn.disabled = true;
+        const watchBtn = document.getElementById("modalWatchlistBtn");
+        if (watchBtn) {
+            watchBtn.innerText = "Unavailable";
+            watchBtn.disabled = true;
+        }
+    }
 };
 document.addEventListener("click", (e) => {
     if (e.target.classList.contains("close-modal")) {
@@ -512,75 +564,66 @@ function closeTrailer() {
 
 window.openTrailer = openTrailer;
 window.closeTrailer = closeTrailer;
-const refreshBtn =
-document.getElementById('refreshMovieBtn');
-
-if (refreshBtn) {
-
-    refreshBtn.addEventListener('click', async () => {
-
-        if (!currentOpenMovieId) return;
-
-        // Show visual feedback
-        const icon =
-        document.querySelector(
-            '#refreshMovieBtn .refresh-icon'
-        );
-
-        if (icon) {
-            icon.style.animation =
-            "spin 1s linear infinite";
+// HELPER: Toggle Watchlist UI state and trigger additions/removals
+function updateWatchlistButtonState(btn, isAdded, movie) {
+  btn.disabled = false;
+  btn.dataset.added = isAdded ? "true" : "false";
+  if (isAdded) {
+    btn.innerHTML = `<i class="fas fa-check"></i> In Watchlist`;
+    btn.classList.add("added");
+  } else {
+    btn.innerHTML = `<i class="fas fa-plus"></i> Watchlist`;
+    btn.classList.remove("added");
+  }
+  btn.onclick = async () => {
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+    try {
+      const res = await fetch(`${API_BASE}/watchlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          movie: {
+            id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path
+          }
+        }),
+        credentials: "include"
+      });
+      if (res.ok) {
+        const wlData = await res.json();
+        const updatedAdded = wlData.some(m => Number(m.tmdbId) === Number(movie.id) || Number(m.id) === Number(movie.id));
+        updateWatchlistButtonState(btn, updatedAdded, movie);
+        // Automatically refresh watchlist panels if defined on the active page
+        if (typeof window.loadWatchlist === "function") {
+          window.loadWatchlist();
         }
-
-        try {
-
-            const response =
-            await fetch(
-                `${API_BASE}/movie/${currentOpenMovieId}`
-            );
-
-            const freshData =
-            await response.json();
-
-            const freshCast =
-            await fetchCast(currentOpenMovieId);
-
-            document.getElementById(
-                'modalTitle'
-            ).innerText =
-            freshData.title;
-
-            document.getElementById(
-                'modalRating'
-            ).innerHTML =
-            `⭐ ${freshData.vote_average.toFixed(1)}`;
-
-            document.getElementById(
-                'modalOverview'
-            ).innerHTML = `
-                ${freshData.overview || 'No overview available.'}
-                <br><br>
-                <strong>Cast:</strong> ${freshCast}
-            `;
-
-            console.log(
-                "Modal data refreshed for ID:",
-                currentOpenMovieId
-            );
-
-        } catch (err) {
-
-            console.error(
-                "Refresh failed:",
-                err
-            );
-
-        } finally {
-
-            if (icon) {
-                icon.style.animation = "none";
-            }
+        if (typeof window.loadWatchlistRecommendations === "function") {
+          window.loadWatchlistRecommendations(true);
         }
-    });
+      }
+    } catch (err) {
+      console.error("Failed to toggle watchlist inside modal", err);
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
 
+// HELPER: Map language codes to readable strings
+function getLanguageName(code) {
+  const langs = {
+    en: "English",
+    ko: "Korean",
+    ja: "Japanese",
+    es: "Spanish",
+    fr: "French",
+    de: "German",
+    it: "Italian",
+    zh: "Chinese",
+    hi: "Hindi",
+    ru: "Russian"
+  };
+  return langs[code.toLowerCase()] || code.toUpperCase();
 }
