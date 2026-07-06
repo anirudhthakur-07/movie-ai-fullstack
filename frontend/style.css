@@ -1563,9 +1563,10 @@ justify-content: center;
 
 .modal-btn {
   flex: 1;
-  padding: 11px 16px;
+  height: 42px;
+  padding: 0 16px;
   border-radius: 8px;
-  border: none;
+  border: none !important;
   font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
@@ -1591,7 +1592,7 @@ justify-content: center;
 
 .watchlist-btn.added {
   background: linear-gradient(135deg, #10b981, #059669) !important;
-  border-color: transparent !important;
+  border: none !important;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
 }
 
