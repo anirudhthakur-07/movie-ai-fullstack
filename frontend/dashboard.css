@@ -292,7 +292,7 @@ body {
 }
 
 .username-row h2 {
-    font-size: 2.8rem;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
     font-weight: 800;
     letter-spacing: -0.5px;
     background: linear-gradient(90deg, #ffffff, #e2e8f0);
@@ -477,6 +477,15 @@ body {
 .stats-mini-grid .stat-widget:nth-child(7),
 .stats-mini-grid .stat-widget:nth-child(8) {
     grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+    .stats-mini-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .stats-mini-grid .stat-widget {
+        grid-column: span 1 !important;
+    }
 }
 
 @media (max-width: 600px) {
@@ -1131,5 +1140,18 @@ body {
         padding-left: max(15px, env(safe-area-inset-left)) !important;
         padding-right: max(15px, env(safe-area-inset-right)) !important;
         padding-bottom: max(30px, env(safe-area-inset-bottom)) !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .profile-header-top {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
+    }
+    .profile-level-badge {
+        text-align: left !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 }

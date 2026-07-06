@@ -1869,7 +1869,7 @@ body.modal-open {
 }
 
 #heroTitle {
-  font-size: 4rem;
+  font-size: clamp(2rem, 7vw, 4rem);
   font-weight: 800;
   color: white;
   line-height: 1.1;
@@ -3905,4 +3905,52 @@ pointer-events: auto;
 @keyframes nyxDotBounce {
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
+}
+
+@media (max-width: 480px) {
+  .nyx-chat-window {
+    width: calc(100vw - 30px) !important;
+    right: 15px !important;
+    left: 15px !important;
+    bottom: 80px !important;
+    height: 65vh !important;
+  }
+  .login-card {
+    padding: 24px 20px 30px !important;
+    border-radius: 20px !important;
+    width: 90% !important;
+    margin: 15px auto !important;
+  }
+  .login-wrapper {
+    padding: 10px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 15px !important;
+  }
+  .nav-right {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .search-wrapper {
+    flex: 1 !important;
+    max-width: none !important;
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    margin-left: 15px !important;
+    margin-bottom: 80px !important;
+    max-width: calc(100% - 30px) !important;
+  }
 }
