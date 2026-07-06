@@ -324,7 +324,7 @@ async function loadAchievements() {
                     if (ach) {
                         window.toastManager.show({
                             title: ach.title,
-                            xp: ach.xpReward || 100,
+                            xp: ach.xp || 100,
                             iconClass: ACHIEVEMENT_META[id]?.icon || "fas fa-award",
                             priority: 1
                         });
