@@ -10,14 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
             gap: 12px !important;
         }
 
-        /* Drawer container styling */
+        /* Drawer container styling (Desktop) */
         .manual-drawer {
             position: fixed !important;
             top: 0 !important;
             right: 0 !important;
             width: 380px !important;
             height: 100vh !important;
-            background: rgba(10, 10, 12, 0.82) !important;
+            background: rgba(10, 10, 12, 0.95) !important;
             backdrop-filter: blur(20px) !important;
             -webkit-backdrop-filter: blur(20px) !important;
             border-left: 1px solid rgba(255, 46, 67, 0.25) !important;
@@ -37,12 +37,16 @@ document.addEventListener("DOMContentLoaded", () => {
             padding: 24px !important;
             box-sizing: border-box !important;
         }
+        
+        /* Tooltip and progress bar alignment */
         .drawer-header {
+            position: relative !important;
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-            padding-bottom: 16px !important;
+            padding-bottom: 18px !important;
+            margin-bottom: 8px !important;
         }
         .drawer-header h3 {
             margin: 0 !important;
@@ -56,28 +60,40 @@ document.addEventListener("DOMContentLoaded", () => {
         .drawer-header h3 i {
             color: #ff2e43 !important;
         }
+        
+        /* Touch target optimization: min 44x44px for Close targets */
         .drawer-header .close-btn {
             background: none !important;
             border: none !important;
             color: #8e8e93 !important;
-            font-size: 1.5rem !important;
+            font-size: 1.8rem !important;
             cursor: pointer !important;
+            width: 44px !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+            margin: -10px !important;
             transition: color 0.2s ease !important;
         }
         .drawer-header .close-btn:hover {
             color: #fff !important;
         }
+        
+        /* Scrollable body with custom styles */
         .drawer-body {
             flex: 1 !important;
             overflow-y: auto !important;
             padding-top: 16px !important;
             padding-right: 4px !important;
+            -webkit-overflow-scrolling: touch !important;
         }
         .manual-section {
             background: rgba(255, 255, 255, 0.03) !important;
             border: 1px solid rgba(255, 255, 255, 0.05) !important;
             border-radius: 12px !important;
-            padding: 16px !important;
+            padding: 18px !important;
             margin-bottom: 16px !important;
             transition: border-color 0.3s ease !important;
         }
@@ -85,16 +101,16 @@ document.addEventListener("DOMContentLoaded", () => {
             border-color: rgba(255, 46, 67, 0.3) !important;
         }
         .manual-section h4 {
-            margin: 0 0 8px 0 !important;
-            font-size: 0.95rem !important;
+            margin: 0 0 10px 0 !important;
+            font-size: 1rem !important;
             color: #fff !important;
             font-family: 'Outfit', sans-serif !important;
         }
         .manual-section p {
             margin: 0 !important;
-            font-size: 0.8rem !important;
+            font-size: 0.85rem !important;
             color: #c7c7cc !important;
-            line-height: 1.5 !important;
+            line-height: 1.6 !important;
         }
         .manual-section p strong {
             color: #fff !important;
@@ -106,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
             bottom: 24px !important;
             right: 24px !important;
             width: 320px !important;
-            background: rgba(18, 18, 22, 0.85) !important;
+            background: rgba(18, 18, 22, 0.88) !important;
             backdrop-filter: blur(15px) !important;
             -webkit-backdrop-filter: blur(15px) !important;
             border: 1px solid rgba(255, 46, 67, 0.3) !important;
@@ -137,20 +153,29 @@ document.addEventListener("DOMContentLoaded", () => {
             color: #fff !important;
             font-family: 'Outfit', sans-serif !important;
         }
+        
+        /* Popup close touch target */
         .close-popup-btn {
             background: none !important;
             border: none !important;
             color: #8e8e93 !important;
-            font-size: 1.25rem !important;
+            font-size: 1.5rem !important;
             cursor: pointer !important;
+            width: 44px !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: -10px !important;
+            padding: 0 !important;
         }
         .close-popup-btn:hover {
             color: #fff !important;
         }
         .popup-message {
-            font-size: 0.8rem !important;
+            font-size: 0.85rem !important;
             color: #c7c7cc !important;
-            line-height: 1.45 !important;
+            line-height: 1.5 !important;
             margin: 0 0 16px 0 !important;
             text-align: left !important;
         }
@@ -160,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
             align-items: center !important;
         }
         .checkbox-container {
-            font-size: 0.72rem !important;
+            font-size: 0.75rem !important;
             color: #8e8e93 !important;
             cursor: pointer !important;
             display: flex !important;
@@ -171,23 +196,52 @@ document.addEventListener("DOMContentLoaded", () => {
             background: linear-gradient(135deg, #ff2e43 0%, #b3001b 100%) !important;
             border: none !important;
             color: #fff !important;
-            padding: 6px 12px !important;
+            padding: 8px 16px !important;
             border-radius: 8px !important;
-            font-size: 0.75rem !important;
+            font-size: 0.8rem !important;
             cursor: pointer !important;
             font-family: 'Outfit', sans-serif !important;
             font-weight: 600 !important;
         }
         
-        /* Mobile layout styling updates */
-        @media (max-width: 480px) {
+        /* Body scroll lock override */
+        body.manual-open-lock {
+            overflow: hidden !important;
+        }
+        
+        /* Mobile responsive stylesheet */
+        @media (max-width: 768px) {
+            /* Full-Screen cinematic overlay */
             .manual-drawer {
-                width: 100% !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                border-left: none !important;
+                border-top: 1px solid rgba(255, 46, 67, 0.25) !important;
+                transform: translateY(100%) !important;
+                transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            }
+            .manual-drawer.show {
+                transform: translateY(0) !important;
+            }
+            .drawer-content {
+                padding: 20px !important;
             }
             .onboarding-popup {
                 bottom: 16px !important;
                 right: 16px !important;
                 width: calc(100% - 32px) !important;
+            }
+        }
+        
+        /* Navbar text compacting for mobile */
+        @media (max-width: 480px) {
+            .nav-action-btn {
+                font-size: 0 !important; /* Hide text nodes safely */
+                padding: 8px 12px !important;
+            }
+            .nav-action-btn i {
+                font-size: 1rem !important;
+                margin-right: 0 !important;
             }
         }
     `;
@@ -219,8 +273,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="drawer-header">
                 <h3><i class="fas fa-compass icon-gradient"></i> The Dark Manual</h3>
                 <button id="closeManualDrawer" class="close-btn">&times;</button>
+                <!-- Sticky scroll progress indicator bar -->
+                <div id="manualProgressBar" style="position: absolute; bottom: 0; left: 0; height: 3px; background: #ff2e43; width: 0%; transition: width 0.1s ease;"></div>
             </div>
-            <div class="drawer-body">
+            <div class="drawer-body" id="manualDrawerBody">
                 <section class="manual-section">
                     <h4>🔮 1. The DNA Profile & Streaming Home</h4>
                     <p>Your profile is a living, breathing <strong>Movie DNA signature</strong> that adapts based on your clicks, searches, and watchlist additions.</p>
@@ -263,23 +319,47 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.appendChild(popupEl);
 
-    // 5. Drawer Toggle Logic
+    // 5. Drawer Toggle & Scroll Lock logic
     const openManualBtn = document.getElementById("darkManualBtn");
     const closeManualBtn = document.getElementById("closeManualDrawer");
     const drawer = document.getElementById("darkManualDrawer");
 
-    if (openManualBtn && drawer) {
-        openManualBtn.addEventListener("click", () => {
-            drawer.classList.toggle("show");
-        });
-    }
-    if (closeManualBtn && drawer) {
-        closeManualBtn.addEventListener("click", () => {
+    const openDrawer = () => {
+        if (drawer) {
+            drawer.classList.add("show");
+            document.body.classList.add("manual-open-lock");
+        }
+    };
+
+    const closeDrawer = () => {
+        if (drawer) {
             drawer.classList.remove("show");
+            document.body.classList.remove("manual-open-lock");
+        }
+    };
+
+    if (openManualBtn) {
+        openManualBtn.addEventListener("click", openDrawer);
+    }
+    if (closeManualBtn) {
+        closeManualBtn.addEventListener("click", closeDrawer);
+    }
+
+    // 6. Scroll Progress Bar logic
+    const drawerBody = document.getElementById("manualDrawerBody");
+    const progressBar = document.getElementById("manualProgressBar");
+
+    if (drawerBody && progressBar) {
+        drawerBody.addEventListener("scroll", () => {
+            const scrollTop = drawerBody.scrollTop;
+            const scrollHeight = drawerBody.scrollHeight;
+            const clientHeight = drawerBody.clientHeight;
+            const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+            progressBar.style.width = scrollPercent + "%";
         });
     }
 
-    // 6. Onboarding Notification Logic
+    // 7. Onboarding Notification Logic
     const popup = document.getElementById("onboardingPopup");
     const closePopupBtn = document.getElementById("closeOnboardingPopup");
     const startOnboardingBtn = document.getElementById("startOnboardingBtn");
@@ -313,7 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (startOnboardingBtn) {
         startOnboardingBtn.addEventListener("click", () => {
             dismissPopup();
-            if (drawer) drawer.classList.add("show");
+            openDrawer();
         });
     }
 });
