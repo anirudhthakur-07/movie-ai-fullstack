@@ -13,6 +13,8 @@ if (!sessionActive) {
 // Global state variables
 let statsOverview = { totalClicks: 0, topProvider: "No Data", topGenre: "No Data" };
 let profileData = null;
+let previousUnlockedIds = null;
+let previousLevel = null;
 
 // AI Persona mapping dictionary
 const PERSONA_TITLES = {
@@ -311,6 +313,36 @@ async function loadAchievements() {
         if (!res.ok) throw new Error("Achievements fetch failed");
 
         const data = await res.json();
+
+        // Trigger cinematic toast alerts for new unlocks
+        if (window.toastManager) {
+            const currentUnlockedIds = data.achievements.filter(a => a.unlocked).map(a => a.id);
+            if (previousUnlockedIds !== null) {
+                const newlyUnlocked = currentUnlockedIds.filter(id => !previousUnlockedIds.includes(id));
+                newlyUnlocked.forEach(id => {
+                    const ach = data.achievements.find(a => a.id === id);
+                    if (ach) {
+                        window.toastManager.show({
+                            title: ach.title,
+                            xp: ach.xpReward || 100,
+                            iconClass: ACHIEVEMENT_META[id]?.icon || "fas fa-award",
+                            priority: 1
+                        });
+                    }
+                });
+            }
+            previousUnlockedIds = currentUnlockedIds;
+
+            const currentLevel = data.level;
+            if (previousLevel !== null && currentLevel > previousLevel) {
+                window.toastManager.show({
+                    title: `Reached Level ${currentLevel}!`,
+                    iconClass: "fas fa-crown",
+                    priority: 3
+                });
+            }
+            previousLevel = currentLevel;
+        }
 
         // Level & XP Bar values
         document.getElementById("explorerLevel").innerText = `Level ${data.level}`;

@@ -1,6 +1,6 @@
 // Shared Header Component - Dark Manual & Onboarding Flow
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Inject Stylesheet for Drawer & Onboarding Popup
+    // 1. Inject Stylesheet for Drawer, Onboarding Popup, and Toast notifications
     const styleEl = document.createElement("style");
     styleEl.textContent = `
         /* Navigation alignment fixes */
@@ -216,6 +216,86 @@ document.addEventListener("DOMContentLoaded", () => {
             font-family: 'Outfit', sans-serif !important;
             font-weight: 600 !important;
         }
+
+        /* Toast notifications styles */
+        .toast-container {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            z-index: 10000 !important;
+            pointer-events: none !important;
+            max-width: 350px !important;
+            width: 100% !important;
+        }
+        .toast-card {
+            display: flex !important;
+            align-items: center !important;
+            gap: 16px !important;
+            background: rgba(18, 18, 22, 0.95) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(255, 46, 67, 0.3) !important;
+            border-radius: 12px !important;
+            padding: 14px 18px !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 46, 67, 0.1) !important;
+            pointer-events: auto !important;
+            transform: translateY(20px) scale(0.95) !important;
+            opacity: 0 !important;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease !important;
+            box-sizing: border-box !important;
+        }
+        .toast-card.show {
+            transform: translateY(0) scale(1) !important;
+            opacity: 1 !important;
+        }
+        .toast-card.exit {
+            transform: translateY(-20px) scale(0.9) !important;
+            opacity: 0 !important;
+        }
+        .toast-card.level-up-toast {
+            border: 1px solid rgba(255, 215, 0, 0.5) !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.2) !important;
+        }
+        .toast-card.level-up-toast .toast-icon i {
+            color: #ffd700 !important;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5) !important;
+        }
+        .toast-icon {
+            font-size: 1.5rem !important;
+            color: #ff2e43 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 32px !important;
+        }
+        .toast-details {
+            display: flex !important;
+            flex-direction: column !important;
+            text-align: left !important;
+        }
+        .toast-alert-title {
+            font-size: 0.72rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            color: #8e8e93 !important;
+            font-weight: 600 !important;
+            margin-bottom: 2px !important;
+        }
+        .toast-title {
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 0.9rem !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+        }
+        .toast-xp {
+            font-size: 0.75rem !important;
+            color: #34c759 !important;
+            font-weight: 600 !important;
+            margin-top: 2px !important;
+        }
         
         /* Body scroll lock override */
         body.manual-open-lock {
@@ -243,6 +323,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 bottom: 16px !important;
                 right: 16px !important;
                 width: calc(100% - 32px) !important;
+            }
+
+            /* Responsive toast positioning */
+            .toast-container {
+                bottom: auto !important;
+                top: 20px !important;
+                right: 50% !important;
+                transform: translateX(50%) !important;
+                width: 90% !important;
+                max-width: 450px !important;
+            }
+            .toast-card {
+                transform: translateY(-20px) scale(0.95) !important;
+            }
+            .toast-card.show {
+                transform: translateY(0) scale(1) !important;
+            }
+            .toast-card.exit {
+                transform: translateY(-10px) scale(0.9) !important;
             }
         }
         
@@ -425,3 +524,128 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+// ==========================================================================
+// 8. EVENT-DRIVEN SINGLETON TOAST NOTIFICATION QUEUE (PRODUCTION HARDENED)
+// ==========================================================================
+class ToastManager {
+    constructor() {
+        this.queue = [];
+        this.stage = [];
+        this.active = false;
+        this.debounceTimer = null;
+    }
+
+    // Prevents DOM XSS injection attacks
+    escapeHTML(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Dynamic show request entry
+    show(payload) {
+        const sanitized = {
+            title: this.escapeHTML(payload.title),
+            xp: Number(payload.xp) || 0,
+            iconClass: this.escapeHTML(payload.iconClass || 'fas fa-award'),
+            priority: Number(payload.priority) || 1
+        };
+
+        // High priority actions (Level Ups = 3) bypass aggregation
+        if (sanitized.priority === 3) {
+            this.queue.push(sanitized);
+            this.sortQueue();
+            this.processQueue();
+        } else {
+            this.stage.push(sanitized);
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => {
+                this.flushStaging();
+            }, 300);
+        }
+    }
+
+    // Aggregates standard achievements triggered simultaneously
+    flushStaging() {
+        if (this.stage.length === 1) {
+            this.queue.push(this.stage[0]);
+        } else if (this.stage.length > 1) {
+            const totalXP = this.stage.reduce((sum, item) => sum + (item.xp || 0), 0);
+            this.queue.push({
+                title: `${this.stage.length} Achievements Unlocked!`,
+                xp: totalXP,
+                iconClass: "fas fa-trophy",
+                priority: 1
+            });
+        }
+        this.stage = [];
+        this.sortQueue();
+        this.processQueue();
+    }
+
+    sortQueue() {
+        // Sorts descending by priority: Level Up (3) -> Avatar (2) -> Standard (1)
+        this.queue.sort((a, b) => b.priority - a.priority);
+    }
+
+    async processQueue() {
+        if (this.active || this.queue.length === 0) return;
+        this.active = true;
+        const nextToast = this.queue.shift();
+        await this.renderToast(nextToast);
+        this.active = false;
+        this.processQueue();
+    }
+
+    renderToast(data) {
+        return new Promise(resolve => {
+            const container = this.getContainer();
+            const card = document.createElement("div");
+            
+            const isLevelUp = data.priority === 3;
+            card.className = `toast-card glass-card ${isLevelUp ? 'level-up-toast' : ''}`;
+            
+            card.innerHTML = `
+                <div class="toast-icon"><i class="${data.iconClass}"></i></div>
+                <div class="toast-details">
+                    <span class="toast-alert-title">${isLevelUp ? 'System Upgrade' : 'Milestone Reached'}</span>
+                    <strong class="toast-title">${data.title}</strong>
+                    ${data.xp ? `<span class="toast-xp">+${data.xp} XP</span>` : ''}
+                </div>
+            `;
+            container.appendChild(card);
+
+            // Entry animation trigger
+            setTimeout(() => card.classList.add("show"), 50);
+
+            // Dismiss & auto-cleanup
+            setTimeout(() => {
+                card.classList.remove("show");
+                card.classList.add("exit");
+                card.addEventListener("transitionend", () => {
+                    card.remove();
+                    resolve();
+                });
+            }, isLevelUp ? 5000 : 4000);
+        });
+    }
+
+    getContainer() {
+        let container = document.getElementById("toastContainer");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "toastContainer";
+            container.className = "toast-container";
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+}
+
+// Global hook instantiation
+window.toastManager = new ToastManager();
