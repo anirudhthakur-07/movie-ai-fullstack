@@ -1586,17 +1586,7 @@ justify-content: center;
 }
 
 .watchlist-btn {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-  transition: all 0.3s ease !important;
-}
-
-.watchlist-btn:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+  /* Inherits modal-btn red gradient styling */
 }
 
 .watchlist-btn.added {
@@ -1713,13 +1703,53 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  width: 100%;
+  width: auto;
   gap: 10px;
 }
 
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.refresh-btn:hover {
+  background: rgba(229, 9, 20, 0.1);
+  border-color: #e50914;
+  color: #ff2a3d;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.2);
+}
+
+.refresh-btn:active {
+  transform: scale(0.95);
+}
+
+.refresh-btn:hover .refresh-icon {
+  transform: rotate(180deg);
+}
+
+.refresh-icon {
+  font-size: 16px;
+  display: inline-block;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  line-height: 1;
+  color: inherit;
+}
+
 .refresh-container span {
-  font-size: 14px;
-  color: #aaa;
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
 }
 
 .watch-btn {
