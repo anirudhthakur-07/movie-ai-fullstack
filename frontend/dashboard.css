@@ -993,7 +993,8 @@ body {
     user-select: none !important;
 }
 
-.widget-info-btn:hover .widget-tooltip {
+.stat-widget:hover .widget-tooltip,
+.widget-tooltip.active {
     opacity: 1 !important;
     pointer-events: auto !important;
     transform: translateY(0) !important;

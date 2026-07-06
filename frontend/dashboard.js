@@ -685,6 +685,34 @@ function setupAchievementsModal() {
     }
 }
 
+// 9. TOOLTIP TOGGLE EVENTS FOR STAT WIDGETS (MOBILE FRIENDLY)
+function setupTooltipEvents() {
+    const widgets = document.querySelectorAll(".stat-widget");
+    widgets.forEach(widget => {
+        widget.addEventListener("click", (e) => {
+            const tooltip = widget.querySelector(".widget-tooltip");
+            if (tooltip) {
+                // Close all other tooltips first
+                document.querySelectorAll(".widget-tooltip").forEach(t => {
+                    if (t !== tooltip) {
+                        t.classList.remove("active");
+                    }
+                });
+                // Toggle active state
+                tooltip.classList.toggle("active");
+            }
+            e.stopPropagation();
+        });
+    });
+
+    // Close any active tooltip when clicking outside
+    document.addEventListener("click", () => {
+        document.querySelectorAll(".widget-tooltip").forEach(t => {
+            t.classList.remove("active");
+        });
+    });
+}
+
 // Bootstrapping function calls
 loadAnalytics();
 loadProfile();
@@ -692,6 +720,7 @@ loadAchievements();
 loadProviderChart();
 loadGenreChart();
 setupAchievementsModal();
+setupTooltipEvents();
 
 window.logout = async function () {
     try {
