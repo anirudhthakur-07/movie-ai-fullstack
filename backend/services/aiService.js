@@ -72,15 +72,15 @@ async function generateRecommendationExplanations(username, favoriteGenres, watc
       For the user "${username}" who likes genres [${genresList}] and has watched [${watchlistList}],
       generate a highly personalized, compelling, single-sentence explanation (under 12-15 words) for why they would love each of the following recommended movies.
       Write in the second person ("you"), be punchy, and highlight why it fits their taste.
-      Use standard HTML <strong> tags for key thematic matching concepts (e.g. <strong>sci-fi survival</strong>, <strong>cyberpunk thriller</strong>).
+      Do NOT use any HTML tags, markdown bolding (**), or strong wrappers. Write only in plain text.
       
       Recommended Movies:
       ${recsListText}
       
       Return ONLY a JSON object mapping the movie ID string to the generated explanation string. Example:
       {
-        "603": "Matches your affinity for <strong>mind-bending cyberpunk</strong> realities.",
-        "577922": "A complex <strong>temporal puzzle</strong> that aligns with your love for sci-fi."
+        "603": "Matches your affinity for mind-bending cyberpunk realities.",
+        "577922": "A complex temporal puzzle that aligns with your love for sci-fi."
       }
     `;
 
@@ -95,7 +95,14 @@ async function generateRecommendationExplanations(username, favoriteGenres, watc
     }
     text = text.trim();
     
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    // SECURITY & CLEANUP: Strip any HTML tags to ensure safe plain-text rendering in the UI
+    for (const key in parsed) {
+      if (typeof parsed[key] === "string") {
+        parsed[key] = parsed[key].replace(/<[^>]*>/g, "");
+      }
+    }
+    return parsed;
   } catch (err) {
     console.error("Gemini API recommendations explanation generation failed:", err.message);
     return null;

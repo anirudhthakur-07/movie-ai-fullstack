@@ -249,9 +249,10 @@ if (reasonsBox) {
 
         reasonsBox.innerHTML =
             movie.explanations
-                .map(reason =>
-                    `<span class="reason-tag">${escapeHTML(reason)}</span>`
-                )
+                .map(reason => {
+                    const cleanReason = String(reason || "").replace(/<\/?strong>/gi, "");
+                    return `<span class="reason-tag">${escapeHTML(cleanReason)}</span>`;
+                })
                 .join("");
 
         reasonsBox.classList.remove("hidden");
