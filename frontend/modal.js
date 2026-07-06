@@ -7,6 +7,18 @@ let currentOpenMovieId = null;
 // authFetch is defined globally in script.js
 // No duplicate definition here — uses the script.js version with try/catch
 
+// SECURITY: HTML Entity Escaping
+// Prevents DOM XSS from TMDB-sourced content injected via innerHTML
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 // MOVIE CAST INFORMATION
 // Retrieve Top Cast Members From Backend API
 async function fetchCast(movieId) {
@@ -192,9 +204,9 @@ window.openModal = async function (movie) {
       // Render extra catalog metadata
       if (metaExtra) {
         metaExtra.innerHTML = `
-          <span class="meta-tag"><i class="far fa-clock"></i> ${runtimeVal}</span>
-          <span class="meta-tag"><i class="far fa-user"></i> Dir: ${directorName}</span>
-          <span class="meta-tag"><i class="fas fa-globe"></i> ${langName}</span>
+          <span class="meta-tag"><i class="far fa-clock"></i> ${escapeHTML(runtimeVal)}</span>
+          <span class="meta-tag"><i class="far fa-user"></i> Dir: ${escapeHTML(directorName)}</span>
+          <span class="meta-tag"><i class="fas fa-globe"></i> ${escapeHTML(langName)}</span>
         `;
       }
 
@@ -225,9 +237,9 @@ window.openModal = async function (movie) {
       modalRating.innerHTML = rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
       modalYear.textContent = year ? year.split('-')[0] : 'Unknown';
       modalOverview.innerHTML = `
-        ${fullMovie.overview ?? fullMovie.description ?? 'No overview available.'}
+        ${escapeHTML(fullMovie.overview ?? fullMovie.description ?? 'No overview available.')}
         <br><br>
-        <strong>Cast:</strong> ${cast}
+        <strong>Cast:</strong> ${escapeHTML(cast)}
       `;
       const isWatchlistRecommendation = movie.explanations && movie.explanations.length;
 
@@ -238,7 +250,7 @@ if (reasonsBox) {
         reasonsBox.innerHTML =
             movie.explanations
                 .map(reason =>
-                    `<span class="reason-tag">${reason}</span>`
+                    `<span class="reason-tag">${escapeHTML(reason)}</span>`
                 )
                 .join("");
 

@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
     openedRecommendationsCount: { type: Number, default: 0 },
     recommendationInteractionsCount: { type: Number, default: 0 },
     dashboardViewsCount: { type: Number, default: 0 },
+    isAdmin: { type: Boolean, default: false },
     gender: { type: String, enum: ["male", "female"], default: "male" }
 });
 
