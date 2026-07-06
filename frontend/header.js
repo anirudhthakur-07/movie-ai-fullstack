@@ -89,6 +89,19 @@ document.addEventListener("DOMContentLoaded", () => {
             padding-right: 4px !important;
             -webkit-overflow-scrolling: touch !important;
         }
+        .drawer-body::-webkit-scrollbar {
+            width: 6px !important;
+        }
+        .drawer-body::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+        .drawer-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-radius: 10px !important;
+        }
+        .drawer-body::-webkit-scrollbar-thumb:hover {
+            background: #ff2e43 !important;
+        }
         .manual-section {
             background: rgba(255, 255, 255, 0.03) !important;
             border: 1px solid rgba(255, 255, 255, 0.05) !important;
