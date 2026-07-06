@@ -372,13 +372,34 @@ h4 {
   max-width: 850px;
   /* CHANGE: Height must be fixed for overflow-y to work */
   height: 80vh;
-  background: rgba(20, 20, 20, 0.75);
-  backdrop-filter: blur(25px);
+  background: rgba(18, 18, 22, 0.65);
+  backdrop-filter: blur(35px);
+  -webkit-backdrop-filter: blur(35px);
   border-radius: 16px;
-  border: 1px solid rgba(243, 5, 5, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: visible;
-  /* Keeps everything inside the rounded corners */
   position: relative;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+/* Cinematic Ambient Aura Backdrop */
+.modal-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--modal-backdrop);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  filter: blur(45px);
+  z-index: -1;
+  border-radius: 16px;
+  pointer-events: none;
+  transition: background-image 0.5s ease-in-out;
 }
 
 @keyframes modalFadeIn {
@@ -443,6 +464,7 @@ h4 {
   flex: 0 0 45%;
   overflow: hidden;
   height: 100%;
+  perspective: 1000px;
 }
 
 .modal-poster img {
@@ -451,7 +473,13 @@ h4 {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+  transform-origin: center center;
+}
+
+.modal-poster:hover img {
+  transform: scale(1.03) rotateY(-2deg);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
 }
 
 .movie-info-overlay {
@@ -484,23 +512,50 @@ h4 {
 
 .modal-meta {
   display: flex;
+  align-items: center;
   gap: 15px;
   margin-bottom: 20px;
   font-size: 1.1rem;
 }
 
 .rating-badge {
+  background: rgba(70, 211, 105, 0.12);
   color: #46d369;
-  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(70, 211, 105, 0.22);
 }
 
 .modal-meta-extra {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #999;
-  margin-top: -12px;
+  margin-top: -10px;
   margin-bottom: 20px;
-  letter-spacing: 0.3px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ccc;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-tag i {
+  color: #e50914;
 }
 
 .skeleton-meta-loader {
@@ -1586,7 +1641,17 @@ justify-content: center;
 }
 
 .watchlist-btn {
-  /* Inherits modal-btn red gradient styling */
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.watchlist-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
 }
 
 .watchlist-btn.added {

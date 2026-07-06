@@ -121,6 +121,11 @@ window.openModal = async function (movie) {
         ? `${IMG_BASE}${fullMovie.poster_path || fullMovie.poster}`
         : null;
 
+    const modalContent = document.querySelector(".modal-content");
+    if (modalContent) {
+        modalContent.style.setProperty('--modal-backdrop', imgUrl ? `url(${imgUrl})` : "none");
+    }
+
     // handle both cached + fresh images
     modalImg.onload = () => {
         if (currentModalRequest !== requestId) return;
@@ -160,6 +165,13 @@ window.openModal = async function (movie) {
       }
       modalRetryCount = 0; // reset retry counter
 
+      if (modalContent) {
+          const backdropUrl = fullMovie.backdrop_path 
+            ? `url(${IMG_BASE}${fullMovie.backdrop_path})`
+            : (imgUrl ? `url(${imgUrl})` : "none");
+          modalContent.style.setProperty('--modal-backdrop', backdropUrl);
+      }
+
       const rating = fullMovie.vote_average ?? fullMovie.rating ?? 'N/A';
       const year = fullMovie.release_date || fullMovie.first_air_date || '';
       const cast = await fetchCast(movieId);
@@ -179,7 +191,11 @@ window.openModal = async function (movie) {
 
       // Render extra catalog metadata
       if (metaExtra) {
-        metaExtra.textContent = `${runtimeVal} | Director: ${directorName} | ${langName}`;
+        metaExtra.innerHTML = `
+          <span class="meta-tag"><i class="far fa-clock"></i> ${runtimeVal}</span>
+          <span class="meta-tag"><i class="far fa-user"></i> Dir: ${directorName}</span>
+          <span class="meta-tag"><i class="fas fa-globe"></i> ${langName}</span>
+        `;
       }
 
       // Check Watchlist status
