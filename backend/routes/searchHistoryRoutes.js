@@ -40,6 +40,10 @@ await SearchHistory.findOneAndUpdate(
 );
         console.log("SEARCH SAVED");
 
+        // Invalidate cache immediately on update
+        const cacheService = require("../services/AI/cacheService");
+        cacheService.clearUserCache(req.userId);
+
         res.json({
             success: true
         });

@@ -66,6 +66,10 @@ router.post("/event", auth, async (req, res) => {
             weight
         });
 
+        // Invalidate cache immediately on update
+        const cacheService = require("../services/AI/cacheService");
+        cacheService.clearUserCache(req.userId);
+
         res.json({ success: true, deduplicated: false });
 
     } catch (err) {

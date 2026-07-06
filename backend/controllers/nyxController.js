@@ -53,7 +53,8 @@ async function handleNyxQuery(req, res) {
     }
 
     // 2. Check local response cache to preserve rate limits
-    const cached = cacheService.get(query);
+    const cacheKey = `${userId}:${query}`;
+    const cached = cacheService.get(cacheKey);
     if (cached) {
       cacheHit = true;
       const duration = Date.now() - startTime;
@@ -99,7 +100,7 @@ async function handleNyxQuery(req, res) {
     const validated = validateResponse(parsedJSON);
 
     // Store in cache for future references
-    cacheService.set(query, validated);
+    cacheService.set(cacheKey, validated);
 
     const duration = Date.now() - startTime;
     aiLogger.logRequest({

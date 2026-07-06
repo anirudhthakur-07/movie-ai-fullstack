@@ -5,6 +5,8 @@ const router = express.Router();
 const User = require("../models/User");
 const auth = require("../middleware/auth");
 const tmdbApi = require("../config/tmdb");
+const cacheService = require("../services/AI/cacheService");
+
 
 router.post('/', auth, async (req, res) => {
   try {
@@ -64,6 +66,9 @@ router.post('/', auth, async (req, res) => {
         }
       );
     }
+    
+    // Invalidate cache immediately on update
+    cacheService.clearUserCache(req.userId);
 
     const updatedUser = await User.findById(req.userId);
     res.json(updatedUser.watchlist);
@@ -101,6 +106,9 @@ router.delete('/', auth, async (req, res) => {
       { $set: { watchlist: [] } }
     );
 
+    // Invalidate cache immediately on deletion
+    cacheService.clearUserCache(req.userId);
+
     res.json([]);
   } catch (err) {
     console.error("WATCHLIST DELETE ERROR:", err.message);
@@ -131,6 +139,9 @@ router.put('/:tmdbId/folder', auth, async (req, res) => {
       { _id: req.userId, "watchlist.tmdbId": tmdbId },
       { $set: { "watchlist.$.folder": String(folderName).trim() } }
     );
+
+    // Invalidate cache immediately on folder update
+    cacheService.clearUserCache(req.userId);
 
     const updatedUser = await User.findById(req.userId);
     res.json(updatedUser.watchlist);

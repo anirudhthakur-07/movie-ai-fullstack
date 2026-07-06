@@ -45,6 +45,11 @@ router.post("/profile/gender", auth, async (req, res) => {
             return res.status(400).json({ error: "Invalid gender choice" });
         }
         await User.updateOne({ _id: req.userId }, { $set: { gender } });
+        
+        // Invalidate cache immediately on update
+        const cacheService = require("../services/AI/cacheService");
+        cacheService.clearUserCache(req.userId);
+
         res.json({ message: "Gender selection updated", gender });
     } catch (err) {
         console.error("Gender update error:", err);

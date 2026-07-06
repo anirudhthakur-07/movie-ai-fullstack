@@ -22,6 +22,16 @@ class CacheService {
   clear() {
     this.cache.clear();
   }
+
+  clearUserCache(userId) {
+    if (!userId) return;
+    const prefix = `${userId}:`;
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(prefix)) {
+        this.cache.delete(key);
+      }
+    }
+  }
 }
 
 module.exports = new CacheService();
