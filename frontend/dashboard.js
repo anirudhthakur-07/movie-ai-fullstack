@@ -13,8 +13,6 @@ if (!sessionActive) {
 // Global state variables
 let statsOverview = { totalClicks: 0, topProvider: "No Data", topGenre: "No Data" };
 let profileData = null;
-let previousUnlockedIds = null;
-let previousLevel = null;
 
 // AI Persona mapping dictionary
 const PERSONA_TITLES = {
@@ -314,34 +312,56 @@ async function loadAchievements() {
 
         const data = await res.json();
 
-        // Trigger cinematic toast alerts for new unlocks
+        // Trigger cinematic toast alerts for new unlocks (sessionStorage persisted to survive page refreshes/navs)
         if (window.toastManager) {
-            const currentUnlockedIds = data.achievements.filter(a => a.unlocked).map(a => a.id);
-            if (previousUnlockedIds !== null) {
-                const newlyUnlocked = currentUnlockedIds.filter(id => !previousUnlockedIds.includes(id));
-                newlyUnlocked.forEach(id => {
-                    const ach = data.achievements.find(a => a.id === id);
-                    if (ach) {
-                        window.toastManager.show({
-                            title: ach.title,
-                            xp: ach.xp || 100,
-                            iconClass: ACHIEVEMENT_META[id]?.icon || "fas fa-award",
-                            priority: 1
-                        });
-                    }
-                });
+            let celebrated = [];
+            try {
+                const stored = sessionStorage.getItem("celebrated_achievements");
+                if (stored) celebrated = JSON.parse(stored);
+            } catch (e) {
+                console.error("Failed to parse celebrated achievements", e);
             }
-            previousUnlockedIds = currentUnlockedIds;
+
+            const currentUnlockedIds = data.achievements.filter(a => a.unlocked).map(a => a.id);
+            const achievementsInitialized = sessionStorage.getItem("achievements_initialized") === "true";
+
+            if (!achievementsInitialized) {
+                // First dashboard load of this session: mark all current unlocks as celebrated
+                sessionStorage.setItem("celebrated_achievements", JSON.stringify(currentUnlockedIds));
+                sessionStorage.setItem("achievements_initialized", "true");
+            } else {
+                // Subsequent load/refresh: compare unlocked list with celebrated list
+                const newlyUnlocked = currentUnlockedIds.filter(id => !celebrated.includes(id));
+                if (newlyUnlocked.length > 0) {
+                    newlyUnlocked.forEach(id => {
+                        const ach = data.achievements.find(a => a.id === id);
+                        if (ach) {
+                            window.toastManager.show({
+                                title: ach.title,
+                                xp: ach.xp || 100,
+                                iconClass: ACHIEVEMENT_META[id]?.icon || "fas fa-award",
+                                priority: 1
+                            });
+                        }
+                    });
+                    const updatedCelebrated = [...new Set([...celebrated, ...currentUnlockedIds])];
+                    sessionStorage.setItem("celebrated_achievements", JSON.stringify(updatedCelebrated));
+                }
+            }
 
             const currentLevel = data.level;
-            if (previousLevel !== null && currentLevel > previousLevel) {
-                window.toastManager.show({
-                    title: `Reached Level ${currentLevel}!`,
-                    iconClass: "fas fa-crown",
-                    priority: 3
-                });
+            const storedLevel = sessionStorage.getItem("previous_level");
+            if (storedLevel !== null) {
+                const prevLevelNum = Number(storedLevel);
+                if (currentLevel > prevLevelNum) {
+                    window.toastManager.show({
+                        title: `Reached Level ${currentLevel}!`,
+                        iconClass: "fas fa-crown",
+                        priority: 3
+                    });
+                }
             }
-            previousLevel = currentLevel;
+            sessionStorage.setItem("previous_level", currentLevel.toString());
         }
 
         // Level & XP Bar values
