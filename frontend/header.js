@@ -278,21 +278,36 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="drawer-body" id="manualDrawerBody">
                 <section class="manual-section">
-                    <h4>🔮 1. The DNA Profile & Streaming Home</h4>
-                    <p>Your profile is a living, breathing <strong>Movie DNA signature</strong> that adapts based on your clicks, searches, and watchlist additions.</p>
-                    <p style="margin-top: 8px;">Clicking Netflix/Prime links locks in your <strong>Streaming Home</strong> and filters movie recommendations.</p>
+                    <h4>🔮 1. The DNA Profile</h4>
+                    <p>Calculates and projects your active taste distribution and cinematic preferences across key genre nodes.</p>
                 </section>
                 <section class="manual-section">
-                    <h4>🧠 2. The Nyx Curator</h4>
-                    <p>Engage with <strong>Nyx</strong> by opening the floating chat orb. Ask <em>"Analyze my taste profile"</em> to get neural narrative critiques based on your history.</p>
+                    <h4>📺 2. Streaming Home</h4>
+                    <p>Tracks your streaming clicks to set your primary provider and filters recommendations matching your networks.</p>
                 </section>
                 <section class="manual-section">
-                    <h4>🏆 3. The Explorer Journey</h4>
-                    <p>Earn XP by searching and clicking. Progress through <strong>40-Tier Gamified Achievements</strong> to advance your Explorer Level and unlock profile badges.</p>
+                    <h4>🧠 3. The Nyx Curator</h4>
+                    <p>Open the chat orb to consult Nyx—a platform-aware curator providing deep insights grounded on your context.</p>
                 </section>
                 <section class="manual-section">
-                    <h4>🍿 4. The Library & Co-Viewing</h4>
-                    <p>Curate your <strong>Watchlist</strong> and group items into custom folders. Match watchlists with friends to suggest movies for joint co-viewing.</p>
+                    <h4>🏆 4. Explorer Levels</h4>
+                    <p>Earn XP by searching and interacting, driving your climb across profile rankings.</p>
+                </section>
+                <section class="manual-section">
+                    <h4>🎖️ 5. Achievement Badges</h4>
+                    <p>A 40-tier gamified challenge path unlocking profile badges reflecting your viewing behaviors.</p>
+                </section>
+                <section class="manual-section">
+                    <h4>📂 6. Curated Folders</h4>
+                    <p>Organize watchlist items into custom-named folders to group titles matching specific viewing moods.</p>
+                </section>
+                <section class="manual-section">
+                    <h4>👥 7. Co-Viewing Matcher</h4>
+                    <p>Select a friend's profile to compute watchlist overlaps and suggest perfect joint watch party selections.</p>
+                </section>
+                <section class="manual-section">
+                    <h4>🔍 8. Exploration Index</h4>
+                    <p>Measures search depth and genre diversity to grade how actively you seek hidden cinematic gems.</p>
                 </section>
             </div>
         </div>
