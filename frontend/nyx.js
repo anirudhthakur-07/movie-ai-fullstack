@@ -277,10 +277,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return indicatorEl;
   }
 
+  // Helper: Highlight elements on page with a pulsing neon class
+  function highlightElement(selector) {
+    const el = document.querySelector(selector);
+    if (el) {
+      const card = el.closest(".glass-card") || el.closest(".stat-widget") || el.closest(".dashboard-section") || el;
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.add("highlight-glow");
+      setTimeout(() => {
+        card.classList.remove("highlight-glow");
+      }, 4000);
+    }
+  }
+
   // Helper: Execute JSON commands returned by the backend OS layer
   function handleActions(actions, data) {
     actions.forEach(action => {
-
       if (action === "openMovie" && data.movieId) {
         if (typeof window.openModal === "function") {
           window.openModal({ id: data.movieId });
@@ -296,12 +308,54 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = "dashboard.html";
         }
       }
+      else if (action === "openHome") {
+        if (!window.location.pathname.includes("index.html")) {
+          window.location.href = "index.html";
+        }
+      }
+      else if (action === "openSettings") {
+        if (!window.location.pathname.includes("dashboard.html")) {
+          window.location.href = "dashboard.html";
+        }
+      }
       else if (action === "scrollRecommendation") {
         const recRow = document.getElementById("watchlistRecRow") || 
                        document.getElementById("scifiRow") || 
                        document.getElementById("groupRecsRow");
         if (recRow) {
           recRow.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+      else if (action === "showPersona") {
+        if (!window.location.pathname.includes("dashboard.html")) {
+          sessionStorage.setItem("nyx_pending_highlight", "showPersona");
+          window.location.href = "dashboard.html";
+        } else {
+          highlightElement("#personality");
+        }
+      }
+      else if (action === "showMovieDNA") {
+        if (!window.location.pathname.includes("dashboard.html")) {
+          sessionStorage.setItem("nyx_pending_highlight", "showMovieDNA");
+          window.location.href = "dashboard.html";
+        } else {
+          highlightElement("#dnaContainer");
+        }
+      }
+      else if (action === "showAnalytics") {
+        if (!window.location.pathname.includes("dashboard.html")) {
+          sessionStorage.setItem("nyx_pending_highlight", "showAnalytics");
+          window.location.href = "dashboard.html";
+        } else {
+          highlightElement("#providerChart");
+        }
+      }
+      else if (action === "highlightAchievements") {
+        if (!window.location.pathname.includes("dashboard.html")) {
+          sessionStorage.setItem("nyx_pending_highlight", "highlightAchievements");
+          window.location.href = "dashboard.html";
+        } else {
+          highlightElement("#achievementsContainer");
         }
       }
     });
@@ -319,4 +373,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Run startup initializations
   loadChatHistory();
   resetInactivityTimer();
+
+  // Execute cross-page pending action highlights once dashboard loads
+  const pendingHighlight = sessionStorage.getItem("nyx_pending_highlight");
+  if (pendingHighlight && window.location.pathname.includes("dashboard.html")) {
+    sessionStorage.removeItem("nyx_pending_highlight");
+    setTimeout(() => {
+      if (pendingHighlight === "showPersona") highlightElement("#personality");
+      else if (pendingHighlight === "showMovieDNA") highlightElement("#dnaContainer");
+      else if (pendingHighlight === "showAnalytics") highlightElement("#providerChart");
+      else if (pendingHighlight === "highlightAchievements") highlightElement("#achievementsContainer");
+    }, 1000);
+  }
 });

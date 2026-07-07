@@ -26,13 +26,13 @@ async function handleNyxQuery(req, res) {
   let cacheHit = false;
 
   try {
-    // 1. Detect local intent (bypass Gemini completely if database handles query)
+    // 1. Detect local intent (bypass Gemini completely if database/routing handles query)
     const localIntent = detectLocalIntent(query);
     if (localIntent && localIntent.handledLocally) {
       const response = {
         type: localIntent.type,
         message: localIntent.message || `Locally resolved query: ${query}`,
-        actions: localIntent.type === "navigation" ? [`open${localIntent.target.charAt(0).toUpperCase() + localIntent.target.slice(1)}`] : [],
+        actions: localIntent.actions || [],
         local: true
       };
 
@@ -97,11 +97,72 @@ async function handleNyxQuery(req, res) {
     // 5. Query Gemini AI Gateway
     const rawResult = await callLLM(prompt);
 
-    // 6. Clean response envelopes
-    const parsedJSON = cleanAndParseJSON(rawResult);
+    let finalResponse;
 
-    // 7. Validate output schemas and actions
-    const validated = validateResponse(parsedJSON);
+    // 6. Inspect if gateway returned a native Tool Call JSON
+    if (rawResult.startsWith('{"toolCalls":')) {
+      const parsedCall = JSON.parse(rawResult);
+      const call = parsedCall.toolCalls[0];
+      
+      finalResponse = {
+        type: "summary",
+        message: "Executing curated platform command.",
+        actions: []
+      };
+
+      if (call.name === "navigate") {
+        const target = call.args.target;
+        finalResponse.type = "navigation";
+        if (target === "dashboard") {
+          finalResponse.message = "Opening your main control center.";
+          finalResponse.actions = ["openDashboard"];
+        } else if (target === "watchlist") {
+          finalResponse.message = "Opening your saved collection folder.";
+          finalResponse.actions = ["openWatchlist"];
+        } else if (target === "home") {
+          finalResponse.message = "Returning to the dark cinema gate.";
+          finalResponse.actions = ["openHome"];
+        } else if (target === "settings") {
+          finalResponse.message = "Opening configurations.";
+          finalResponse.actions = ["openSettings"];
+        }
+      } else if (call.name === "openMovie") {
+        finalResponse.type = "recommendation";
+        finalResponse.message = `Displaying cinematic insights.`;
+        finalResponse.actions = ["openMovie"];
+        finalResponse.movieId = Number(call.args.movieId);
+      } else if (call.name === "showPersona") {
+        finalResponse.type = "persona";
+        finalResponse.message = "Focusing on your active taste persona archetype.";
+        finalResponse.actions = ["showPersona"];
+      } else if (call.name === "showMovieDNA") {
+        finalResponse.type = "movieDNA";
+        finalResponse.message = "Locating your movie DNA indicators.";
+        finalResponse.actions = ["showMovieDNA"];
+      } else if (call.name === "showAnalytics") {
+        finalResponse.type = "analytics";
+        finalResponse.message = "Opening provider click analytics insights.";
+        finalResponse.actions = ["showAnalytics"];
+      } else if (call.name === "scrollRecommendation") {
+        finalResponse.type = "recommendation";
+        finalResponse.message = "Scrolling to recommendations grid.";
+        finalResponse.actions = ["scrollRecommendation"];
+      }
+    } else {
+      // 7. General narrative explanation: Parse if JSON, otherwise wrap text
+      try {
+        finalResponse = cleanAndParseJSON(rawResult);
+      } catch (jsonErr) {
+        finalResponse = {
+          type: "summary",
+          message: rawResult,
+          actions: []
+        };
+      }
+    }
+
+    // 8. Validate output schemas and actions
+    const validated = validateResponse(finalResponse);
 
     // Store in cache for future references
     cacheService.set(cacheKey, validated);
@@ -110,7 +171,7 @@ async function handleNyxQuery(req, res) {
     aiLogger.logRequest({
       intent,
       promptSize,
-      tokens: Math.ceil(promptSize / 4) + Math.ceil(rawResult.length / 4), // Simple token estimate
+      tokens: Math.ceil(promptSize / 4) + Math.ceil(rawResult.length / 4),
       duration,
       cacheHit: false,
       success: true
@@ -129,7 +190,6 @@ async function handleNyxQuery(req, res) {
       error: err
     });
 
-    // Clean, cinematic fallback execution
     const fallback = getFallbackResponse(intent, query);
     return res.json(fallback);
   }
@@ -137,7 +197,6 @@ async function handleNyxQuery(req, res) {
 
 async function getNyxLogs(req, res) {
   try {
-    // Only return latest logs
     return res.json(aiLogger.getLogs());
   } catch (err) {
     return res.status(500).json({ error: "Failed to retrieve logs" });
