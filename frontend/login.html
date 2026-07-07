@@ -11,52 +11,8 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
-    <style>
-        .input-group select {
-            width: 100%;
-            padding: 18px 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid transparent;
-            border-radius: 16px;
-            color: white;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255, 255, 255, 0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 20px center;
-            background-size: 16px;
-            padding-right: 45px;
-        }
-        .input-group select:focus {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--primary-glow);
-            box-shadow: 0 0 15px rgba(229, 9, 20, 0.35);
-            padding-top: 25px;
-            padding-bottom: 11px;
-            outline: none;
-        }
-        .input-group select:valid {
-            padding-top: 25px;
-            padding-bottom: 11px;
-        }
-        .input-group select:focus+label,
-        .input-group select:valid+label {
-            top: 15px;
-            font-size: 11px;
-            color: var(--primary-glow);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .input-group select option {
-            background: #16161a;
-            color: #fff;
-        }
-    </style>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body class="login-body">
@@ -66,184 +22,259 @@
     </video>
 
     <div class="overlay"></div>
+
     <!-- Login Card -->
     <div class="login-wrapper">
         <div class="login-card">
 
-      <h1 class="brand">
-  <span class="icon">🎬</span>
-  Movie Recommendation System
-</h1>
+            <h1 class="brand">
+                <span class="icon">🎬</span>
+                Movie Recommendation System
+            </h1>
             <p class="subtitle">Sign in and Discover movies</p>
 
-            <!-- Error message -->
+            <!-- Localized general error message banner -->
             <div id="error-msg" class="error-message hidden"></div>
 
-            <!-- Form -->
-            <form onsubmit="event.preventDefault(); login();">
-                 
-                <!-- Username -->
-                <div class="input-group">
-                    <input type="text" id="username" required autocomplete="off" placeholder=" ">
-                    <label for="username">Username</label>
+            <!-- Form Viewport -->
+            <div class="form-viewport">
+                <div class="form-slider" id="formSlider">
+                    
+                    <!-- 1. LOGIN FORM PANEL -->
+                    <div class="form-pane" id="loginPane">
+                        <form onsubmit="event.preventDefault(); login();">
+                            <!-- Username -->
+                            <div class="input-group">
+                                <input type="text" id="username" required autocomplete="off" placeholder=" " oninput="validateField(this, 'username')">
+                                <label for="username">Username</label>
+                                <span class="validation-status"><i class="fas fa-check-circle"></i></span>
+                            </div>
+                            <span class="field-error hidden" id="usernameError">Username must be 3-30 alphanumeric characters</span>
+
+                            <!-- Password -->
+                            <div class="input-group">
+                                <input type="password" id="password" required placeholder=" " oninput="validateField(this, 'password')">
+                                <label for="password">Password</label>
+                                <span class="validation-status"><i class="fas fa-check-circle"></i></span>
+                            </div>
+                            <span class="field-error hidden" id="passwordError">Password must be at least 6 characters</span>
+
+                            <div class="terms-box">
+                                <input type="checkbox" id="terms">
+                                <label for="terms">
+                                    By continuing, you agree to the
+                                    <span class="policy-link" onclick="openPolicy()">Terms & Privacy Policy</span>
+                                </label>
+                            </div>
+                            <p id="termsError" class="terms-error hidden">Please accept Terms & Privacy Policy</p>
+
+                            <!-- Login button with loader container -->
+                            <button type="submit" class="btn login-btn">
+                                Login
+                            </button>
+
+                            <div class="divider"><span>OR</span></div>
+                            <p class="subtitle">Don't have an account? <span class="form-toggle-link" onclick="toggleFormMode('signup')">Sign Up</span></p>
+                        </form>
+                    </div>
+
+                    <!-- 2. REGISTER FORM PANEL -->
+                    <div class="form-pane" id="registerPane">
+                        <form onsubmit="event.preventDefault(); register();">
+                            <!-- Username -->
+                            <div class="input-group">
+                                <input type="text" id="regUsername" required autocomplete="off" placeholder=" " oninput="validateField(this, 'username')">
+                                <label for="regUsername">Username</label>
+                                <span class="validation-status"><i class="fas fa-check-circle"></i></span>
+                            </div>
+                            <span class="field-error hidden" id="regUsernameError">Username must be 3-30 alphanumeric characters</span>
+
+                            <!-- Password -->
+                            <div class="input-group">
+                                <input type="password" id="regPassword" required placeholder=" " oninput="validateField(this, 'password')">
+                                <label for="regPassword">Password</label>
+                                <span class="validation-status"><i class="fas fa-check-circle"></i></span>
+                            </div>
+                            <span class="field-error hidden" id="regPasswordError">Password must be at least 6 characters</span>
+
+                            <!-- Gender Pill Selection -->
+                            <div class="gender-selection">
+                                <span class="gender-label">Select Profile Archetype</span>
+                                <div class="gender-pills">
+                                    <button type="button" class="gender-pill active" id="pillMale" onclick="selectGender('male')">
+                                        <i class="fas fa-mars"></i> Male / Cosmic
+                                    </button>
+                                    <button type="button" class="gender-pill" id="pillFemale" onclick="selectGender('female')">
+                                        <i class="fas fa-venus"></i> Female / Nyx Core
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="terms-box">
+                                <input type="checkbox" id="regTerms">
+                                <label for="regTerms">
+                                    By continuing, you agree to the
+                                    <span class="policy-link" onclick="openPolicy()">Terms & Privacy Policy</span>
+                                </label>
+                            </div>
+                            <p id="regTermsError" class="terms-error hidden">Please accept Terms & Privacy Policy</p>
+
+                            <!-- Sign Up button with loader container -->
+                            <button type="submit" class="btn register-btn">
+                                Sign Up
+                            </button>
+
+                            <div class="divider"><span>OR</span></div>
+                            <p class="subtitle">Already have an account? <span class="form-toggle-link" onclick="toggleFormMode('login')">Login</span></p>
+                        </form>
+                    </div>
+
                 </div>
+            </div>
 
-                <!-- Password -->
-                <div class="input-group">
-                    <input type="password" id="password" required placeholder=" ">
-                    <label for="password">Password</label>
+            <!-- POLICY MODAL -->
+            <div id="policyModal" class="policy-modal hidden">
+                <div class="policy-content">
+                    <button class="close-policy" onclick="closePolicy()">✖</button>
+                    <h2>Privacy & Terms</h2>
+                    <p class="policy-subtitle">Please review and accept before continuing.</p>
+                    <div class="policy-text">
+                        <ul class="policy-list">
+                            <li>Uses TMDB API for movie information.</li>
+                            <li>No copyrighted movies are hosted.</li>
+                            <li>Streaming availability varies by region.</li>
+                            <li>User accounts are securely authenticated.</li>
+                        </ul>
+                    </div>
+                    <button class="accept-policy-btn" onclick="acceptPolicy()">Accept & Continue</button>
                 </div>
-                
-
-               <div class="terms-box">
-
-    <input type="checkbox" id="terms" >
-
-    <label for="terms">
-        By continuing, you agree to the
-
-        <span class="policy-link"
-              onclick="openPolicy()">
-
-            Terms & Privacy Policy
-
-        </span>
-    </label>
-
-</div>
-<p id="termsError"
-   class="terms-error hidden">
-
-   Please accept Terms & Privacy Policy
-
-</p>
-                <!-- Login Button -->
-                <button type="submit" class="btn login-btn">
-                    Login
-                </button>
-
-                <div class="divider"><span>OR</span></div>
-                <p class="subtitle">Don't have an account? Sign Up</p>
-                <!-- Register Button -->
-
-                <button type="button" class="btn register-btn" onclick="register()">
-                    Sign Up
-                </button>
-
-            </form>
-<!-- POLICY MODAL -->
-<div id="policyModal"
-     class="policy-modal hidden">
-
-    <div class="policy-content">
-
-        <button class="close-policy"
-                onclick="closePolicy()">
-
-            ✖
-
-        </button>
-
-<h2>Privacy & Terms</h2>
-<p class="policy-subtitle">
-Please review and accept before continuing.
-</p>
-        <div class="policy-text">
-
-          <ul class="policy-list">
-          <li>Uses TMDB API for movie information.</li>
-          <li>No copyrighted movies are hosted.</li>
-          <li>Streaming availability varies by region.</li>
-           <li>User accounts are securely authenticated.</li>
-         </ul>
+            </div>
 
         </div>
-
-        <button class="accept-policy-btn"
-                onclick="acceptPolicy()">
-
-            Accept & Continue
-
-        </button>
-
     </div>
 
-</div>
-        </div>
-    </div>
     <script src="config.js"></script>
-    <!-- SCRIPT -->
     <script>
         // 🔐 Redirect if already logged in
         if (sessionStorage.getItem("sessionActive")) {
             window.location.href = "index.html";
         }
 
-// POLICY SYSTEM
-document
-.getElementById("username")
-.addEventListener("input", () => {
+        // Active State variables
+        let selectedGender = "male";
 
-    const username =
-    document.getElementById("username").value;
+        // Real-Time Input Validation Handler
+        function validateField(input, type) {
+            const val = input.value;
+            let isValid = false;
+            let errorSpan = null;
 
-    const accepted =
-    localStorage.getItem(
-      "policyAccepted_" + username
-    );
+            // Resolve inline error elements
+            if (input.id === "username") errorSpan = document.getElementById("usernameError");
+            if (input.id === "password") errorSpan = document.getElementById("passwordError");
+            if (input.id === "regUsername") errorSpan = document.getElementById("regUsernameError");
+            if (input.id === "regPassword") errorSpan = document.getElementById("regPasswordError");
 
-    document.getElementById("terms").checked =
-    accepted === "true";
-});
-function openPolicy() {
+            if (type === "username") {
+                const regex = /^[a-zA-Z0-9_]{3,30}$/;
+                isValid = regex.test(val);
+            } else if (type === "password") {
+                isValid = val.length >= 6;
+            }
 
-    document
-        .getElementById("policyModal")
-        .classList.remove("hidden");
-}
+            if (val === "") {
+                input.classList.remove("valid", "invalid");
+                if (errorSpan) errorSpan.classList.add("hidden");
+            } else if (isValid) {
+                input.classList.remove("invalid");
+                input.classList.add("valid");
+                if (errorSpan) errorSpan.classList.add("hidden");
+            } else {
+                input.classList.remove("valid");
+                input.classList.add("invalid");
+                if (errorSpan) errorSpan.classList.remove("hidden");
+            }
+        }
 
-function closePolicy() {
+        // Gender Selection Pill Switcher
+        function selectGender(gender) {
+            selectedGender = gender;
+            document.getElementById("pillMale").classList.toggle("active", gender === "male");
+            document.getElementById("pillFemale").classList.toggle("active", gender === "female");
+        }
 
-    document
-        .getElementById("policyModal")
-        .classList.add("hidden");
-}
+        // Slide Pane Toggle Form Mode
+        function toggleFormMode(mode) {
+            const slider = document.getElementById("formSlider");
+            const subtitle = document.querySelector(".subtitle");
+            const errorMsg = document.getElementById("error-msg");
 
-function acceptPolicy() {
+            if (errorMsg) {
+                errorMsg.innerText = "";
+                errorMsg.classList.add("hidden");
+            }
 
-   const username =
-document.getElementById("username").value;
+            if (mode === "signup") {
+                slider.classList.add("show-signup");
+                if (subtitle) subtitle.innerText = "Create your account and discover movies";
+            } else {
+                slider.classList.remove("show-signup");
+                if (subtitle) subtitle.innerText = "Sign in and discover movies";
+            }
+        }
 
-if(username){
+        // Policy accepted link hook
+        document.getElementById("username").addEventListener("input", () => {
+            const username = document.getElementById("username").value;
+            const accepted = localStorage.getItem("policyAccepted_" + username);
+            document.getElementById("terms").checked = (accepted === "true");
+        });
+        
+        document.getElementById("regUsername").addEventListener("input", () => {
+            const username = document.getElementById("regUsername").value;
+            const accepted = localStorage.getItem("policyAccepted_" + username);
+            document.getElementById("regTerms").checked = (accepted === "true");
+        });
 
-localStorage.setItem(
-    "policyAccepted_" + username,
-    "true"
-);
+        function openPolicy() {
+            document.getElementById("policyModal").classList.remove("hidden");
+        }
 
-}
-    document
-        .getElementById("terms")
-        .checked = true;
+        function closePolicy() {
+            document.getElementById("policyModal").classList.add("hidden");
+        }
 
-    closePolicy();
-}
+        function acceptPolicy() {
+            const activeInput = document.getElementById("formSlider").classList.contains("show-signup") 
+                ? document.getElementById("regUsername") 
+                : document.getElementById("username");
+            
+            const username = activeInput.value.trim();
+            if (username) {
+                localStorage.setItem("policyAccepted_" + username, "true");
+            }
+
+            document.getElementById("terms").checked = true;
+            document.getElementById("regTerms").checked = true;
+            closePolicy();
+        }
+
         async function login() {
             const loginBtn = document.querySelector(".login-btn");
             const registerBtn = document.querySelector(".register-btn");
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             const accepted = document.getElementById("terms").checked;
-            const error = document.getElementById("termsError");
+            const termsError = document.getElementById("termsError");
+            const errorMsg = document.getElementById("error-msg");
 
             if (!accepted) {
-                error.classList.remove("hidden");
+                termsError.classList.remove("hidden");
                 return;
             }
+            termsError.classList.add("hidden");
 
-            error.classList.add("hidden");
-            
-            // Set loading state
+            // Setup loading state animation
             const originalHTML = loginBtn.innerHTML;
             loginBtn.innerHTML = `<div class="uib-loader-container"><div class="uib-loader-dot"></div></div>`;
             loginBtn.disabled = true;
@@ -260,10 +291,10 @@ localStorage.setItem(
                 const data = await res.json();
 
                 if (data.error) {
-                    document.getElementById("error-msg").innerText = data.error || "Login failed";
-                    document.getElementById("error-msg").classList.remove("hidden");
+                    errorMsg.innerText = data.error || "Login failed";
+                    errorMsg.classList.remove("hidden");
                     
-                    // Restore button state
+                    // Reset loading state
                     loginBtn.innerHTML = originalHTML;
                     loginBtn.disabled = false;
                     if (registerBtn) registerBtn.disabled = false;
@@ -272,44 +303,45 @@ localStorage.setItem(
 
                 sessionStorage.setItem("sessionActive", "true");
                 
-                // Smooth body fade-out transition
+                // Fade page out transition
                 document.body.classList.add("fade-out");
                 setTimeout(() => {
                     window.location.href = "index.html";
                 }, 600);
 
             } catch (err) {
-                console.error("Login request error:", err);
-                document.getElementById("error-msg").innerText = "Unable to connect to server. Please try again.";
-                document.getElementById("error-msg").classList.remove("hidden");
-                
-                // Restore button state
+                console.error("Login failure:", err);
+                errorMsg.innerText = "Connection error. Unable to contact authentication server.";
+                errorMsg.classList.remove("hidden");
+
+                // Reset loading state
                 loginBtn.innerHTML = originalHTML;
                 loginBtn.disabled = false;
                 if (registerBtn) registerBtn.disabled = false;
             }
         }
+
         async function register() {
             const loginBtn = document.querySelector(".login-btn");
             const registerBtn = document.querySelector(".register-btn");
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const gender = "male";
-            const accepted = document.getElementById("terms").checked;
-            const error = document.getElementById("termsError");
+            const username = document.getElementById("regUsername").value;
+            const password = document.getElementById("regPassword").value;
+            const accepted = document.getElementById("regTerms").checked;
+            const termsError = document.getElementById("regTermsError");
+            const errorMsg = document.getElementById("error-msg");
 
             if (!accepted) {
-                error.classList.remove("hidden");
+                termsError.classList.remove("hidden");
                 return;
             }
+            termsError.classList.add("hidden");
 
-            error.classList.add("hidden");
             if (!username || !password) {
                 alert("Enter username & password");
                 return;
             }
 
-            // Set loading state
+            // Setup loading state animation
             const originalHTML = registerBtn.innerHTML;
             registerBtn.innerHTML = `<div class="uib-loader-container"><div class="uib-loader-dot"></div></div>`;
             registerBtn.disabled = true;
@@ -319,46 +351,43 @@ localStorage.setItem(
                 const res = await fetch(`${API_BASE}/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password, gender }),
+                    body: JSON.stringify({ username, password, gender: selectedGender }),
                     credentials: "include"
                 });
 
                 const data = await res.json();
 
                 if (data.error) {
-                    document.getElementById("error-msg").innerText = data.error;
-                    document.getElementById("error-msg").classList.remove("hidden");
+                    errorMsg.innerText = data.error;
+                    errorMsg.classList.remove("hidden");
                     
-                    // Restore button state
+                    // Reset loading state
                     registerBtn.innerHTML = originalHTML;
                     registerBtn.disabled = false;
                     if (loginBtn) loginBtn.disabled = false;
                     return;
                 }
 
-                // AUTO LOGIN
                 sessionStorage.setItem("sessionActive", "true");
                 
-                // Smooth body fade-out transition
+                // Fade page out transition
                 document.body.classList.add("fade-out");
                 setTimeout(() => {
                     window.location.href = "index.html";
                 }, 600);
 
             } catch (err) {
-                console.error("Register request error:", err);
-                document.getElementById("error-msg").innerText = "Unable to connect to server. Please try again.";
-                document.getElementById("error-msg").classList.remove("hidden");
-                
-                // Restore button state
+                console.error("Registration failure:", err);
+                errorMsg.innerText = "Connection error. Unable to contact registration server.";
+                errorMsg.classList.remove("hidden");
+
+                // Reset loading state
                 registerBtn.innerHTML = originalHTML;
                 registerBtn.disabled = false;
                 if (loginBtn) loginBtn.disabled = false;
             }
         }
-        
     </script>
-
 </body>
 
 </html>

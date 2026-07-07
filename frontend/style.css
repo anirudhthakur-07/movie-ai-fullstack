@@ -4177,3 +4177,256 @@ body {
     transform: scale(1);
   }
 }
+
+/* ==========================================================================
+   Zero-Trust Micro-Interactions, Glassmorphism Glows & Dual Form Panels
+   ========================================================================== */
+.login-card {
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.95),
+    0 0 90px rgba(229, 9, 20, 0.18), /* Soft fire glow backing the card */
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Dual Panel form slider viewport */
+.form-viewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.form-slider {
+  display: flex;
+  width: 200%;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.form-pane {
+  width: 50%;
+  flex-shrink: 0;
+  padding: 8px 4px;
+  box-sizing: border-box;
+}
+
+.form-slider.show-signup {
+  transform: translateX(-50%);
+}
+
+/* Real-time Validation Input CSS */
+.input-group {
+  position: relative;
+}
+
+.input-group .validation-status {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.8);
+  font-size: 15px;
+  color: #2ec4b6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+.input-group input.valid ~ .validation-status {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.input-group input.valid {
+  border-color: #2ec4b6 !important;
+  box-shadow: 0 0 12px rgba(46, 196, 182, 0.2) !important;
+}
+
+.input-group input.invalid {
+  border-color: #ff2e43 !important;
+  box-shadow: 0 0 12px rgba(255, 46, 67, 0.2) !important;
+}
+
+/* Inline localized validation errors styling */
+.field-error {
+  display: block;
+  text-align: left;
+  font-size: 11px;
+  color: #ff2e43;
+  margin-top: -15px;
+  margin-bottom: 15px;
+  margin-left: 10px;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+/* Premium Gender Selector styles */
+.gender-selection {
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.gender-label {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+.gender-pills {
+  display: flex;
+  gap: 12px;
+}
+
+.gender-pill {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 48px;
+}
+
+.gender-pill i {
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.gender-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.gender-pill.active {
+  background: rgba(229, 9, 20, 0.12) !important;
+  border-color: #ff2e43 !important;
+  color: #ff2e43 !important;
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.2);
+  font-weight: 600;
+}
+
+.btn.register-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  height: 48px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+
+.btn.register-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn.login-btn {
+  height: 52px;
+}
+
+.form-toggle-link {
+  color: var(--primary-glow);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.form-toggle-link:hover {
+  color: #ff5b6b;
+}
+
+.input-group input:focus {
+  outline: none !important;
+}
+
+/* ==========================================================================
+   PREMIUM BUTTON LOADER & PAGE TRANSITION ANIMATIONS
+   ========================================================================== */
+.login-body {
+  transition: opacity 0.6s ease, transform 0.6s ease !important;
+  opacity: 1;
+}
+
+.login-body.fade-out {
+  opacity: 0 !important;
+  transform: scale(0.98) !important;
+  pointer-events: none !important;
+}
+
+/* Global fade-in transition for the dashboard and homepage body */
+body {
+  animation: bodyFadeIn 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes bodyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button Loading animation containers styles */
+.uib-loader-container {
+  --uib-size: 38px;
+  --uib-color: #ffffff;
+  --uib-speed: 1.3s;
+  --uib-dot-size: calc(var(--uib-size) * 0.22);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--uib-dot-size);
+  width: var(--uib-size);
+  vertical-align: middle;
+}
+
+.uib-loader-dot,
+.uib-loader-container::before,
+.uib-loader-container::after {
+  content: '';
+  display: block;
+  height: var(--uib-dot-size);
+  width: var(--uib-dot-size);
+  border-radius: 50%;
+  background-color: var(--uib-color);
+  transform: scale(0);
+  transition: background-color 0.3s ease;
+}
+
+.uib-loader-container::before {
+  animation: pulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.375) infinite;
+}
+
+.uib-loader-dot {
+  animation: pulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.25) infinite both;
+}
+
+.uib-loader-container::after {
+  animation: pulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.125) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
