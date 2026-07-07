@@ -3770,14 +3770,27 @@ pointer-events: auto;
   background: rgba(12, 12, 16, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
-  display: flex;
+  display: flex !important; /* Override default hidden display:none behavior to allow transitions */
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  animation: slideUpNyx 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   box-sizing: border-box;
+  
+  /* Smooth hardware-accelerated toggle transitions */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(15px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s ease;
+  will-change: transform;
+}
+
+/* Shown state selector when not flagged as hidden */
+.nyx-chat-window:not(.hidden) {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) scale(1) !important;
 }
 
 .nyx-chat-header {
@@ -3957,12 +3970,6 @@ pointer-events: auto;
 }
 
 @media (max-width: 576px) {
-  .navbar {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 12px !important;
-    padding: 12px 15px !important;
-  }
   .nav-right {
     width: 100% !important;
     display: flex !important;
@@ -3977,7 +3984,86 @@ pointer-events: auto;
   }
 }
 
+/* ==========================================================================
+   MOBILE-FIRST UX HARDENING & VIEWPORT CONTAINMENT OVERRIDES
+   ========================================================================== */
 @media (max-width: 768px) {
+  /* Prevent horizontal layout shifts and overflows */
+  html, body {
+    overflow-x: hidden !important;
+    position: relative;
+    width: 100%;
+  }
+
+  /* Navigation resiliency to prevent button overlap */
+  .navbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 15px !important;
+    height: auto !important;
+    flex-direction: row !important; /* Keep items horizontal on larger mobile */
+  }
+
+  /* Scale navbar actions to Touch-First standards (minimum 44x44px target area) */
+  .nav-action-btn {
+    font-size: 0 !important; /* Hide text, keep icons */
+    padding: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .nav-action-btn i {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+
+  /* Chatbot trigger scaling using clamp() for screen-agnostic sizing */
+  .nyx-orb-container {
+    bottom: 15px !important;
+    right: 15px !important;
+    z-index: 100000 !important;
+  }
+
+  .nyx-orb {
+    width: clamp(45px, 12vw, 55px) !important;
+    height: clamp(45px, 12vw, 55px) !important;
+  }
+
+  /* Chatbot Window boundary constraints & viewport containment */
+  .nyx-chat-window {
+    position: fixed !important;
+    bottom: 80px !important;
+    right: 15px !important;
+    left: auto !important;
+    width: 350px !important;
+    max-width: 90vw !important;
+    height: clamp(350px, 60vh, 480px) !important;
+    z-index: 100000 !important;
+    transform-origin: bottom right !important;
+    
+    /* Hardware-Accelerated translate slide transitions */
+    display: flex !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(100%) scale(0.95) !important;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease !important;
+    will-change: transform !important;
+    animation: none !important;
+  }
+
+  /* Toggle transition states */
+  .nyx-chat-window:not(.hidden) {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+
   .hero-content {
     margin-left: 15px !important;
     margin-bottom: 80px !important;
