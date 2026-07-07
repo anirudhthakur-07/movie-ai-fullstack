@@ -639,6 +639,7 @@ function displayMovies(movies, container, replace = false) {
     const card = document.createElement('div');
     card.dataset.id = movie.id;
     card.classList.add('movie-card');
+    card._movieData = movie;
     card.addEventListener("click", async () => {
       if (movie.explanations && movie.explanations.length > 0 && sessionStorage.getItem("sessionActive")) {
         fetch(`${API_BASE}/achievements/track`, {
@@ -652,7 +653,7 @@ function displayMovies(movies, container, replace = false) {
       }
 
       if (typeof openModal === "function") {
-        openModal(movie);
+        openModal(movie, card);
       }
     });
 

@@ -691,13 +691,14 @@ function displayWatchlist(list, container, isFilterSubCall = false) {
     filteredList.forEach(movie => {
         const card = document.createElement('div');
         card.classList.add('watch-card');
+        card._movieData = {
+            id: movie.tmdbId || movie.id,
+            title: movie.title || "Unknown",
+            poster_path: movie.poster || movie.poster_path || ""
+        };
 
         card.addEventListener("click", () => {
-            openModal({
-                id: movie.tmdbId || movie.id,
-                title: movie.title || "Unknown",
-                poster_path: movie.poster || movie.poster_path || ""
-            });
+            openModal(card._movieData, card);
         });
 
         const poster = movie.poster || movie.poster_path;
@@ -757,12 +758,13 @@ function displayRowMovies(movies, container, isRecommendation = false) {
     movies.forEach(movie => {
         const card = document.createElement("div");
         card.className = "movie-card";
+        card._movieData = {
+            id: movie.tmdbId || movie.id,
+            title: movie.title || "Unknown",
+            poster_path: movie.poster || movie.poster_path || ""
+        };
         card.addEventListener("click", () => {
-            openModal({
-                id: movie.tmdbId || movie.id,
-                title: movie.title || "Unknown",
-                poster_path: movie.poster || movie.poster_path || ""
-            });
+            openModal(card._movieData, card);
         });
 
         const posterPath = movie.poster || movie.poster_path;

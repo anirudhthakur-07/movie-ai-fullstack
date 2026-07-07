@@ -60,12 +60,169 @@ async function fetchProviders(movieId) {
 // MOVIE DETAILS MODAL
 // Display Complete Movie Information
 let modalRetryCount = 0;
+let modalSiblings = [];
+let modalCurrentIndex = -1;
+let isTransitioning = false;
+let touchStartX = 0;
+let touchEndX = 0;
 
-window.openModal = async function (movie) {
-    const requestId = Date.now();
-    currentModalRequest = requestId;
+function setupSwipeGestures() {
+    const modalContent = document.querySelector(".modal-content");
+    if (!modalContent || modalContent._swipeBound) return;
+    
+    modalContent.addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    modalContent.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }, { passive: true });
+    
+    modalContent._swipeBound = true;
+}
+
+function handleSwipeGesture() {
+    if (modalSiblings.length <= 1 || isTransitioning) return;
+    const swipeThreshold = 75;
+    const diffX = touchEndX - touchStartX;
+    if (diffX < -swipeThreshold) {
+        navigateModal(1);
+    } else if (diffX > swipeThreshold) {
+        navigateModal(-1);
+    }
+}
+
+function setupModalArrows() {
+    let prevArrow = document.getElementById("modalPrevArrow");
+    let nextArrow = document.getElementById("modalNextArrow");
+    const modalContent = document.querySelector(".modal-content");
+    if (!modalContent) return;
+
+    if (modalSiblings.length > 1 && modalCurrentIndex !== -1) {
+        if (!prevArrow) {
+            prevArrow = document.createElement("button");
+            prevArrow.id = "modalPrevArrow";
+            prevArrow.className = "modal-nav-arrow prev-arrow";
+            prevArrow.innerHTML = "❮";
+            modalContent.appendChild(prevArrow);
+        }
+        if (!nextArrow) {
+            nextArrow = document.createElement("button");
+            nextArrow.id = "modalNextArrow";
+            nextArrow.className = "modal-nav-arrow next-arrow";
+            nextArrow.innerHTML = "❯";
+            modalContent.appendChild(nextArrow);
+        }
+        prevArrow.style.display = "flex";
+        nextArrow.style.display = "flex";
+        
+        prevArrow.onclick = (e) => {
+            e.stopPropagation();
+            navigateModal(-1);
+        };
+        nextArrow.onclick = (e) => {
+            e.stopPropagation();
+            navigateModal(1);
+        };
+    } else {
+        if (prevArrow) prevArrow.style.display = "none";
+        if (nextArrow) nextArrow.style.display = "none";
+    }
+}
+
+function updateDots() {
+    let dotsContainer = document.getElementById("modalDotsContainer");
+    if (modalSiblings.length > 1) {
+        if (!dotsContainer) {
+            dotsContainer = document.createElement("div");
+            dotsContainer.id = "modalDotsContainer";
+            dotsContainer.className = "modal-indicator-dots";
+            const modalBody = document.querySelector(".modal-body");
+            if (modalBody) {
+                modalBody.parentNode.insertBefore(dotsContainer, modalBody.nextSibling);
+            }
+        }
+        dotsContainer.style.display = "flex";
+        dotsContainer.innerHTML = "";
+        const maxDots = Math.min(modalSiblings.length, 10);
+        for (let i = 0; i < maxDots; i++) {
+            const dot = document.createElement("span");
+            dot.className = "indicator-dot" + (i === modalCurrentIndex ? " active" : "");
+            const targetIndex = i;
+            dot.onclick = () => {
+                const diff = targetIndex - modalCurrentIndex;
+                if (diff !== 0) navigateModal(diff);
+            };
+            dotsContainer.appendChild(dot);
+        }
+    } else {
+        if (dotsContainer) dotsContainer.style.display = "none";
+    }
+}
+
+async function navigateModal(direction) {
+    if (isTransitioning || modalSiblings.length <= 1 || modalCurrentIndex === -1) return;
+    isTransitioning = true;
+    
+    const modalBody = document.querySelector(".modal-body");
+    if (!modalBody) {
+        isTransitioning = false;
+        return;
+    }
+    
+    const outgoingClass = direction > 0 ? "slide-out-left" : "slide-out-right";
+    const incomingClass = direction > 0 ? "slide-in-right" : "slide-in-left";
+    
+    modalBody.classList.add(outgoingClass);
+    
+    setTimeout(async () => {
+        modalCurrentIndex = (modalCurrentIndex + direction + modalSiblings.length) % modalSiblings.length;
+        const nextMovie = modalSiblings[modalCurrentIndex];
+        
+        await updateModalContent(nextMovie);
+        updateDots();
+        
+        modalBody.classList.remove(outgoingClass);
+        modalBody.classList.add(incomingClass);
+        
+        setTimeout(() => {
+            modalBody.classList.remove(incomingClass);
+            isTransitioning = false;
+        }, 380);
+    }, 200);
+}
+
+window.openModal = async function (movie, cardElement) {
     const modal = document.getElementById('movieModal');
     if (!modal) return;   
+
+    if (cardElement) {
+        const parent = cardElement.closest('.movie-row') || cardElement.closest('.movie-grid') || cardElement.closest('.watchlist-grid') || cardElement.closest('#watchlistContainer') || cardElement.parentNode;
+        if (parent) {
+            const cards = Array.from(parent.querySelectorAll('.movie-card, .watch-card'));
+            modalSiblings = cards.map(c => c._movieData).filter(Boolean);
+            modalCurrentIndex = modalSiblings.findIndex(m => Number(m.id || m.tmdbId) === Number(movie.id || movie.tmdbId));
+        }
+    } else {
+        modalSiblings = [];
+        modalCurrentIndex = -1;
+    }
+
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('show'), 10);
+    document.body.classList.add("modal-open");
+
+    setupSwipeGestures();
+    setupModalArrows();
+    updateDots();
+
+    await updateModalContent(movie);
+};
+
+async function updateModalContent(movie) {
+    const requestId = Date.now();
+    currentModalRequest = requestId;
     const modalImg = document.getElementById('modalImg');
     const modalTitle = document.getElementById('modalTitle');
     const modalRating = document.getElementById('modalRating');
@@ -88,10 +245,7 @@ window.openModal = async function (movie) {
     currentOpenMovieId = movieId;
     let fullMovie = movie;
     if (!movieId) return;
-    // Display modal immediately while data loads
-    modal.classList.remove('hidden');
-    setTimeout(() => modal.classList.add('show'), 10);
-    document.body.classList.add("modal-open");
+
     modalImg.classList.add("skeleton", "skeleton-img");
     modalImg.style.display = "block";
     modalImg.style.opacity = 0;
@@ -122,10 +276,6 @@ window.openModal = async function (movie) {
   <br>
   <div class="skeleton skeleton-text" style="width:50%"></div>
 `;
-    if (reasonsBox) {
-        reasonsBox.innerHTML = "";
-        reasonsBox.classList.add("hidden");
-    }
 
     const imgUrl = (fullMovie.poster_path || fullMovie.poster)
         ? `${IMG_BASE}${fullMovie.poster_path || fullMovie.poster}`
@@ -136,7 +286,6 @@ window.openModal = async function (movie) {
         modalContent.style.setProperty('--modal-backdrop', imgUrl ? `url(${imgUrl})` : "none");
     }
 
-    // handle both cached + fresh images
     modalImg.onload = () => {
         if (currentModalRequest !== requestId) return;
         modalImg.classList.remove("skeleton", "skeleton-img");
@@ -155,13 +304,14 @@ window.openModal = async function (movie) {
             modalImg.classList.remove("skeleton", "skeleton-img");
             modalImg.style.opacity = 1;
         }
-    }    const trailerBtn = document.getElementById("playTrailerBtn");
-    // Reset trailer button before loading new data
+    }    
+    
+    const trailerBtn = document.getElementById("playTrailerBtn");
     trailerBtn.innerText = "Loading...";
     trailerBtn.disabled = true;
     trailerBtn.onclick = null;
+    
     try {
-      // Retrieve latest movie details from backend (which includes credits)
       const res = await fetch(`${API_BASE}/movie/${movieId}`);
 
       if (!res.ok) {
@@ -173,7 +323,7 @@ window.openModal = async function (movie) {
       if (fullMovie.error) {
           throw new Error(fullMovie.error);
       }
-      modalRetryCount = 0; // reset retry counter
+      modalRetryCount = 0;
 
       if (modalContent) {
           const backdropUrl = fullMovie.backdrop_path 
@@ -187,19 +337,13 @@ window.openModal = async function (movie) {
       const cast = await fetchCast(movieId);
       if (currentModalRequest !== requestId) return;
 
-      // Extract Director
       const directorMember = fullMovie.credits && fullMovie.credits.crew 
         ? fullMovie.credits.crew.find(c => c.job === "Director") 
         : null;
       const directorName = directorMember ? directorMember.name : "Unknown";
-
-      // Extract Language
       const langName = getLanguageName(fullMovie.original_language || 'en');
-
-      // Extract Runtime
       const runtimeVal = fullMovie.runtime ? `${fullMovie.runtime} min` : "N/A";
 
-      // Render extra catalog metadata
       if (metaExtra) {
         metaExtra.innerHTML = `
           <span class="meta-tag"><i class="far fa-clock"></i> ${escapeHTML(runtimeVal)}</span>
@@ -208,7 +352,6 @@ window.openModal = async function (movie) {
         `;
       }
 
-      // Check Watchlist status
       const watchBtn = document.getElementById("modalWatchlistBtn");
       if (watchBtn) {
         try {
@@ -225,7 +368,6 @@ window.openModal = async function (movie) {
         }
       }
 
-      // Fire behavioral intelligence movie_detail event
       if (typeof window.trackBehaviorEvent === "function") {
           const firstGenre = fullMovie.genres?.[0]?.name || "";
           window.trackBehaviorEvent("movie_detail", movieId, fullMovie.title, firstGenre);
@@ -241,38 +383,29 @@ window.openModal = async function (movie) {
       `;
       const isWatchlistRecommendation = movie.explanations && movie.explanations.length;
 
-if (reasonsBox) {
-
-    if (isWatchlistRecommendation) {
-
-        reasonsBox.innerHTML =
-            movie.explanations
-                .map(reason => {
-                    const cleanReason = String(reason || "").replace(/<\/?strong>/gi, "");
-                    return `<span class="reason-tag">${escapeHTML(cleanReason)}</span>`;
-                })
-                .join("");
-
-        reasonsBox.classList.remove("hidden");
-
-    } else {
-
-        reasonsBox.innerHTML = "";
-        reasonsBox.classList.add("hidden");
-    }
-}     const trailerUrl = await fetchTrailer(movieId);
-        // Clear previously displayed OTT providers
+      if (reasonsBox) {
+          if (isWatchlistRecommendation) {
+              reasonsBox.innerHTML =
+                  movie.explanations
+                      .map(reason => {
+                          const cleanReason = String(reason || "").replace(/<\/?strong>/gi, "");
+                          return `<span class="reason-tag">${escapeHTML(cleanReason)}</span>`;
+                      })
+                      .join("");
+              reasonsBox.classList.remove("hidden");
+          } else {
+              reasonsBox.innerHTML = "";
+              reasonsBox.classList.add("hidden");
+          }
+      }     
+      const trailerUrl = await fetchTrailer(movieId);
       const providerContainer = document.getElementById("floatingProviders");
       const providerIcons = document.getElementById("providerIcons");
 
       if (providerIcons && providerContainer) {
-          // instantly clear old icons
           providerIcons.innerHTML = "";
-
-          // instantly hide dock
           providerContainer.classList.add("hidden");
 
-          // Reposition dynamically for mobile vs desktop layout
           if (window.innerWidth <= 768) {
               const overviewEl = document.getElementById("modalOverview");
               if (overviewEl) {
@@ -287,258 +420,114 @@ if (reasonsBox) {
           }
       }
 
-// Load streaming providers for current movie
-fetchProviders(movieId).then(providers => {
+      fetchProviders(movieId).then(providers => {
+          if (currentModalRequest !== requestId) return;
+          providerIcons.innerHTML = "";
+          if (!providers || providers.length === 0) return;
 
-    // stop stale requests
-    if (currentModalRequest !== requestId) return;
+          const uniqueProviders = [];
+          const seen = new Set();
+          const allowedProviders = [
+              "Netflix", "Amazon Prime Video", "Prime Video",
+              "Disney Plus", "Disney+ Hotstar", "JioHotstar",
+              "Zee5", "ZEE5", "SonyLIV", "Sony Liv",
+              "AppleTV", "Apple TV", "Apple TV Plus", "Crunchyroll"
+          ];
+              
+          providers.forEach(provider => {
+              let normalized = provider.provider_name.toLowerCase().trim();
+              normalized = normalized
+                  .replace("with ads", "")
+                  .replace("standard", "")
+                  .replace("premium", "")
+                  .replace("essential", "")
+                  .replace("roku channel", "")
+                  .replace(/\+/g, "")
+                  .trim();
 
-    // clear previous icons safely
-    providerIcons.innerHTML = "";
+              const isAllowed = allowedProviders.some(name => {
+                  const cleanedName = name.toLowerCase().replace(/\+/g, "").trim();
+                  return normalized === cleanedName;
+              });
+              if (!isAllowed) return;
+              if (seen.has(normalized)) return;
+              seen.add(normalized);
+              uniqueProviders.push(provider);
+          });
+              
+          uniqueProviders.forEach(provider => {
+              const img = document.createElement("img");
+              img.src = `https://image.tmdb.org/t/p/original${provider.logo_path}`;
+              img.className = "provider-logo";
+              img.title = provider.provider_name;
+              img.onclick = async () => {
+                  const cleanName = provider.provider_name.toLowerCase()
+                      .replace("with ads", "").replace("standard", "").replace("premium", "")
+                      .replace("essential", "").replace("roku channel", "").replace(/\+/g, "").trim();
 
-    // no providers
-    if (!providers || providers.length === 0) return;
+                  let url = null;
+                  if (cleanName.includes("netflix")) url = "https://www.netflix.com";
+                  else if (cleanName.includes("prime")) url = "https://www.primevideo.com";
+                  else if (cleanName.includes("hulu")) url = "https://www.hulu.com";
+                  else if (cleanName.includes("hotstar")) url = "https://www.hotstar.com/in";
+                  else if (cleanName.includes("disney")) url = "https://www.disneyplus.com";
+                  else if (cleanName.includes("zee5")) url = "https://www.zee5.com";
+                  else if (cleanName.includes("sony")) url = "https://www.sonyliv.com";
+                  else if (cleanName.includes("apple")) url = "https://tv.apple.com";
+                  else if (cleanName.includes("crunchyroll")) url = "https://www.crunchyroll.com";
 
+                  if (url) {
+                      let genreName = fullMovie.genres?.[0]?.name || movie.genres?.[0]?.name;
+                      if (!genreName && movie.genre_ids?.length) {
+                          const genreLookup = {
+                              28:"Action", 12:"Adventure", 16:"Animation", 35:"Comedy", 80:"Crime",
+                              18:"Drama", 14:"Fantasy", 27:"Horror", 9648:"Mystery", 878:"Science Fiction", 53:"Thriller"
+                          };
+                          genreName = genreLookup[movie.genre_ids[0]];
+                      }
+                      await authFetch(`${API_BASE}/provider-click`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                              movieId: fullMovie.id,
+                              movieTitle: fullMovie.title,
+                              provider: provider.provider_name,
+                              genre: genreName || "Unknown"
+                          })
+                      });
+                      setTimeout(() => {
+                          window.open(url, "_blank", "noopener,noreferrer");
+                      }, 300);
+                  }
+              };
+              providerIcons.appendChild(img);
+          });
 
-// Filter supported streaming platforms
-const uniqueProviders = [];
-const seen = new Set();
+          if (currentModalRequest !== requestId) return;
+          providerContainer.classList.remove("hidden");
+      });
 
-
-const allowedProviders = [
-
-    "Netflix",
-
-    "Amazon Prime Video",
-    "Prime Video",
-
-    "Disney Plus",
-    "Disney+ Hotstar",
-    "JioHotstar",
-
-    "Zee5",
-    "ZEE5",
-
-    "SonyLIV",
-    "Sony Liv",
-
-    "AppleTV",
-    "Apple TV",
-    "Apple TV Plus",
-
-    "Crunchyroll",
-
-];
-    
-
-providers.forEach(provider => {
-
-    let normalized =
-        provider.provider_name
-        .toLowerCase()
-        .trim();
-
-    // remove useless variants
-    normalized =
-        normalized
-        .replace("with ads", "")
-        .replace("standard", "")
-        .replace("premium", "")
-        .replace("essential", "")
-        .replace("roku channel", "")
-        .replace(/\+/g, "")
-        .trim();
-
-    const isAllowed =
-    allowedProviders.some(name => {
-
-        const cleanedName =
-            name.toLowerCase()
-            .replace(/\+/g, "")
-            .trim();
-
-        return normalized === cleanedName;
-    });
-    if (!isAllowed) return;
-
-    // avoid duplicates
-    if (seen.has(normalized)) return;
-
-    seen.add(normalized);
-
-    uniqueProviders.push(provider);
-});
-    
-
-    uniqueProviders.forEach(provider => {
-
-        const img = document.createElement("img");
-
-        img.src =
-`https://image.tmdb.org/t/p/original${provider.logo_path}`;
-
-        img.className = "provider-logo";
-
-        img.title = provider.provider_name;
-img.onclick = async () => {
-    const cleanName =
-        provider.provider_name
-        .toLowerCase()
-        .replace("with ads", "")
-        .replace("standard", "")
-        .replace("premium", "")
-        .replace("essential", "")
-        .replace("roku channel", "")
-        .replace(/\+/g, "")
-        .trim();
-
-    let url = null;
-
-    //  NETFLIX
-    if (cleanName.includes("netflix")) {
-        url = "https://www.netflix.com";
-    }
-
-    // PRIME VIDEO
-    else if (
-        cleanName.includes("prime")
-    ) {
-        url = "https://www.primevideo.com";
-    }
- //  HULU
-    else if (
-        cleanName.includes("hulu")
-    ) {
-        url = "https://www.hulu.com";
-    }
-   //  HOTSTAR ONLY
-else if (
-    cleanName.includes("hotstar")
-) {
-    url = "https://www.hotstar.com/in";
-}
-
-//  DISNEY+
-else if (
-    cleanName.includes("disney")
-) {
-    url = "https://www.disneyplus.com";
-}
-
-    //  ZEE5
-    else if (
-        cleanName.includes("zee5")
-    ) {
-        url = "https://www.zee5.com";
-    }
-
-    //  SONYLIV
-    else if (
-        cleanName.includes("sony")
-    ) {
-        url = "https://www.sonyliv.com";
-    }
-
-    // APPLE TV
-    else if (
-        cleanName.includes("apple")
-    ) {
-        url = "https://tv.apple.com";
-    }
-
-    //  CRUNCHYROLL
-    else if (
-        cleanName.includes("crunchyroll")
-    ) {
-        url = "https://www.crunchyroll.com";
-    }
-
-  if (url) {
-
-  // Track user OTT platform interaction for analytics
-
-
-let genreName =
-    fullMovie.genres?.[0]?.name ||
-    movie.genres?.[0]?.name;
-
-if (!genreName && movie.genre_ids?.length) {
-
-    const genreLookup = {
-        28:"Action",
-        12:"Adventure",
-        16:"Animation",
-        35:"Comedy",
-        80:"Crime",
-        18:"Drama",
-        14:"Fantasy",
-        27:"Horror",
-        9648:"Mystery",
-        878:"Science Fiction",
-        53:"Thriller"
-    };
-
-    genreName =
-        genreLookup[movie.genre_ids[0]];
-}
-if (!genreName) {
-    // default set
-}
-await authFetch(`${API_BASE}/provider-click`, {
-
-    method: "POST",
-
-    headers: {
-        "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify({
-
-        movieId: fullMovie.id,
-
-        movieTitle: fullMovie.title,
-
-        provider: provider.provider_name,
-        genre: genreName || "Unknown"
-    })
-});
-  // Redirect user to selected streaming platform
-   setTimeout(() => {
-     window.open(url, "_blank", "noopener,noreferrer");
-}, 300);
-}
-};
-     
-        providerIcons.appendChild(img);
-    });
-
-    // show ONLY after fully rendered
-    if (currentModalRequest !== requestId) return;
-
-    providerContainer.classList.remove("hidden");
-});
-        if (currentModalRequest !== requestId) return;
-        if (trailerUrl) {
-            trailerBtn.innerText = "▶ Watch Trailer";
-            trailerBtn.onclick = () => {
-                // Fire behavioral intelligence trailer_watch event
-                if (typeof window.trackBehaviorEvent === "function") {
-                    const firstGenre = fullMovie.genres?.[0]?.name || "";
-                    window.trackBehaviorEvent("trailer_watch", movieId, fullMovie.title, firstGenre);
-                }
-                openTrailer(trailerUrl);
-            };
-            trailerBtn.disabled = false;
-        } else {
-            trailerBtn.innerText = "Trailer not available";
-            trailerBtn.disabled = true;
-        }
+      if (currentModalRequest !== requestId) return;
+      if (trailerUrl) {
+          trailerBtn.innerText = "▶ Watch Trailer";
+          trailerBtn.onclick = () => {
+              if (typeof window.trackBehaviorEvent === "function") {
+                  const firstGenre = fullMovie.genres?.[0]?.name || "";
+                  window.trackBehaviorEvent("trailer_watch", movieId, fullMovie.title, firstGenre);
+              }
+              openTrailer(trailerUrl);
+          };
+          trailerBtn.disabled = false;
+      } else {
+          trailerBtn.innerText = "Trailer not available";
+          trailerBtn.disabled = true;
+      }
 
     } catch (err) {
         if (modalRetryCount < 2) {
             modalRetryCount++;
             setTimeout(() => {
-                window.openModal(movie);
+                updateModalContent(movie);
             }, 1000);
             return;
         }
@@ -558,7 +547,7 @@ await authFetch(`${API_BASE}/provider-click`, {
             watchBtn.disabled = true;
         }
     }
-};
+}
 document.addEventListener("click", (e) => {
     if (e.target.classList.contains("close-modal")) {
         const modal = document.getElementById("movieModal");
