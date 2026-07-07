@@ -12,16 +12,17 @@ router.post("/history", auth, async (req, res) => {
 
         const { query } = req.body;
 
-        console.log("USER ID:", req.userId);
-        console.log("QUERY:", query);
-if (
-    !query ||
-    query.trim().length < 3
-) {
-    return res.status(400).json({
-        error: "Query must be at least 3 characters"
-    });
-}
+        if (!query || query.trim().length < 3) {
+            return res.status(400).json({
+                error: "Query must be at least 3 characters"
+            });
+        }
+
+        if (query.trim().length > 100) {
+            return res.status(400).json({
+                error: "Query must be 100 characters or less"
+            });
+        }
 await SearchHistory.findOneAndUpdate(
     {
         userId: req.userId,
