@@ -4097,3 +4097,83 @@ pointer-events: auto;
     max-width: calc(100% - 30px) !important;
   }
 }
+
+/* ==========================================================================
+   PREMIUM BUTTON LOADER & PAGE TRANSITION ANIMATIONS
+   ========================================================================== */
+.login-body {
+  transition: opacity 0.6s ease, transform 0.6s ease !important;
+  opacity: 1;
+}
+
+.login-body.fade-out {
+  opacity: 0 !important;
+  transform: scale(0.98) !important;
+  pointer-events: none !important;
+}
+
+/* Global fade-in transition for the dashboard and homepage body */
+body {
+  animation: bodyFadeIn 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes bodyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button Loading animation containers styles */
+.uib-loader-container {
+  --uib-size: 38px;
+  --uib-color: #ffffff;
+  --uib-speed: 1.3s;
+  --uib-dot-size: calc(var(--uib-size) * 0.22);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--uib-dot-size);
+  width: var(--uib-size);
+  vertical-align: middle;
+}
+
+.uib-loader-dot,
+.uib-loader-container::before,
+.uib-loader-container::after {
+  content: '';
+  display: block;
+  height: var(--uib-dot-size);
+  width: var(--uib-dot-size);
+  border-radius: 50%;
+  background-color: var(--uib-color);
+  transform: scale(0);
+  transition: background-color 0.3s ease;
+}
+
+.uib-loader-container::before {
+  animation: pulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.375) infinite;
+}
+
+.uib-loader-dot {
+  animation: pulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.25) infinite both;
+}
+
+.uib-loader-container::after {
+  animation: pulse var(--uib-speed) ease-in-out calc(var(--uib-speed) * -0.125) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+}

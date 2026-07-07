@@ -229,48 +229,74 @@ localStorage.setItem(
     closePolicy();
 }
         async function login() {
+            const loginBtn = document.querySelector(".login-btn");
+            const registerBtn = document.querySelector(".register-btn");
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
-            const accepted =
-document.getElementById("terms").checked;
-const error =
-document.getElementById("termsError");
+            const accepted = document.getElementById("terms").checked;
+            const error = document.getElementById("termsError");
 
-if (!accepted) {
-
-    error.classList.remove("hidden");
-
-    return;
-}
-
-error.classList.add("hidden");
-           const res = await fetch(`${API_BASE}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-                credentials: "include"
-            });
-
-            const data = await res.json();
-
-            if (data.error) {
-                document.getElementById("error-msg").innerText = data.error || "Login failed";
-                document.getElementById("error-msg").classList.remove("hidden");
+            if (!accepted) {
+                error.classList.remove("hidden");
                 return;
             }
 
-            sessionStorage.setItem("sessionActive", "true");
-            window.location.href = "index.html";
+            error.classList.add("hidden");
+            
+            // Set loading state
+            const originalHTML = loginBtn.innerHTML;
+            loginBtn.innerHTML = `<div class="uib-loader-container"><div class="uib-loader-dot"></div></div>`;
+            loginBtn.disabled = true;
+            if (registerBtn) registerBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password }),
+                    credentials: "include"
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    document.getElementById("error-msg").innerText = data.error || "Login failed";
+                    document.getElementById("error-msg").classList.remove("hidden");
+                    
+                    // Restore button state
+                    loginBtn.innerHTML = originalHTML;
+                    loginBtn.disabled = false;
+                    if (registerBtn) registerBtn.disabled = false;
+                    return;
+                }
+
+                sessionStorage.setItem("sessionActive", "true");
+                
+                // Smooth body fade-out transition
+                document.body.classList.add("fade-out");
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 600);
+
+            } catch (err) {
+                console.error("Login request error:", err);
+                document.getElementById("error-msg").innerText = "Unable to connect to server. Please try again.";
+                document.getElementById("error-msg").classList.remove("hidden");
+                
+                // Restore button state
+                loginBtn.innerHTML = originalHTML;
+                loginBtn.disabled = false;
+                if (registerBtn) registerBtn.disabled = false;
+            }
         }
         async function register() {
+            const loginBtn = document.querySelector(".login-btn");
+            const registerBtn = document.querySelector(".register-btn");
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
             const gender = "male";
-            const accepted =
-document.getElementById("terms").checked;
-
-            const error =
-document.getElementById("termsError");
+            const accepted = document.getElementById("terms").checked;
+            const error = document.getElementById("termsError");
 
             if (!accepted) {
                 error.classList.remove("hidden");
@@ -283,28 +309,52 @@ document.getElementById("termsError");
                 return;
             }
 
-            const res = await fetch(`${API_BASE}/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password, gender }),
-                credentials: "include"
-            });
+            // Set loading state
+            const originalHTML = registerBtn.innerHTML;
+            registerBtn.innerHTML = `<div class="uib-loader-container"><div class="uib-loader-dot"></div></div>`;
+            registerBtn.disabled = true;
+            if (loginBtn) loginBtn.disabled = true;
 
-            const data = await res.json();
+            try {
+                const res = await fetch(`${API_BASE}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password, gender }),
+                    credentials: "include"
+                });
 
-            if (data.error) {
-                document.getElementById("error-msg").innerText =
-                data.error;
+                const data = await res.json();
 
-              document.getElementById("error-msg")
-               .classList.remove("hidden");
-                return;
+                if (data.error) {
+                    document.getElementById("error-msg").innerText = data.error;
+                    document.getElementById("error-msg").classList.remove("hidden");
+                    
+                    // Restore button state
+                    registerBtn.innerHTML = originalHTML;
+                    registerBtn.disabled = false;
+                    if (loginBtn) loginBtn.disabled = false;
+                    return;
+                }
+
+                // AUTO LOGIN
+                sessionStorage.setItem("sessionActive", "true");
+                
+                // Smooth body fade-out transition
+                document.body.classList.add("fade-out");
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 600);
+
+            } catch (err) {
+                console.error("Register request error:", err);
+                document.getElementById("error-msg").innerText = "Unable to connect to server. Please try again.";
+                document.getElementById("error-msg").classList.remove("hidden");
+                
+                // Restore button state
+                registerBtn.innerHTML = originalHTML;
+                registerBtn.disabled = false;
+                if (loginBtn) loginBtn.disabled = false;
             }
-
-            //  AUTO LOGIN
-            sessionStorage.setItem("sessionActive", "true");
-
-            window.location.href = "index.html";
         }
         
     </script>
