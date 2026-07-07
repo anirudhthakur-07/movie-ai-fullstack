@@ -549,7 +549,6 @@ class ToastManager {
 
     // Dynamic show request entry
     show(payload) {
-        console.log("[DIAGNOSTIC] ToastManager.show() received payload:", payload);
         const sanitized = {
             title: this.escapeHTML(payload.title),
             xp: Number(payload.xp) || 0,
@@ -604,7 +603,6 @@ class ToastManager {
     }
 
     renderToast(data) {
-        console.log("[DIAGNOSTIC] ToastManager.renderToast() mounting DOM card for:", data.title);
         return new Promise(resolve => {
             const container = this.getContainer();
             const card = document.createElement("div");
