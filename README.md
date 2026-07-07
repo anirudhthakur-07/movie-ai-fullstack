@@ -13,7 +13,6 @@ The application uses pure HTML5, CSS3 (with notch/safe-area mobile responsivenes
 ---
 ## Live Demo
 - **Frontend App:** [https://movie-ai-fullstack.vercel.app](https://movie-ai-fullstack.vercel.app)
-- **Backend API:** `https://movie-ai-fullstack.onrender.com/api`
 
 ---
 
