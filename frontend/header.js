@@ -347,17 +347,24 @@ document.addEventListener("DOMContentLoaded", () => {
             .toast-card.exit {
                 transform: translateY(-10px) scale(0.9) !important;
             }
-        }
-        
-        /* Navbar text compacting for mobile */
-        @media (max-width: 480px) {
+            
+            /* Navbar mobile compact adjustments */
+            .nav-right {
+                gap: 8px !important;
+            }
             .nav-action-btn {
-                font-size: 0 !important; /* Hide text nodes safely */
-                padding: 8px 12px !important;
+                font-size: 0 !important;
+                padding: 0 !important;
+                width: 36px !important;
+                height: 36px !important;
+                border-radius: 50% !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             .nav-action-btn i {
-                font-size: 1rem !important;
-                margin-right: 0 !important;
+                font-size: 14px !important;
+                margin: 0 !important;
             }
         }
     `;

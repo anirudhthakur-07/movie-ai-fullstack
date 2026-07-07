@@ -133,7 +133,7 @@ body {
 .dashboard-wrapper {
     max-width: 1300px;
     margin: 0 auto;
-    padding: 90px 6% 40px 6%; /* Clears the fixed 68px navbar */
+    padding: 78px 6% 40px 6%; /* Clears the fixed 68px navbar tightly */
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -1137,7 +1137,7 @@ body {
         font-size: 1.5rem !important;
     }
     .dashboard-wrapper {
-        padding-top: calc(75px + env(safe-area-inset-top)) !important;
+        padding-top: calc(68px + env(safe-area-inset-top)) !important;
         padding-left: max(15px, env(safe-area-inset-left)) !important;
         padding-right: max(15px, env(safe-area-inset-right)) !important;
         padding-bottom: max(30px, env(safe-area-inset-bottom)) !important;
