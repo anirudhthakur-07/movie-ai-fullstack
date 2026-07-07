@@ -138,9 +138,10 @@ function updateDots() {
             dotsContainer = document.createElement("div");
             dotsContainer.id = "modalDotsContainer";
             dotsContainer.className = "modal-indicator-dots";
-            const modalBody = document.querySelector(".modal-body");
-            if (modalBody) {
-                modalBody.parentNode.insertBefore(dotsContainer, modalBody.nextSibling);
+            // Append dotsContainer directly to #movieModal, outside .modal-content
+            const modalElement = document.getElementById("movieModal");
+            if (modalElement) {
+                modalElement.appendChild(dotsContainer);
             }
         }
         dotsContainer.style.display = "flex";
@@ -163,34 +164,65 @@ function updateDots() {
 
 async function navigateModal(direction) {
     if (isTransitioning || modalSiblings.length <= 1 || modalCurrentIndex === -1) return;
-    isTransitioning = true;
     
-    const modalBody = document.querySelector(".modal-body");
-    if (!modalBody) {
-        isTransitioning = false;
-        return;
+    const nextIndex = (modalCurrentIndex + direction + modalSiblings.length) % modalSiblings.length;
+    const nextMovie = modalSiblings[nextIndex];
+    const nextMovieId = nextMovie.id || nextMovie.tmdbId;
+
+    const trailerBtn = document.getElementById("playTrailerBtn");
+    let originalTrailerText = "";
+    if (trailerBtn) {
+        originalTrailerText = trailerBtn.innerText;
+        trailerBtn.innerText = "Connecting...";
+        trailerBtn.disabled = true;
     }
     
-    const outgoingClass = direction > 0 ? "slide-out-left" : "slide-out-right";
-    const incomingClass = direction > 0 ? "slide-in-right" : "slide-in-left";
-    
-    modalBody.classList.add(outgoingClass);
-    
-    setTimeout(async () => {
-        modalCurrentIndex = (modalCurrentIndex + direction + modalSiblings.length) % modalSiblings.length;
-        const nextMovie = modalSiblings[modalCurrentIndex];
+    try {
+        // Pre-fetch details BEFORE triggering card transition
+        const res = await fetch(`${API_BASE}/movie/${nextMovieId}`);
+        if (!res.ok) throw new Error("Pre-fetch failed");
         
-        await updateModalContent(nextMovie);
-        updateDots();
+        const fetchedMovie = await res.json();
         
-        modalBody.classList.remove(outgoingClass);
-        modalBody.classList.add(incomingClass);
+        // Prevent double triggers during active sliding phase
+        isTransitioning = true;
         
-        setTimeout(() => {
-            modalBody.classList.remove(incomingClass);
+        const modalBody = document.querySelector(".modal-body");
+        if (!modalBody) {
             isTransitioning = false;
-        }, 380);
-    }, 200);
+            return;
+        }
+
+        const outgoingClass = direction > 0 ? "slide-out-left" : "slide-out-right";
+        const incomingClass = direction > 0 ? "slide-in-right" : "slide-in-left";
+
+        modalBody.classList.add(outgoingClass);
+
+        setTimeout(async () => {
+            modalCurrentIndex = nextIndex;
+
+            const newRequestId = Date.now();
+            currentModalRequest = newRequestId;
+            await renderModalDetailsWithData(fetchedMovie, nextMovie, newRequestId);
+            updateDots();
+
+            modalBody.classList.remove(outgoingClass);
+            modalBody.classList.add(incomingClass);
+
+            setTimeout(() => {
+                modalBody.classList.remove(incomingClass);
+                isTransitioning = false;
+            }, 380);
+        }, 200);
+
+    } catch (err) {
+        console.error("Failed to pre-fetch next movie:", err);
+        if (trailerBtn) {
+            trailerBtn.innerText = originalTrailerText;
+            trailerBtn.disabled = false;
+        }
+        isTransitioning = false;
+    }
 }
 
 window.openModal = async function (movie, cardElement) {
@@ -223,6 +255,7 @@ window.openModal = async function (movie, cardElement) {
 async function updateModalContent(movie) {
     const requestId = Date.now();
     currentModalRequest = requestId;
+    
     const modalImg = document.getElementById('modalImg');
     const modalTitle = document.getElementById('modalTitle');
     const modalRating = document.getElementById('modalRating');
@@ -243,7 +276,6 @@ async function updateModalContent(movie) {
 
     const movieId = movie.id || movie.tmdbId;
     currentOpenMovieId = movieId;
-    let fullMovie = movie;
     if (!movieId) return;
 
     modalImg.classList.add("skeleton", "skeleton-img");
@@ -269,42 +301,23 @@ async function updateModalContent(movie) {
     if (reasonsBox) {
         reasonsBox.innerHTML = "";
         reasonsBox.classList.add("hidden");
-    }  modalOverview.innerHTML = `
-  <div class="skeleton skeleton-text"></div>
-  <div class="skeleton skeleton-text"></div>
-  <div class="skeleton skeleton-text"></div>
-  <br>
-  <div class="skeleton skeleton-text" style="width:50%"></div>
-`;
+    }  
+    modalOverview.innerHTML = `
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text"></div>
+      <br>
+      <div class="skeleton skeleton-text" style="width:50%"></div>
+    `;
 
-    const imgUrl = (fullMovie.poster_path || fullMovie.poster)
-        ? `${IMG_BASE}${fullMovie.poster_path || fullMovie.poster}`
+    const imgUrl = (movie.poster_path || movie.poster)
+        ? `${IMG_BASE}${movie.poster_path || movie.poster}`
         : null;
 
     const modalContent = document.querySelector(".modal-content");
     if (modalContent) {
         modalContent.style.setProperty('--modal-backdrop', imgUrl ? `url(${imgUrl})` : "none");
     }
-
-    modalImg.onload = () => {
-        if (currentModalRequest !== requestId) return;
-        modalImg.classList.remove("skeleton", "skeleton-img");
-        modalImg.style.opacity = 1;
-    };
-
-    if (!imgUrl) {
-        modalImg.classList.remove("skeleton", "skeleton-img");
-        modalImg.style.display = "none";
-        if (placeholder) {
-            placeholder.classList.remove("hidden");
-        }
-    } else {
-        modalImg.src = imgUrl;
-        if (modalImg.complete) {
-            modalImg.classList.remove("skeleton", "skeleton-img");
-            modalImg.style.opacity = 1;
-        }
-    }    
     
     const trailerBtn = document.getElementById("playTrailerBtn");
     trailerBtn.innerText = "Loading...";
@@ -312,218 +325,15 @@ async function updateModalContent(movie) {
     trailerBtn.onclick = null;
     
     try {
-      const res = await fetch(`${API_BASE}/movie/${movieId}`);
-
-      if (!res.ok) {
-          throw new Error("Movie fetch failed");
-      }
-
-      fullMovie = await res.json();
-
-      if (fullMovie.error) {
-          throw new Error(fullMovie.error);
-      }
-      modalRetryCount = 0;
-
-      if (modalContent) {
-          const backdropUrl = fullMovie.backdrop_path 
-            ? `url(${IMG_BASE}${fullMovie.backdrop_path})`
-            : (imgUrl ? `url(${imgUrl})` : "none");
-          modalContent.style.setProperty('--modal-backdrop', backdropUrl);
-      }
-
-      const rating = fullMovie.vote_average ?? fullMovie.rating ?? 'N/A';
-      const year = fullMovie.release_date || fullMovie.first_air_date || '';
-      const cast = await fetchCast(movieId);
-      if (currentModalRequest !== requestId) return;
-
-      const directorMember = fullMovie.credits && fullMovie.credits.crew 
-        ? fullMovie.credits.crew.find(c => c.job === "Director") 
-        : null;
-      const directorName = directorMember ? directorMember.name : "Unknown";
-      const langName = getLanguageName(fullMovie.original_language || 'en');
-      const runtimeVal = fullMovie.runtime ? `${fullMovie.runtime} min` : "N/A";
-
-      if (metaExtra) {
-        metaExtra.innerHTML = `
-          <span class="meta-tag"><i class="far fa-clock"></i> ${escapeHTML(runtimeVal)}</span>
-          <span class="meta-tag"><i class="far fa-user"></i> Dir: ${escapeHTML(directorName)}</span>
-          <span class="meta-tag"><i class="fas fa-globe"></i> ${escapeHTML(langName)}</span>
-        `;
-      }
-
-      const watchBtn = document.getElementById("modalWatchlistBtn");
-      if (watchBtn) {
-        try {
-          const wlRes = await fetch(`${API_BASE}/watchlist`, { credentials: "include" });
-          if (wlRes.ok) {
-            const wlData = await wlRes.json();
-            const isAdded = wlData.some(m => Number(m.tmdbId) === Number(movieId) || Number(m.id) === Number(movieId));
-            updateWatchlistButtonState(watchBtn, isAdded, fullMovie);
-          } else {
-            updateWatchlistButtonState(watchBtn, false, fullMovie);
-          }
-        } catch (e) {
-          updateWatchlistButtonState(watchBtn, false, fullMovie);
-        }
-      }
-
-      if (typeof window.trackBehaviorEvent === "function") {
-          const firstGenre = fullMovie.genres?.[0]?.name || "";
-          window.trackBehaviorEvent("movie_detail", movieId, fullMovie.title, firstGenre);
-      }
-
-      modalTitle.textContent = fullMovie.title || "Unknown";
-      modalRating.innerHTML = rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
-      modalYear.textContent = year ? year.split('-')[0] : 'Unknown';
-      modalOverview.innerHTML = `
-        ${escapeHTML(fullMovie.overview ?? fullMovie.description ?? 'No overview available.')}
-        <br><br>
-        <strong>Cast:</strong> ${escapeHTML(cast)}
-      `;
-      const isWatchlistRecommendation = movie.explanations && movie.explanations.length;
-
-      if (reasonsBox) {
-          if (isWatchlistRecommendation) {
-              reasonsBox.innerHTML =
-                  movie.explanations
-                      .map(reason => {
-                          const cleanReason = String(reason || "").replace(/<\/?strong>/gi, "");
-                          return `<span class="reason-tag">${escapeHTML(cleanReason)}</span>`;
-                      })
-                      .join("");
-              reasonsBox.classList.remove("hidden");
-          } else {
-              reasonsBox.innerHTML = "";
-              reasonsBox.classList.add("hidden");
-          }
-      }     
-      const trailerUrl = await fetchTrailer(movieId);
-      const providerContainer = document.getElementById("floatingProviders");
-      const providerIcons = document.getElementById("providerIcons");
-
-      if (providerIcons && providerContainer) {
-          providerIcons.innerHTML = "";
-          providerContainer.classList.add("hidden");
-
-          if (window.innerWidth <= 768) {
-              const overviewEl = document.getElementById("modalOverview");
-              if (overviewEl) {
-                  overviewEl.parentNode.insertBefore(providerContainer, overviewEl.nextSibling);
-              }
-          } else {
-              const modalContentEl = document.querySelector(".modal-content");
-              const modalBodyEl = document.querySelector(".modal-body");
-              if (modalContentEl && modalBodyEl) {
-                  modalContentEl.insertBefore(providerContainer, modalBodyEl);
-              }
-          }
-      }
-
-      fetchProviders(movieId).then(providers => {
-          if (currentModalRequest !== requestId) return;
-          providerIcons.innerHTML = "";
-          if (!providers || providers.length === 0) return;
-
-          const uniqueProviders = [];
-          const seen = new Set();
-          const allowedProviders = [
-              "Netflix", "Amazon Prime Video", "Prime Video",
-              "Disney Plus", "Disney+ Hotstar", "JioHotstar",
-              "Zee5", "ZEE5", "SonyLIV", "Sony Liv",
-              "AppleTV", "Apple TV", "Apple TV Plus", "Crunchyroll"
-          ];
-              
-          providers.forEach(provider => {
-              let normalized = provider.provider_name.toLowerCase().trim();
-              normalized = normalized
-                  .replace("with ads", "")
-                  .replace("standard", "")
-                  .replace("premium", "")
-                  .replace("essential", "")
-                  .replace("roku channel", "")
-                  .replace(/\+/g, "")
-                  .trim();
-
-              const isAllowed = allowedProviders.some(name => {
-                  const cleanedName = name.toLowerCase().replace(/\+/g, "").trim();
-                  return normalized === cleanedName;
-              });
-              if (!isAllowed) return;
-              if (seen.has(normalized)) return;
-              seen.add(normalized);
-              uniqueProviders.push(provider);
-          });
-              
-          uniqueProviders.forEach(provider => {
-              const img = document.createElement("img");
-              img.src = `https://image.tmdb.org/t/p/original${provider.logo_path}`;
-              img.className = "provider-logo";
-              img.title = provider.provider_name;
-              img.onclick = async () => {
-                  const cleanName = provider.provider_name.toLowerCase()
-                      .replace("with ads", "").replace("standard", "").replace("premium", "")
-                      .replace("essential", "").replace("roku channel", "").replace(/\+/g, "").trim();
-
-                  let url = null;
-                  if (cleanName.includes("netflix")) url = "https://www.netflix.com";
-                  else if (cleanName.includes("prime")) url = "https://www.primevideo.com";
-                  else if (cleanName.includes("hulu")) url = "https://www.hulu.com";
-                  else if (cleanName.includes("hotstar")) url = "https://www.hotstar.com/in";
-                  else if (cleanName.includes("disney")) url = "https://www.disneyplus.com";
-                  else if (cleanName.includes("zee5")) url = "https://www.zee5.com";
-                  else if (cleanName.includes("sony")) url = "https://www.sonyliv.com";
-                  else if (cleanName.includes("apple")) url = "https://tv.apple.com";
-                  else if (cleanName.includes("crunchyroll")) url = "https://www.crunchyroll.com";
-
-                  if (url) {
-                      let genreName = fullMovie.genres?.[0]?.name || movie.genres?.[0]?.name;
-                      if (!genreName && movie.genre_ids?.length) {
-                          const genreLookup = {
-                              28:"Action", 12:"Adventure", 16:"Animation", 35:"Comedy", 80:"Crime",
-                              18:"Drama", 14:"Fantasy", 27:"Horror", 9648:"Mystery", 878:"Science Fiction", 53:"Thriller"
-                          };
-                          genreName = genreLookup[movie.genre_ids[0]];
-                      }
-                      await authFetch(`${API_BASE}/provider-click`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                              movieId: fullMovie.id,
-                              movieTitle: fullMovie.title,
-                              provider: provider.provider_name,
-                              genre: genreName || "Unknown"
-                          })
-                      });
-                      setTimeout(() => {
-                          window.open(url, "_blank", "noopener,noreferrer");
-                      }, 300);
-                  }
-              };
-              providerIcons.appendChild(img);
-          });
-
-          if (currentModalRequest !== requestId) return;
-          providerContainer.classList.remove("hidden");
-      });
-
-      if (currentModalRequest !== requestId) return;
-      if (trailerUrl) {
-          trailerBtn.innerText = "▶ Watch Trailer";
-          trailerBtn.onclick = () => {
-              if (typeof window.trackBehaviorEvent === "function") {
-                  const firstGenre = fullMovie.genres?.[0]?.name || "";
-                  window.trackBehaviorEvent("trailer_watch", movieId, fullMovie.title, firstGenre);
-              }
-              openTrailer(trailerUrl);
-          };
-          trailerBtn.disabled = false;
-      } else {
-          trailerBtn.innerText = "Trailer not available";
-          trailerBtn.disabled = true;
-      }
-
-    } catch (err) {
+        const res = await fetch(`${API_BASE}/movie/${movieId}`);
+        if (!res.ok) throw new Error("Movie fetch failed");
+        const fullMovie = await res.json();
+        
+        if (fullMovie.error) throw new Error(fullMovie.error);
+        modalRetryCount = 0;
+        
+        await renderModalDetailsWithData(fullMovie, movie, requestId);
+    } catch(err) {
         if (modalRetryCount < 2) {
             modalRetryCount++;
             setTimeout(() => {
@@ -531,7 +341,6 @@ async function updateModalContent(movie) {
             }, 1000);
             return;
         }
-
         modalTitle.textContent = "Movie unavailable";
         modalRating.innerHTML = "⭐ N/A";
         modalYear.textContent = "";
@@ -541,18 +350,250 @@ async function updateModalContent(movie) {
         }
         trailerBtn.innerText = "Trailer unavailable";
         trailerBtn.disabled = true;
-        const watchBtn = document.getElementById("modalWatchlistBtn");
-        if (watchBtn) {
-            watchBtn.innerText = "Unavailable";
-            watchBtn.disabled = true;
+        if (watchlistBtn) {
+            watchlistBtn.innerText = "Unavailable";
+            watchlistBtn.disabled = true;
         }
     }
 }
+
+async function renderModalDetailsWithData(fullMovie, movie, requestId) {
+    const movieId = fullMovie.id || fullMovie.tmdbId || movie.id || movie.tmdbId;
+    const modalImg = document.getElementById('modalImg');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalRating = document.getElementById('modalRating');
+    const modalYear = document.getElementById('modalYear');
+    const modalOverview = document.getElementById('modalOverview');
+    const reasonsBox = document.getElementById("recommendationReasons");
+    const metaExtra = document.getElementById("modalMetaExtra");
+    const watchlistBtn = document.getElementById("modalWatchlistBtn");
+    const trailerBtn = document.getElementById("playTrailerBtn");
+    const placeholder = document.getElementById("modalPlaceholder");
+
+    const imgUrl = (fullMovie.poster_path || fullMovie.poster)
+        ? `${IMG_BASE}${fullMovie.poster_path || fullMovie.poster}`
+        : null;
+
+    const modalContent = document.querySelector(".modal-content");
+    if (modalContent) {
+        const backdropUrl = fullMovie.backdrop_path 
+          ? `url(${IMG_BASE}${fullMovie.backdrop_path})`
+          : (imgUrl ? `url(${imgUrl})` : "none");
+        modalContent.style.setProperty('--modal-backdrop', backdropUrl);
+    }
+
+    if (currentModalRequest !== requestId) return;
+
+    if (!imgUrl) {
+        modalImg.classList.remove("skeleton", "skeleton-img");
+        modalImg.style.display = "none";
+        if (placeholder) {
+            placeholder.classList.remove("hidden");
+        }
+    } else {
+        modalImg.src = imgUrl;
+        modalImg.classList.remove("skeleton", "skeleton-img");
+        modalImg.style.display = "block";
+        modalImg.style.opacity = 1;
+    }
+
+    const rating = fullMovie.vote_average ?? fullMovie.rating ?? 'N/A';
+    const year = fullMovie.release_date || fullMovie.first_air_date || '';
+    const cast = await fetchCast(movieId);
+    if (currentModalRequest !== requestId) return;
+
+    const directorMember = fullMovie.credits && fullMovie.credits.crew 
+      ? fullMovie.credits.crew.find(c => c.job === "Director") 
+      : null;
+    const directorName = directorMember ? directorMember.name : "Unknown";
+    const langName = getLanguageName(fullMovie.original_language || 'en');
+    const runtimeVal = fullMovie.runtime ? `${fullMovie.runtime} min` : "N/A";
+
+    if (metaExtra) {
+      metaExtra.innerHTML = `
+        <span class="meta-tag"><i class="far fa-clock"></i> ${escapeHTML(runtimeVal)}</span>
+        <span class="meta-tag"><i class="far fa-user"></i> Dir: ${escapeHTML(directorName)}</span>
+        <span class="meta-tag"><i class="fas fa-globe"></i> ${escapeHTML(langName)}</span>
+      `;
+    }
+
+    if (watchlistBtn) {
+      try {
+        const wlRes = await fetch(`${API_BASE}/watchlist`, { credentials: "include" });
+        if (wlRes.ok) {
+          const wlData = await wlRes.json();
+          const isAdded = wlData.some(m => Number(m.tmdbId) === Number(movieId) || Number(m.id) === Number(movieId));
+          updateWatchlistButtonState(watchlistBtn, isAdded, fullMovie);
+        } else {
+          updateWatchlistButtonState(watchlistBtn, false, fullMovie);
+        }
+      } catch (e) {
+        updateWatchlistButtonState(watchlistBtn, false, fullMovie);
+      }
+    }
+
+    if (typeof window.trackBehaviorEvent === "function") {
+        const firstGenre = fullMovie.genres?.[0]?.name || "";
+        window.trackBehaviorEvent("movie_detail", movieId, fullMovie.title, firstGenre);
+    }
+
+    modalTitle.textContent = fullMovie.title || "Unknown";
+    modalRating.innerHTML = rating ? `⭐ ${Number(rating).toFixed(1)}` : "⭐ N/A";
+    modalYear.textContent = year ? year.split('-')[0] : 'Unknown';
+    modalOverview.innerHTML = `
+      ${escapeHTML(fullMovie.overview ?? fullMovie.description ?? 'No overview available.')}
+      <br><br>
+      <strong>Cast:</strong> ${escapeHTML(cast)}
+    `;
+
+    const isWatchlistRecommendation = movie.explanations && movie.explanations.length;
+    if (reasonsBox) {
+        if (isWatchlistRecommendation) {
+            reasonsBox.innerHTML =
+                movie.explanations
+                    .map(reason => {
+                        const cleanReason = String(reason || "").replace(/<\/?strong>/gi, "");
+                        return `<span class="reason-tag">${escapeHTML(cleanReason)}</span>`;
+                    })
+                    .join("");
+            reasonsBox.classList.remove("hidden");
+        } else {
+            reasonsBox.innerHTML = "";
+            reasonsBox.classList.add("hidden");
+        }
+    }     
+
+    const trailerUrl = await fetchTrailer(movieId);
+    const providerContainer = document.getElementById("floatingProviders");
+    const providerIcons = document.getElementById("providerIcons");
+
+    if (providerIcons && providerContainer) {
+        providerIcons.innerHTML = "";
+        providerContainer.classList.add("hidden");
+
+        if (window.innerWidth <= 768) {
+            const overviewEl = document.getElementById("modalOverview");
+            if (overviewEl) {
+                overviewEl.parentNode.insertBefore(providerContainer, overviewEl.nextSibling);
+            }
+        } else {
+            const modalContentEl = document.querySelector(".modal-content");
+            const modalBodyEl = document.querySelector(".modal-body");
+            if (modalContentEl && modalBodyEl) {
+                modalContentEl.insertBefore(providerContainer, modalBodyEl);
+            }
+        }
+    }
+
+    fetchProviders(movieId).then(providers => {
+        if (currentModalRequest !== requestId) return;
+        providerIcons.innerHTML = "";
+        if (!providers || providers.length === 0) return;
+
+        const uniqueProviders = [];
+        const seen = new Set();
+        const allowedProviders = [
+            "Netflix", "Amazon Prime Video", "Prime Video",
+            "Disney Plus", "Disney+ Hotstar", "JioHotstar",
+            "Zee5", "ZEE5", "SonyLIV", "Sony Liv",
+            "AppleTV", "Apple TV", "Apple TV Plus", "Crunchyroll"
+        ];
+            
+        providers.forEach(provider => {
+            let normalized = provider.provider_name.toLowerCase().trim();
+            normalized = normalized
+                .replace("with ads", "").replace("standard", "").replace("premium", "")
+                .replace("essential", "").replace("roku channel", "").replace(/\+/g, "").trim();
+
+            const isAllowed = allowedProviders.some(name => {
+                const cleanedName = name.toLowerCase().replace(/\+/g, "").trim();
+                return normalized === cleanedName;
+            });
+            if (!isAllowed) return;
+            if (seen.has(normalized)) return;
+            seen.add(normalized);
+            uniqueProviders.push(provider);
+        });
+            
+        uniqueProviders.forEach(provider => {
+            const img = document.createElement("img");
+            img.src = `https://image.tmdb.org/t/p/original${provider.logo_path}`;
+            img.className = "provider-logo";
+            img.title = provider.provider_name;
+            img.onclick = async () => {
+                const cleanName = provider.provider_name.toLowerCase()
+                    .replace("with ads", "").replace("standard", "").replace("premium", "")
+                    .replace("essential", "").replace("roku channel", "").replace(/\+/g, "").trim();
+
+                let url = null;
+                if (cleanName.includes("netflix")) url = "https://www.netflix.com";
+                else if (cleanName.includes("prime")) url = "https://www.primevideo.com";
+                else if (cleanName.includes("hulu")) url = "https://www.hulu.com";
+                else if (cleanName.includes("hotstar")) url = "https://www.hotstar.com/in";
+                else if (cleanName.includes("disney")) url = "https://www.disneyplus.com";
+                else if (cleanName.includes("zee5")) url = "https://www.zee5.com";
+                else if (cleanName.includes("sony")) url = "https://www.sonyliv.com";
+                else if (cleanName.includes("apple")) url = "https://tv.apple.com";
+                else if (cleanName.includes("crunchyroll")) url = "https://www.crunchyroll.com";
+
+                if (url) {
+                    let genreName = fullMovie.genres?.[0]?.name || movie.genres?.[0]?.name;
+                    if (!genreName && movie.genre_ids?.length) {
+                        const genreLookup = {
+                            28:"Action", 12:"Adventure", 16:"Animation", 35:"Comedy", 80:"Crime",
+                            18:"Drama", 14:"Fantasy", 27:"Horror", 9648:"Mystery", 878:"Science Fiction", 53:"Thriller"
+                        };
+                        genreName = genreLookup[movie.genre_ids[0]];
+                    }
+                    await authFetch(`${API_BASE}/provider-click`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            movieId: fullMovie.id,
+                            movieTitle: fullMovie.title,
+                            provider: provider.provider_name,
+                            genre: genreName || "Unknown"
+                        })
+                    });
+                    setTimeout(() => {
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    }, 300);
+                }
+            };
+            providerIcons.appendChild(img);
+        });
+
+        if (currentModalRequest !== requestId) return;
+        providerContainer.classList.remove("hidden");
+    });
+
+    if (currentModalRequest !== requestId) return;
+    if (trailerUrl) {
+        trailerBtn.innerText = "▶ Watch Trailer";
+        trailerBtn.onclick = () => {
+            if (typeof window.trackBehaviorEvent === "function") {
+                const firstGenre = fullMovie.genres?.[0]?.name || "";
+                window.trackBehaviorEvent("trailer_watch", movieId, fullMovie.title, firstGenre);
+            }
+            openTrailer(trailerUrl);
+        };
+        trailerBtn.disabled = false;
+    } else {
+        trailerBtn.innerText = "Trailer not available";
+        trailerBtn.disabled = true;
+    }
+}
+
 document.addEventListener("click", (e) => {
     if (e.target.classList.contains("close-modal")) {
         const modal = document.getElementById("movieModal");
         modal.classList.remove("show");
-        setTimeout(() => modal.classList.add("hidden"), 300);
+        setTimeout(() => {
+            modal.classList.add("hidden");
+            // Hide dots container on close
+            const dots = document.getElementById("modalDotsContainer");
+            if (dots) dots.style.display = "none";
+        }, 300);
         document.body.classList.remove("modal-open");
     }
 });
