@@ -2,6 +2,7 @@
 // AI-Inspired Movie Recommendation Engine
 const express = require("express");
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
 const tmdbApi = require("../config/tmdb");
@@ -433,7 +434,13 @@ res.json({
   }
 });
 // CO-VIEWING GROUP RECOMMENDATIONS
-router.post('/recommend/group', auth, async (req, res) => {
+const groupCoViewingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // Max 15 attempts per IP
+  message: { error: "Too many co-viewing connection attempts. Please try again after 15 minutes." }
+});
+
+router.post('/recommend/group', auth, groupCoViewingLimiter, async (req, res) => {
   try {
     const { friendUsername, friendCoViewingCode } = req.body;
     if (!friendUsername || !friendCoViewingCode) {

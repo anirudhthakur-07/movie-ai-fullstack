@@ -504,7 +504,7 @@ await authFetch(`${API_BASE}/provider-click`, {
 });
   // Redirect user to selected streaming platform
    setTimeout(() => {
-    window.open(url, "_blank");
+     window.open(url, "_blank", "noopener,noreferrer");
 }, 300);
 }
 };
