@@ -492,7 +492,7 @@ function renderHistory(history) {
 
         chip.innerHTML =
         `<i class="fas fa-history"></i>
-        ${item.query}`;
+        ${escapeHTML(item.query)}`;
 
         chip.onclick = () => {
 

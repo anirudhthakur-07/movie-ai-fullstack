@@ -230,6 +230,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function safeSanitize(str) {
+    if (!str) return '';
+    const escaped = str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+    return escaped
+      .replace(/&lt;strong&gt;/g, '<strong>')
+      .replace(/&lt;\/strong&gt;/g, '</strong>')
+      .replace(/&lt;em&gt;/g, '<em>')
+      .replace(/&lt;\/em&gt;/g, '</em>')
+      .replace(/&lt;br\s*\/?&gt;/g, '<br>')
+      .replace(/&lt;p&gt;/g, '<p>')
+      .replace(/&lt;\/p&gt;/g, '</p>');
+  }
+
   // Helper: Append Message Bubble to chat drawer
   function appendMessage(content, sender, saveToStorage = true) {
     const msgEl = document.createElement("div");
@@ -237,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const textEl = document.createElement("div");
     textEl.classList.add("nyx-text");
-    textEl.innerHTML = content;
+    textEl.innerHTML = safeSanitize(content);
 
     msgEl.appendChild(textEl);
     chatBody.appendChild(msgEl);

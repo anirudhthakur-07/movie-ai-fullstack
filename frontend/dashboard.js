@@ -10,6 +10,29 @@ if (!sessionActive) {
     window.location.href = "login.html";
 }
 
+function escapeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function safeSanitize(str) {
+    if (!str) return '';
+    const escaped = escapeHTML(str);
+    return escaped
+        .replace(/&lt;strong&gt;/g, '<strong>')
+        .replace(/&lt;\/strong&gt;/g, '</strong>')
+        .replace(/&lt;em&gt;/g, '<em>')
+        .replace(/&lt;\/em&gt;/g, '</em>')
+        .replace(/&lt;br\s*\/?&gt;/g, '<br>')
+        .replace(/&lt;p&gt;/g, '<p>')
+        .replace(/&lt;\/p&gt;/g, '</p>');
+}
+
 // Global state variables
 let statsOverview = { totalClicks: 0, topProvider: "No Data", topGenre: "No Data" };
 let profileData = null;
@@ -418,8 +441,8 @@ async function loadAchievements() {
                         <i class="${iconStyle}"></i>
                     </div>
                     <div class="ach-details">
-                        <h5>${m.title}</h5>
-                        <p>${m.desc}</p>
+                        <h5>${escapeHTML(m.title)}</h5>
+                        <p>${escapeHTML(m.desc)}</p>
                         ${m.unlocked 
                             ? `<span class="ach-unlocked-tag"><i class="fas fa-check-circle"></i> Unlocked (+${m.xp} XP)</span>`
                             : `
@@ -453,8 +476,8 @@ async function loadAchievements() {
                         <i class="${iconStyle}"></i>
                     </div>
                     <div class="ach-details">
-                        <h5>${m.title}</h5>
-                        <p>${m.desc}</p>
+                        <h5>${escapeHTML(m.title)}</h5>
+                        <p>${escapeHTML(m.desc)}</p>
                         ${m.unlocked 
                             ? `<span class="ach-unlocked-tag"><i class="fas fa-check-circle"></i> Unlocked (+${m.xp} XP)</span>`
                             : `
@@ -529,7 +552,7 @@ async function updateSummaryList() {
         const itemHtml = `
             <div class="summary-insight-item">
                 <i class="fas fa-sparkles"></i>
-                <span>${insight}</span>
+                <span>${safeSanitize(insight)}</span>
             </div>
         `;
         summaryListEl.insertAdjacentHTML("beforeend", itemHtml);

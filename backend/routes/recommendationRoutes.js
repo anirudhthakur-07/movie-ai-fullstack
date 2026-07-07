@@ -441,13 +441,14 @@ router.post('/recommend/group', auth, async (req, res) => {
     }
 
     const cleanFriendUsername = String(friendUsername).trim();
+    const escapedFriendUsername = cleanFriendUsername.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     const cleanCoViewingCode = String(friendCoViewingCode).trim().toUpperCase();
     
     // Find users
     const [user, friend] = await Promise.all([
       User.findById(req.userId),
       User.findOne({ 
-        username: { $regex: new RegExp(`^${cleanFriendUsername}$`, "i") },
+        username: { $regex: new RegExp(`^${escapedFriendUsername}$`, "i") },
         coViewingCode: cleanCoViewingCode
       })
     ]);
