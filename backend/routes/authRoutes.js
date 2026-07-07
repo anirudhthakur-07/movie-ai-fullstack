@@ -43,16 +43,16 @@ router.post('/register', authLimiter, async (req, res) => {
     const token = jwt.sign(
       { id: newUser._id },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "14d" }
     );
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
     });
-    res.json({ success: true });
+    res.json({ success: true, token });
   } catch {
     res.status(400).json({ error: "User already exists" });
   }
@@ -82,16 +82,16 @@ router.post('/register', authLimiter, async (req, res) => {
     const token = jwt.sign(
       { id: user._id },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "14d" }
     );
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
     });
-    res.json({ success: true });
+    res.json({ success: true, token });
 
   } catch (err) {
 

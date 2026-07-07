@@ -837,6 +837,7 @@ window.logout = async function () {
         await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
     } catch (e) { /* silent */ }
     sessionStorage.removeItem("sessionActive");
+    localStorage.removeItem("authToken");
     localStorage.removeItem("cachedWatchlist");
     localStorage.removeItem("movieDetailsCache");
     Object.keys(localStorage).forEach(key => {

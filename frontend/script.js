@@ -1249,6 +1249,7 @@ async function logout() {
   } catch (e) { /* silent */ }
   sessionStorage.removeItem("sessionActive");
   // Clear user-scoped localStorage to prevent data persistence on shared devices
+  localStorage.removeItem("authToken");
   localStorage.removeItem("cachedWatchlist");
   localStorage.removeItem("movieDetailsCache");
   Object.keys(localStorage).forEach(key => {

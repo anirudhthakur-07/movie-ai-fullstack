@@ -302,6 +302,9 @@
                 }
 
                 sessionStorage.setItem("sessionActive", "true");
+                if (data.token) {
+                    localStorage.setItem("authToken", data.token);
+                }
                 
                 // Fade page out transition
                 document.body.classList.add("fade-out");
@@ -369,6 +372,9 @@
                 }
 
                 sessionStorage.setItem("sessionActive", "true");
+                if (data.token) {
+                    localStorage.setItem("authToken", data.token);
+                }
                 
                 // Fade page out transition
                 document.body.classList.add("fade-out");

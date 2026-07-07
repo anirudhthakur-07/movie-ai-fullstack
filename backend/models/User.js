@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema({
     recommendationInteractionsCount: { type: Number, default: 0 },
     dashboardViewsCount: { type: Number, default: 0 },
     isAdmin: { type: Boolean, default: false },
-    gender: { type: String, enum: ["male", "female"], default: "male" }
+    gender: { type: String, enum: ["male", "female"], default: "male" },
+    lastActive: { type: Date, default: Date.now }
 });
+
+// TTL index to automatically delete inactive users after 6 months (180 days)
+userSchema.index({ lastActive: 1 }, { expireAfterSeconds: 15552000 });
 
 module.exports = mongoose.model('User', userSchema);
