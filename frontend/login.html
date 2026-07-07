@@ -17,11 +17,8 @@
 
 <body class="login-body">
 
-    <video autoplay muted loop playsinline id="bg-video">
-        <source src="assets/videos/bg.mp4" type="video/mp4">
-    </video>
-
-    <div class="overlay"></div>
+    <!-- Seamless Looping Cinematic Background Canvas -->
+    <canvas id="cinematic-bg" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -2; background: #050508;"></canvas>
 
     <!-- Login Card -->
     <div class="login-wrapper">
@@ -394,6 +391,135 @@
                 if (loginBtn) loginBtn.disabled = false;
             }
         }
+    </script>
+    <!-- Seamless Looping Cinematic Background Engine -->
+    <script>
+        (function() {
+            const canvas = document.getElementById('cinematic-bg');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            // Spark particle configuration
+            const particles = [];
+            const maxParticles = 60;
+            
+            class Spark {
+                constructor() {
+                    this.reset();
+                    // Distribute vertically on initial load
+                    this.y = Math.random() * height;
+                }
+                
+                reset() {
+                    this.x = Math.random() * width;
+                    this.y = height + Math.random() * 20;
+                    this.size = Math.random() * 1.6 + 0.4;
+                    this.speedX = Math.random() * 0.4 - 0.2;
+                    this.speedY = -(Math.random() * 0.4 + 0.15);
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                    this.maxLife = Math.random() * 200 + 100;
+                    this.life = this.maxLife;
+                    this.color = Math.random() > 0.5 ? 'rgba(229, 9, 20, ' : 'rgba(255, 120, 20, ';
+                }
+                
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.life--;
+                    this.opacity = (this.life / this.maxLife) * 0.6;
+                    
+                    if (this.life <= 0 || this.y < -10 || this.x < -10 || this.x > width + 10) {
+                        this.reset();
+                    }
+                }
+                
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color + this.opacity + ')';
+                    ctx.shadowBlur = this.size * 3;
+                    ctx.shadowColor = 'rgba(229, 9, 20, 0.4)';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+            
+            for (let i = 0; i < maxParticles; i++) {
+                particles.push(new Spark());
+            }
+
+            let lastTime = 0;
+            function animate(time) {
+                requestAnimationFrame(animate);
+                
+                lastTime = time;
+                
+                // Deep background black
+                ctx.fillStyle = '#040406';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Perfect 15-second loop cycle mapping (15000ms)
+                const pulseCycle = (time % 15000) / 15000;
+                const pulseAngle = pulseCycle * Math.PI * 2;
+                const pulse = Math.sin(pulseAngle) * 0.12 + 0.88; // subtle pulse
+                
+                // Left Volumetric Glow
+                const leftX = width * 0.15 + Math.sin(pulseAngle * 0.5) * 35;
+                const leftY = height * 0.35 + Math.cos(pulseAngle * 0.5) * 35;
+                const leftGlow = ctx.createRadialGradient(leftX, leftY, 0, leftX, leftY, Math.min(width, height) * 0.75);
+                leftGlow.addColorStop(0, `rgba(229, 9, 20, ${0.14 * pulse})`);
+                leftGlow.addColorStop(0.5, `rgba(229, 9, 20, ${0.03 * pulse})`);
+                leftGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = leftGlow;
+                ctx.fillRect(0, 0, width, height);
+
+                // Right Volumetric Glow
+                const rightX = width * 0.85 + Math.cos(pulseAngle * 0.5) * 35;
+                const rightY = height * 0.65 + Math.sin(pulseAngle * 0.5) * 35;
+                const rightGlow = ctx.createRadialGradient(rightX, rightY, 0, rightX, rightY, Math.min(width, height) * 0.75);
+                rightGlow.addColorStop(0, `rgba(229, 9, 20, ${0.12 * pulse})`);
+                rightGlow.addColorStop(0.5, `rgba(255, 100, 0, ${0.02 * pulse})`);
+                rightGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = rightGlow;
+                ctx.fillRect(0, 0, width, height);
+
+                // Center visual clean zone overlay
+                const fogX = width * 0.5 + Math.sin(pulseAngle) * 50;
+                const fogY = height * 0.55 + Math.cos(pulseAngle) * 30;
+                const fogGlow = ctx.createRadialGradient(fogX, fogY, Math.min(width, height) * 0.15, fogX, fogY, Math.min(width, height) * 0.85);
+                fogGlow.addColorStop(0, 'rgba(4, 4, 6, 0)'); // Center clean visual focus
+                fogGlow.addColorStop(0.5, `rgba(229, 9, 20, ${0.03 * pulse})`);
+                fogGlow.addColorStop(0.8, `rgba(14, 8, 10, ${0.06 * pulse})`);
+                fogGlow.addColorStop(1, 'rgba(4, 4, 6, 1)');
+                ctx.fillStyle = fogGlow;
+                ctx.fillRect(0, 0, width, height);
+
+                // Ember Particles rendering
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                
+                // Gentle Stardust Film Grain overlay
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.012)';
+                for (let i = 0; i < 3; i++) {
+                    const size = Math.random() * 2 + 1;
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    ctx.fillRect(x, y, size, size);
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        })();
     </script>
 </body>
 
