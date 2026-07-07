@@ -9,6 +9,109 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <!-- FontAwesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Scoped Styling for Mobile Menu Dropdown (Homepage only) -->
+  <style>
+    /* Unique Menu Toggle Button on Mobile */
+    .menu-toggle-btn {
+      display: none !important;
+    }
+    
+    .nav-mobile-dropdown {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      /* Hide regular navigation buttons on mobile header (excluding logout) */
+      .navbar .watchlist-btn,
+      .navbar .dashboard-btn,
+      .navbar .manual-btn {
+        display: none !important;
+      }
+
+      /* Show the unique ellipsis toggle menu button */
+      .navbar .menu-toggle-btn {
+        display: inline-flex !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #fff !important;
+        cursor: pointer !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease !important;
+      }
+      .navbar .menu-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 46, 67, 0.3) !important;
+      }
+
+      /* Dropdown Menu Container absolute overlay */
+      .nav-mobile-dropdown {
+        display: none;
+        position: fixed !important;
+        top: 66px !important;
+        right: 16px !important;
+        background: rgba(12, 12, 14, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 46, 67, 0.25) !important;
+        border-radius: 12px !important;
+        padding: 8px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 46, 67, 0.1) !important;
+        z-index: 999999 !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        width: 170px !important;
+        opacity: 0;
+        transform: translateY(-8px) !important;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease !important;
+        pointer-events: none !important;
+        box-sizing: border-box !important;
+      }
+
+      .nav-mobile-dropdown.show {
+        display: flex !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        pointer-events: auto !important;
+      }
+
+      /* Dropdown item buttons styling */
+      .nav-mobile-dropdown .dropdown-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        height: 38px !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #e5e5ea !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        padding: 0 10px !important;
+        cursor: pointer !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+      }
+
+      .nav-mobile-dropdown .dropdown-item:hover {
+        background: rgba(255, 46, 67, 0.15) !important;
+        color: #ff2e43 !important;
+      }
+
+      .nav-mobile-dropdown .dropdown-item i {
+        font-size: 14px !important;
+        width: 18px !important;
+        text-align: center !important;
+        color: #ff2e43 !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -61,19 +164,34 @@
 
 </div>
 
+      <!-- Mobile Menu Dropdown Toggle -->
+      <button id="navMenuToggleBtn" class="nav-action-btn menu-toggle-btn" type="button">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+
       <button class="nav-action-btn watchlist-btn" onclick="openWatchlistPage()">
         <i class="fas fa-list"></i> My List
       </button>
-      <button class="nav-action-btn dashboard-btn"
-onclick="window.location.href='dashboard.html'">
-
-  <i class="fas fa-chart-line"></i> Dashboard
-
-</button>
+      <button class="nav-action-btn dashboard-btn" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </button>
 
       <button class="nav-action-btn logout-btn" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i> Logout
       </button>
+
+      <!-- Dropdown container for mobile screens -->
+      <div id="navMobileDropdown" class="nav-mobile-dropdown">
+        <button class="dropdown-item watchlist-btn-mobile" onclick="openWatchlistPage()">
+          <i class="fas fa-list"></i> My List
+        </button>
+        <button class="dropdown-item dashboard-btn-mobile" onclick="window.location.href='dashboard.html'">
+          <i class="fas fa-chart-line"></i> Dashboard
+        </button>
+        <button class="dropdown-item manual-btn-mobile" id="darkManualBtnMobile">
+          <i class="fas fa-compass"></i> Manual
+        </button>
+      </div>
     </div>
   </nav>
   <!-- Main Content -->
@@ -374,5 +492,39 @@ class="movie-section hidden">
     </div>
   </div>
   <script src="nyx.js"></script>
+  <!-- Mobile Menu Dropdown Interactor -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById("navMenuToggleBtn");
+      const dropdown = document.getElementById("navMobileDropdown");
+      
+      if (toggleBtn && dropdown) {
+        // Open/Close toggle on menu click
+        toggleBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          dropdown.classList.toggle("show");
+        });
+
+        // Close when clicking outside of dropdown
+        document.addEventListener("click", (e) => {
+          if (!dropdown.contains(e.target) && e.target !== toggleBtn) {
+            dropdown.classList.remove("show");
+          }
+        });
+      }
+
+      // Link Mobile Manual Button click to hidden header.js generated manual button
+      const manualBtnMobile = document.getElementById("darkManualBtnMobile");
+      if (manualBtnMobile) {
+        manualBtnMobile.addEventListener("click", () => {
+          const actualBtn = document.getElementById("darkManualBtn");
+          if (actualBtn) {
+            actualBtn.click();
+          }
+          if (dropdown) dropdown.classList.remove("show");
+        });
+      }
+    });
+  </script>
 </body>
 </html>
