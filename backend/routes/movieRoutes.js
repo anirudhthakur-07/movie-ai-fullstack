@@ -3,6 +3,9 @@
 const express = require("express");
 const router = express.Router();
 const tmdbApi = require("../config/tmdb");
+const auth = require("../middleware/auth");
+
+router.use(auth);
 router.get("/movie/:id", async (req, res) => {
 
     try {
