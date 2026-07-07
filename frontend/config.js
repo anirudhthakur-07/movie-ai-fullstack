@@ -42,6 +42,15 @@ window.fetch = async function (url, options = {}) {
             window.location.href = "login.html";
         }
     }
+
+    // Trigger global achievements check after state modifications (watchlist actions or rating actions)
+    if (res.ok && typeof url === "string" && (url.includes("/watchlist") || url.includes("/rate") || url.includes("/explore"))) {
+        setTimeout(() => {
+            if (typeof window.checkAchievementsGlobal === "function") {
+                window.checkAchievementsGlobal();
+            }
+        }, 1200); // 1.2s delay to let DB write complete
+    }
     
     return res;
 };

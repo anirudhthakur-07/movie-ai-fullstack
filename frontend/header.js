@@ -218,17 +218,19 @@ document.addEventListener("DOMContentLoaded", () => {
             font-weight: 600 !important;
         }
 
-        /* Toast notifications styles */
         .toast-container {
             position: fixed !important;
-            bottom: 24px !important;
-            right: 24px !important;
+            top: 75px !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: translateX(-50%) !important;
             display: flex !important;
             flex-direction: column !important;
             gap: 10px !important;
-            z-index: 10000 !important;
+            z-index: 100000 !important;
             pointer-events: none !important;
-            max-width: 350px !important;
+            max-width: 380px !important;
             width: 100% !important;
         }
         .toast-card {
@@ -329,23 +331,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: calc(100% - 32px) !important;
             }
 
-            /* Responsive toast positioning */
+            /* Responsive toast positioning - Centered below navbar with smaller container scale */
             .toast-container {
                 bottom: auto !important;
-                top: 20px !important;
-                right: 50% !important;
-                transform: translateX(50%) !important;
+                top: 70px !important;
+                left: 50% !important;
+                right: auto !important;
+                transform: translateX(-50%) !important;
                 width: 90% !important;
-                max-width: 450px !important;
+                max-width: 290px !important;
             }
             .toast-card {
-                transform: translateY(-20px) scale(0.95) !important;
+                padding: 10px 14px !important;
+                gap: 12px !important;
+                border-radius: 10px !important;
+                transform: translateY(-15px) scale(0.95) !important;
             }
             .toast-card.show {
                 transform: translateY(0) scale(1) !important;
             }
             .toast-card.exit {
-                transform: translateY(-10px) scale(0.9) !important;
+                transform: translateY(-8px) scale(0.9) !important;
+            }
+            .toast-icon {
+                font-size: 1.15rem !important;
+                min-width: 26px !important;
+            }
+            .toast-title {
+                font-size: 0.8rem !important;
+            }
+            .toast-alert-title {
+                font-size: 0.65rem !important;
+            }
+            .toast-xp {
+                font-size: 0.68rem !important;
             }
             
             /* Navbar mobile compact adjustments */
@@ -537,6 +556,9 @@ document.addEventListener("DOMContentLoaded", () => {
             openDrawer();
         });
     }
+
+    // Trigger initial check for achievements after page loads
+    setTimeout(checkAchievementsGlobal, 1500);
 });
 
 // ==========================================================================
@@ -663,3 +685,79 @@ class ToastManager {
 
 // Global hook instantiation
 window.toastManager = new ToastManager();
+
+// Global dynamic achievements checker
+async function checkAchievementsGlobal() {
+    // Only check if session is active (user is logged in) and NOT on dashboard page (dashboard.js handles itself)
+    if (!sessionStorage.getItem("sessionActive") || window.location.pathname.includes("dashboard.html")) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/achievements?t=` + Date.now(), {
+            credentials: "include"
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data && data.achievements && window.toastManager) {
+            const ACHIEVEMENT_META = {
+                "first_step": { icon: "fas fa-flag" },
+                "explorer": { icon: "fas fa-compass" },
+                "critic": { icon: "fas fa-star" },
+                "collector": { icon: "fas fa-boxes-stacked" },
+                "cinephile": { icon: "fas fa-ticket" },
+                "marathoner": { icon: "fas fa-stopwatch" },
+                "genre_master": { icon: "fas fa-layer-group" },
+                "night_owl": { icon: "fas fa-moon" }
+            };
+
+            let celebrated = [];
+            try {
+                const stored = sessionStorage.getItem("celebrated_achievements");
+                if (stored) celebrated = JSON.parse(stored);
+            } catch (e) {}
+
+            const currentUnlockedIds = data.achievements.filter(a => a.unlocked).map(a => a.id);
+            const achievementsInitialized = sessionStorage.getItem("achievements_initialized") === "true";
+
+            if (!achievementsInitialized) {
+                sessionStorage.setItem("celebrated_achievements", JSON.stringify(currentUnlockedIds));
+                sessionStorage.setItem("achievements_initialized", "true");
+            } else {
+                const newlyUnlocked = currentUnlockedIds.filter(id => !celebrated.includes(id));
+                if (newlyUnlocked.length > 0) {
+                    newlyUnlocked.forEach(id => {
+                        const ach = data.achievements.find(a => a.id === id);
+                        if (ach) {
+                            window.toastManager.show({
+                                title: ach.title,
+                                xp: ach.xp || 100,
+                                iconClass: ACHIEVEMENT_META[id]?.icon || "fas fa-award",
+                                priority: 1
+                            });
+                        }
+                    });
+                    const updatedCelebrated = [...new Set([...celebrated, ...currentUnlockedIds])];
+                    sessionStorage.setItem("celebrated_achievements", JSON.stringify(updatedCelebrated));
+                }
+            }
+
+            const currentLevel = data.level;
+            const storedLevel = sessionStorage.getItem("previous_level");
+            if (storedLevel !== null) {
+                const prevLevelNum = Number(storedLevel);
+                if (currentLevel > prevLevelNum) {
+                    window.toastManager.show({
+                        title: `Reached Level ${currentLevel}!`,
+                        iconClass: "fas fa-crown",
+                        priority: 3
+                    });
+                }
+            }
+            sessionStorage.setItem("previous_level", currentLevel.toString());
+        }
+    } catch (err) {
+        // silent
+    }
+}
+
+window.checkAchievementsGlobal = checkAchievementsGlobal;

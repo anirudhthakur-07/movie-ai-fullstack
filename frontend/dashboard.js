@@ -758,10 +758,11 @@ function setupAchievementsModal() {
 
 // 9. TOOLTIP TOGGLE EVENTS FOR STAT WIDGETS (MOBILE FRIENDLY)
 function setupTooltipEvents() {
-    const widgets = document.querySelectorAll(".stat-widget");
-    widgets.forEach(widget => {
-        widget.addEventListener("click", (e) => {
-            const tooltip = widget.querySelector(".widget-tooltip");
+    const infoButtons = document.querySelectorAll(".widget-info-btn");
+    infoButtons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const tooltip = btn.querySelector(".widget-tooltip");
             if (tooltip) {
                 // Close all other tooltips first
                 document.querySelectorAll(".widget-tooltip").forEach(t => {
@@ -772,7 +773,6 @@ function setupTooltipEvents() {
                 // Toggle active state
                 tooltip.classList.toggle("active");
             }
-            e.stopPropagation();
         });
     });
 
