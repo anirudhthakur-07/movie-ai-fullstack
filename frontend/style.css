@@ -2445,12 +2445,19 @@ pointer-events: auto;
     font-size: 1.5rem !important;
   }
 
-  /* Movie Details Modal Column Stacking */
+  /* Movie Details Modal Compact Centered Card */
   .modal-content {
     flex-direction: column !important;
-    height: 90vh !important;
-    width: 95% !important;
+    height: auto !important;
+    max-height: 80vh !important;
+    width: 90% !important;
+    max-width: 420px !important;
     overflow-y: auto !important;
+    border-radius: 20px !important;
+    background: rgba(15, 15, 18, 0.96) !important;
+    border: 1px solid rgba(255, 46, 67, 0.25) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
+    margin: auto !important;
   }
   .modal-body {
     flex-direction: column !important;
@@ -2458,35 +2465,64 @@ pointer-events: auto;
   .modal-poster {
     flex: 0 0 auto !important;
     width: 100% !important;
-    height: 350px !important;
+    height: 220px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    background: rgba(0, 0, 0, 0.25) !important;
+    background: rgba(0, 0, 0, 0.4) !important;
     overflow: hidden !important;
+    border-radius: 19px 19px 0 0 !important;
   }
   .modal-poster img {
     width: auto !important;
-    height: 100% !important;
-    max-width: 100% !important;
+    height: 90% !important;
+    max-height: 200px !important;
+    max-width: 90% !important;
     object-fit: contain !important;
     border-radius: 8px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6) !important;
   }
   .modal-info {
     flex: 0 0 auto !important;
-    padding: 20px !important;
+    padding: 16px !important;
     height: auto !important;
   }
   #modalTitle {
-    font-size: 1.8rem !important;
+    font-size: 1.35rem !important;
+    margin-bottom: 8px !important;
+    line-height: 1.25 !important;
+  }
+  .modal-meta, .modal-meta-extra {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .modal-meta span, .modal-meta-extra span, .modal-meta-extra button {
+    font-size: 0.72rem !important;
+    padding: 3px 6px !important;
+  }
+  .modal-overview {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+    margin-top: 8px !important;
+    margin-bottom: 12px !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+  .modal-info p, .modal-info div {
+    font-size: 0.78rem !important;
   }
   .modal-buttons {
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
   }
   .modal-btn {
     width: 100% !important;
     justify-content: center !important;
+    padding: 10px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
   }
 
   /* Movie Card scaling on mobile for better proportion */
@@ -3993,13 +4029,70 @@ pointer-events: auto;
     height: 65vh !important;
   }
   .login-card {
-    padding: 24px 20px 30px !important;
+    padding: 22px 20px 24px !important;
     border-radius: 20px !important;
-    width: 90% !important;
-    margin: 15px auto !important;
+    width: 88% !important;
+    max-width: 350px !important;
+    margin: auto !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
   }
   .login-wrapper {
-    padding: 10px !important;
+    height: 100vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+  .login-card .brand {
+    font-size: 22px !important;
+    margin-bottom: 6px !important;
+    line-height: 1.2 !important;
+  }
+  .login-card .brand .icon {
+    font-size: 24px !important;
+  }
+  .login-card .subtitle {
+    font-size: 11px !important;
+    margin-bottom: 16px !important;
+  }
+  .login-card .input-group {
+    margin-bottom: 12px !important;
+  }
+  .login-card .input-group input {
+    padding: 13px 16px !important;
+    font-size: 14px !important;
+    border-radius: 12px !important;
+  }
+  .login-card .input-group label {
+    left: 16px !important;
+    font-size: 13px !important;
+  }
+  .login-card .input-group input:focus,
+  .login-card .input-group input:not(:placeholder-shown) {
+    padding-top: 20px !important;
+    padding-bottom: 6px !important;
+  }
+  .login-card .input-group input:focus+label,
+  .login-card .input-group input:not(:placeholder-shown)+label {
+    top: 10px !important;
+    font-size: 9px !important;
+  }
+  .login-card .terms-box {
+    margin: 10px 0 14px !important;
+    font-size: 11px !important;
+  }
+  .login-card .btn {
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+  .login-card .divider {
+    margin: 10px 0 !important;
+  }
+  .login-card .form-pane {
+    padding: 0 !important;
   }
 }
 
