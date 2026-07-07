@@ -256,6 +256,10 @@ new ProviderClick({
 // APPLICATION ROUTES
 app.use(
     "/api",
+    authRoutes
+);
+app.use(
+    "/api",
     searchHistoryRoutes
 );
 app.use(
@@ -265,10 +269,6 @@ app.use(
 app.use(
     "/api",
     recommendationRoutes
-);
-app.use(
-    "/api",
-    authRoutes
 );
 const sensitiveRouteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
