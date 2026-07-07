@@ -375,6 +375,7 @@
                 if (data.token) {
                     localStorage.setItem("authToken", data.token);
                 }
+                localStorage.setItem("just_registered", "true");
                 
                 // Fade page out transition
                 document.body.classList.add("fade-out");

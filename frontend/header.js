@@ -505,11 +505,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const startOnboardingBtn = document.getElementById("startOnboardingBtn");
     const dontShowAgainCheck = document.getElementById("dontShowAgainCheck");
 
-    // Check storage constraints
+    // Check storage constraints - only prompt new sign-up users once
     const onboardingDisabled = localStorage.getItem("dark_onboarding_disabled") === "true";
     const sessionTriggered = sessionStorage.getItem("dark_onboarding_session_triggered") === "true";
+    const justRegistered = localStorage.getItem("just_registered") === "true";
 
-    if (!onboardingDisabled && !sessionTriggered) {
+    if (justRegistered && !onboardingDisabled && !sessionTriggered) {
         // Trigger popup notification non-intrusively 2 seconds after dashboard load
         setTimeout(() => {
             if (popup) {
@@ -521,9 +522,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dismissPopup = () => {
         if (popup) popup.classList.remove("show");
-        if (dontShowAgainCheck && dontShowAgainCheck.checked) {
-            localStorage.setItem("dark_onboarding_disabled", "true");
-        }
+        // Mark onboarding completed/disabled forever once shown
+        localStorage.setItem("dark_onboarding_disabled", "true");
+        localStorage.removeItem("just_registered");
     };
 
     if (closePopupBtn) {
