@@ -39,7 +39,47 @@ const nyxRoutes         = require("./routes/nyxRoutes");
 // EXPRESS APPLICATION SETUP
 const app = express();
 const movieRoutes =require("./routes/movieRoutes");
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdn.jsdelivr.net",
+          "https://cdnjs.cloudflare.com"
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com",
+          "https://cdnjs.cloudflare.com"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "https://cdnjs.cloudflare.com"
+        ],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://image.tmdb.org"
+        ],
+        connectSrc: [
+          "'self'",
+          "http://localhost:5000",
+          "https://movie-ai-backend-ql2a.onrender.com"
+        ],
+        frameSrc: [
+          "'self'",
+          "https://www.youtube.com",
+          "https://www.youtube-nocookie.com"
+        ]
+      }
+    }
+  })
+);
 // SECURITY CONFIGURATION
 // Helmet → Secure HTTP Headers
 // Rate Limiter → Prevent API Abuse
