@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chatHistory = [];
     chatBody.innerHTML = `
       <div class="nyx-message system">
-        <div class="nyx-text">${messageOverride || "The archive awaits. What patterns do we seek?"}</div>
+        <div class="nyx-text">${messageOverride || "Nyx Core online. Ready to analyze your Movie DNA, explore recommendations, or navigate the dashboard."}</div>
       </div>
     `;
   }
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
-      clearChatSession("Session expired. The archive has sealed itself due to inactivity.");
+      clearChatSession("Session expired. Nyx Core has went offline to preserve server resources.");
     }, INACTIVITY_TIMEOUT);
   }
 
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       typingIndicator.remove();
-      appendMessage("The archive is calibrating. A temporary network deviation prevents deep reasoning.", "system", false);
+      appendMessage("Nyx Core experienced a connection deviation while reaching the AI reasoning engine. Your local dashboard and cached navigation remains fully operational.", "system", false);
     } finally {
       isProcessing = false;
       sendBtn.disabled = false;
@@ -358,6 +358,53 @@ document.addEventListener("DOMContentLoaded", () => {
           highlightElement("#achievementsContainer");
         }
       }
+      else if (action === "searchMovie" && data.query) {
+        if (!window.location.pathname.includes("index.html")) {
+          sessionStorage.setItem("nyx_pending_search", data.query);
+          window.location.href = "index.html";
+        } else {
+          const searchInput = document.getElementById("searchInput");
+          if (searchInput) {
+            searchInput.value = data.query;
+            searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        }
+      }
+      else if (action === "playTrailer" && data.movieId) {
+        if (typeof window.openModal === "function") {
+          window.openModal({ id: data.movieId });
+          setTimeout(() => {
+            const trailerBtn = document.getElementById("playTrailerBtn") || 
+                               document.querySelector(".trailer-btn") || 
+                               document.querySelector(".play-trailer-btn");
+            if (trailerBtn) trailerBtn.click();
+          }, 600);
+        }
+      }
+      else if (action === "compareMovies" && data.movieIds) {
+        if (typeof window.openComparisonModal === "function") {
+          window.openComparisonModal(data.movieIds);
+        } else if (typeof window.openModal === "function" && data.movieIds[0]) {
+          window.openModal({ id: data.movieIds[0] });
+        }
+      }
+      else if (action === "highlightSection" && data.sectionId) {
+        if (!window.location.pathname.includes("dashboard.html")) {
+          const mapping = data.sectionId === "dna" ? "showMovieDNA" : 
+                          data.sectionId === "persona" ? "showPersona" : 
+                          data.sectionId === "analytics" ? "showAnalytics" : "highlightAchievements";
+          sessionStorage.setItem("nyx_pending_highlight", mapping);
+          window.location.href = "dashboard.html";
+        } else {
+          const selector = data.sectionId === "dna" ? "#dnaContainer" : 
+                            data.sectionId === "persona" ? "#personality" : 
+                            data.sectionId === "analytics" ? "#providerChart" : "#achievementsContainer";
+          highlightElement(selector);
+        }
+      }
+      else if (action === "scrollToMovie" && data.movieId) {
+        highlightElement(`[data-id="${data.movieId}"]` || `.movie-card[data-id="${data.movieId}"]`);
+      }
     });
   }
 
@@ -383,6 +430,19 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (pendingHighlight === "showMovieDNA") highlightElement("#dnaContainer");
       else if (pendingHighlight === "showAnalytics") highlightElement("#providerChart");
       else if (pendingHighlight === "highlightAchievements") highlightElement("#achievementsContainer");
+    }, 1000);
+  }
+
+  // Execute cross-page pending search once home page loads
+  const pendingSearch = sessionStorage.getItem("nyx_pending_search");
+  if (pendingSearch && window.location.pathname.includes("index.html")) {
+    sessionStorage.removeItem("nyx_pending_search");
+    setTimeout(() => {
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.value = pendingSearch;
+        searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
     }, 1000);
   }
 });

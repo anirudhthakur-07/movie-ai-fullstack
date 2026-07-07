@@ -34,6 +34,20 @@ const NYX_TOOLS = [
         }
       },
       {
+        name: "searchMovie",
+        description: "Perform a search for movies matching a search query string or title filter.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            query: {
+              type: "STRING",
+              description: "The movie title search query."
+            }
+          },
+          required: ["query"]
+        }
+      },
+      {
         name: "showPersona",
         description: "Highlight or focus the user's taste persona card in the dashboard metrics.",
         parameters: {
@@ -58,8 +72,122 @@ const NYX_TOOLS = [
         }
       },
       {
-        name: "scrollRecommendation",
+        name: "showWatchlist",
+        description: "Open or navigate to the user's saved watchlist page.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "showDashboard",
+        description: "Open or navigate to the user's analytics profile dashboard page.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "showAchievements",
+        description: "Open or highlight the milestones achievements panel or modal.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "showCollectionInsights",
+        description: "Scroll to or highlight the collection summaries and stats insight section.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "showRecommendation",
         description: "Scroll the page view to reveal the recommended movies lists section.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "showStreamingProviders",
+        description: "Highlight the click metrics breakdown for streaming providers on the dashboard.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "compareMovies",
+        description: "Trigger a side-by-side comparison modal comparing multiple movies.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            movieIds: {
+              type: "ARRAY",
+              items: { type: "INTEGER" },
+              description: "Array of numerical TMDb movie IDs to compare."
+            }
+          },
+          required: ["movieIds"]
+        }
+      },
+      {
+        name: "playTrailer",
+        description: "Launch the video player modal for the official trailer of the specified movie.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            movieId: {
+              type: "INTEGER",
+              description: "The unique TMDb movie ID."
+            }
+          },
+          required: ["movieId"]
+        }
+      },
+      {
+        name: "highlightSection",
+        description: "Apply a neon highlight glow animation to a specific UI container section (e.g. 'dna', 'persona', 'analytics', 'achievements').",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            sectionId: {
+              type: "STRING",
+              description: "The ID name of the targeted section.",
+              enum: ["dna", "persona", "analytics", "achievements"]
+            }
+          },
+          required: ["sectionId"]
+        }
+      },
+      {
+        name: "scrollToMovie",
+        description: "Scroll the grid container directly to focus on a particular movie card by ID.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            movieId: {
+              type: "INTEGER",
+              description: "The numerical TMDb ID of the movie card."
+            }
+          },
+          required: ["movieId"]
+        }
+      },
+      {
+        name: "showRecentSearches",
+        description: "Reveal the list of the user's recent search queries.",
+        parameters: {
+          type: "OBJECT",
+          properties: {}
+        }
+      },
+      {
+        name: "summarizeWatchlist",
+        description: "Request a summary of the current items in the user's saved list.",
         parameters: {
           type: "OBJECT",
           properties: {}

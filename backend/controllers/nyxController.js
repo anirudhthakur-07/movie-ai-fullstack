@@ -7,10 +7,11 @@ const { validateResponse } = require("../services/AI/responseValidator");
 const { getFallbackResponse } = require("../utils/fallbackResponses");
 const cacheService = require("../services/AI/cacheService");
 const aiLogger = require("../services/AI/aiLogger");
+const { performance } = require("perf_hooks");
 
 async function handleNyxQuery(req, res) {
   const userId = req.userId;
-  const { query, pageContext } = req.body;
+  const { query } = req.body;
 
   if (!query || typeof query !== "string") {
     return res.status(400).json({ error: "Query is required and must be a string" });
@@ -20,35 +21,42 @@ async function handleNyxQuery(req, res) {
     return res.status(400).json({ error: "Query is too long. Limit is 1000 characters." });
   }
 
-  const startTime = Date.now();
+  const startTotal = performance.now();
   let intent = "general";
+  let confidence = 0.50;
   let promptSize = query.length;
   let cacheHit = false;
+  let toolCalled = null;
 
   try {
-    // 1. Detect local intent (bypass Gemini completely if database/routing handles query)
-    const localIntent = detectLocalIntent(query);
-    if (localIntent && localIntent.handledLocally) {
+    // 1. Detect local intent (bypass Gemini completely if offline triggers match)
+    const localClassification = detectLocalIntent(query);
+    intent = localClassification.intent;
+    confidence = localClassification.confidence;
+
+    if (localClassification && localClassification.handledLocally) {
       const response = {
-        type: localIntent.type,
-        message: localIntent.message || `Locally resolved query: ${query}`,
-        actions: localIntent.actions || [],
+        type: localClassification.type || "summary",
+        message: localClassification.message || `Locally resolved query: ${query}`,
+        actions: localClassification.actions || [],
         local: true
       };
 
-      // Resolve watchlist count natively from context builder
-      if (localIntent.type === "watchlist_count") {
+      // Resolve watchlist count dynamically from context builder
+      if (localClassification.type === "watchlist_count" || localClassification.intent === "watchlist_count") {
         const context = await buildUserContext(userId);
+        response.type = "watchlist";
         response.message = `You currently have exactly ${context ? context.watchlistCount : 0} movies saved in your watchlist database.`;
         response.actions = ["openWatchlist"];
       }
 
-      const duration = Date.now() - startTime;
+      const totalLatency = Math.round(performance.now() - startTotal);
       aiLogger.logRequest({
-        intent: localIntent.type,
+        intent,
+        confidence,
         promptSize,
-        tokens: 0,
-        duration,
+        backendLatency: totalLatency,
+        geminiLatency: 0,
         cacheHit: false,
         success: true
       });
@@ -56,60 +64,79 @@ async function handleNyxQuery(req, res) {
       return res.json(response);
     }
 
-    // 2. Check local response cache to preserve rate limits
+    // 2. Resolve ambiguous confidence threshold (< 70%)
+    if (confidence < 0.70 && query.trim().split(/\s+/).length < 2) {
+      // Guard against chaotic inputs with gentle Operating System clarification
+      const totalLatency = Math.round(performance.now() - startTotal);
+      aiLogger.logRequest({
+        intent,
+        confidence,
+        promptSize,
+        backendLatency: totalLatency,
+        success: true
+      });
+      return res.json({
+        type: "warning",
+        message: "Nyx Core requires additional parameters to run analysis. Please query with more details about your DNA, ratings, or navigation.",
+        actions: []
+      });
+    }
+
+    // 3. Check local cache to prevent redundant Gemini API usage
     const cacheKey = `${userId}:${query}`;
     const cached = cacheService.get(cacheKey);
     if (cached) {
       cacheHit = true;
-      const duration = Date.now() - startTime;
+      const totalLatency = Math.round(performance.now() - startTotal);
       aiLogger.logRequest({
         intent: cached.type || "cached",
+        confidence,
         promptSize,
-        tokens: 0,
-        duration,
+        backendLatency: totalLatency,
+        geminiLatency: 0,
         cacheHit: true,
-        success: true
+        success: true,
+        toolCalled: cached.actions && cached.actions[0]
       });
       return res.json(cached);
     }
 
-    // 3. Build user dynamic context
+    // 4. Build user dynamic context
+    const startBackend = performance.now();
     const context = await buildUserContext(userId);
     if (!context) {
       throw new Error("Failed to construct user data context");
     }
+    const backendLatency = Math.round(performance.now() - startBackend);
 
-    // Classify intent based on keywords for prompt mapping
-    if (query.toLowerCase().includes("dna") || query.toLowerCase().includes("theme")) {
-      intent = "movieDNA";
-    } else if (query.toLowerCase().includes("persona") || query.toLowerCase().includes("profile")) {
-      intent = "persona";
-    } else if (query.toLowerCase().includes("recommend") || query.toLowerCase().includes("suggest")) {
-      intent = "recommendation";
-    } else if (query.toLowerCase().includes("analytics") || query.toLowerCase().includes("provider")) {
-      intent = "analytics";
-    }
-
-    // 4. Assemble dynamic prompt template
+    // 5. Assemble prompt with strict memory length limitations (capped to last 3 conversational turns)
     const prompt = buildPrompt(query, context, intent);
     promptSize = prompt.length;
 
-    // 5. Query Gemini AI Gateway
+    // 6. Query Gemini API with Native Tool declarations
+    const startGemini = performance.now();
     const rawResult = await callLLM(prompt);
+    const geminiLatency = Math.round(performance.now() - startGemini);
 
     let finalResponse;
+    
+    // Approximate tokens for logging purposes (standard 4-chars-per-token ratio)
+    const promptTokens = Math.ceil(promptSize / 4);
+    const responseTokens = Math.ceil(rawResult.length / 4);
 
-    // 6. Inspect if gateway returned a native Tool Call JSON
+    // 7. Parse if Gemini executed a tool/function call
     if (rawResult.startsWith('{"toolCalls":')) {
       const parsedCall = JSON.parse(rawResult);
       const call = parsedCall.toolCalls[0];
-      
+      toolCalled = call.name;
+
       finalResponse = {
         type: "summary",
         message: "Executing curated platform command.",
         actions: []
       };
 
+      // Map native tool commands to client action array payloads
       if (call.name === "navigate") {
         const target = call.args.target;
         finalResponse.type = "navigation";
@@ -128,9 +155,14 @@ async function handleNyxQuery(req, res) {
         }
       } else if (call.name === "openMovie") {
         finalResponse.type = "recommendation";
-        finalResponse.message = `Displaying cinematic insights.`;
+        finalResponse.message = "Displaying cinematic insights.";
         finalResponse.actions = ["openMovie"];
         finalResponse.movieId = Number(call.args.movieId);
+      } else if (call.name === "searchMovie") {
+        finalResponse.type = "recommendation";
+        finalResponse.message = `Executing movie search query: "${call.args.query}".`;
+        finalResponse.actions = ["searchMovie"];
+        finalResponse.query = call.args.query;
       } else if (call.name === "showPersona") {
         finalResponse.type = "persona";
         finalResponse.message = "Focusing on your active taste persona archetype.";
@@ -143,13 +175,61 @@ async function handleNyxQuery(req, res) {
         finalResponse.type = "analytics";
         finalResponse.message = "Opening provider click analytics insights.";
         finalResponse.actions = ["showAnalytics"];
-      } else if (call.name === "scrollRecommendation") {
+      } else if (call.name === "showWatchlist") {
+        finalResponse.type = "navigation";
+        finalResponse.message = "Opening your saved watchlist shelf.";
+        finalResponse.actions = ["openWatchlist"];
+      } else if (call.name === "showDashboard") {
+        finalResponse.type = "navigation";
+        finalResponse.message = "Opening your main control center.";
+        finalResponse.actions = ["openDashboard"];
+      } else if (call.name === "showAchievements") {
+        finalResponse.type = "navigation";
+        finalResponse.message = "Revealing your unlocked milestones.";
+        finalResponse.actions = ["openDashboard", "highlightAchievements"];
+      } else if (call.name === "showCollectionInsights") {
+        finalResponse.type = "navigation";
+        finalResponse.message = "Showing collection summary logs.";
+        finalResponse.actions = ["openDashboard", "showCollectionInsights"];
+      } else if (call.name === "showRecommendation") {
         finalResponse.type = "recommendation";
         finalResponse.message = "Scrolling to recommendations grid.";
         finalResponse.actions = ["scrollRecommendation"];
+      } else if (call.name === "showStreamingProviders") {
+        finalResponse.type = "navigation";
+        finalResponse.message = "Displaying provider click analytics chart.";
+        finalResponse.actions = ["openDashboard", "showAnalytics"];
+      } else if (call.name === "compareMovies") {
+        finalResponse.type = "recommendation";
+        finalResponse.message = "Comparing select titles side-by-side.";
+        finalResponse.actions = ["compareMovies"];
+        finalResponse.movieIds = call.args.movieIds;
+      } else if (call.name === "playTrailer") {
+        finalResponse.type = "recommendation";
+        finalResponse.message = "Initializing video player for movie trailer.";
+        finalResponse.actions = ["playTrailer"];
+        finalResponse.movieId = Number(call.args.movieId);
+      } else if (call.name === "highlightSection") {
+        finalResponse.type = "navigation";
+        finalResponse.message = `Focusing on target section: ${call.args.sectionId}.`;
+        finalResponse.actions = ["highlightSection"];
+        finalResponse.sectionId = call.args.sectionId;
+      } else if (call.name === "scrollToMovie") {
+        finalResponse.type = "recommendation";
+        finalResponse.message = "Focusing on selected movie card.";
+        finalResponse.actions = ["scrollToMovie"];
+        finalResponse.movieId = Number(call.args.movieId);
+      } else if (call.name === "showRecentSearches") {
+        finalResponse.type = "summary";
+        finalResponse.message = "Displaying recent search logs.";
+        finalResponse.actions = ["showRecentSearches"];
+      } else if (call.name === "summarizeWatchlist") {
+        finalResponse.type = "watchlist";
+        finalResponse.message = "Aggregating your saved watchlist statistics.";
+        finalResponse.actions = ["summarizeWatchlist"];
       }
     } else {
-      // 7. General narrative explanation: Parse if JSON, otherwise wrap text
+      // 8. General narrative explanation (parse JSON, fallback to plain text envelope)
       try {
         finalResponse = cleanAndParseJSON(rawResult);
       } catch (jsonErr) {
@@ -161,35 +241,39 @@ async function handleNyxQuery(req, res) {
       }
     }
 
-    // 8. Validate output schemas and actions
+    // 9. Validate final actions schema
     const validated = validateResponse(finalResponse);
-
-    // Store in cache for future references
     cacheService.set(cacheKey, validated);
 
-    const duration = Date.now() - startTime;
+    const totalLatency = Math.round(performance.now() - startTotal);
     aiLogger.logRequest({
       intent,
+      confidence,
       promptSize,
-      tokens: Math.ceil(promptSize / 4) + Math.ceil(rawResult.length / 4),
-      duration,
+      promptTokens,
+      responseTokens,
+      backendLatency,
+      geminiLatency,
       cacheHit: false,
-      success: true
+      success: true,
+      toolCalled
     });
 
     return res.json(validated);
   } catch (err) {
-    const duration = Date.now() - startTime;
+    const totalLatency = Math.round(performance.now() - startTotal);
     aiLogger.logRequest({
       intent,
+      confidence,
       promptSize,
-      tokens: 0,
-      duration,
+      backendLatency: totalLatency,
+      geminiLatency: 0,
       cacheHit: false,
       success: false,
       error: err
     });
 
+    // Circuit Breaker & Fallback System
     const fallback = getFallbackResponse(intent, query);
     return res.json(fallback);
   }
