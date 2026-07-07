@@ -374,7 +374,7 @@ h4 {
 
 .modal-content {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 90%;
   max-width: 850px;
   /* CHANGE: Height must be fixed for overflow-y to work */
@@ -478,7 +478,8 @@ h4 {
 .modal-body {
   display: flex;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .modal-poster img.loaded {
@@ -4538,39 +4539,38 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(18, 18, 22, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.3rem;
+  width: 40px;
+  height: 80px;
+  border-radius: 80%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 1010;
-  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), background 0.22s, border-color 0.22s, box-shadow 0.22s;
+  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), background 0.22s, box-shadow 0.22s;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   user-select: none;
 }
 .modal-nav-arrow:hover {
-  background: rgba(255, 46, 67, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  box-shadow: 0 0 15px rgba(255, 46, 67, 0.45);
-  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  transform: translateY(-50%) scale(1.05);
 }
 .modal-nav-arrow:active {
   transform: translateY(-50%) scale(0.96);
 }
 .modal-nav-arrow.prev-arrow {
-  left: -24px;
+  left: -65px;
 }
 .modal-nav-arrow.next-arrow {
-  right: -24px;
+  right: -65px;
 }
 
 /* Movie Details Indicator Dots */
@@ -4580,8 +4580,7 @@ body {
   align-items: center;
   gap: 8px;
   width: 100%;
-  margin-top: 15px;
-  margin-bottom: 5px;
+  margin: 12px 0 16px 0;
   z-index: 100;
   pointer-events: auto;
 }
