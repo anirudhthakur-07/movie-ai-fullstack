@@ -74,7 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
             align-items: center !important;
             justify-content: center !important;
             padding: 0 !important;
-            margin: -10px !important;
+            position: relative !important;
+            z-index: 101 !important;
             transition: color 0.2s ease !important;
         }
         .drawer-header .close-btn:hover {
@@ -298,16 +299,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         /* Body scroll lock override */
-        body.manual-open-lock {
+        /* Body scroll lock override */
+        html.manual-open-lock, body.manual-open-lock {
             overflow: hidden !important;
+            height: 100% !important;
+            width: 100% !important;
         }
         
         /* Mobile responsive stylesheet */
         @media (max-width: 768px) {
             /* Full-Screen cinematic overlay */
             .manual-drawer {
-                width: 100vw !important;
-                height: 100vh !important;
+                width: 100% !important;
+                height: 100% !important;
                 border-left: none !important;
                 border-top: 1px solid rgba(255, 46, 67, 0.25) !important;
                 transform: translateY(100%) !important;
@@ -454,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const openDrawer = () => {
         if (drawer) {
             drawer.classList.add("show");
+            document.documentElement.classList.add("manual-open-lock");
             document.body.classList.add("manual-open-lock");
         }
     };
@@ -461,6 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeDrawer = () => {
         if (drawer) {
             drawer.classList.remove("show");
+            document.documentElement.classList.remove("manual-open-lock");
             document.body.classList.remove("manual-open-lock");
         }
     };
