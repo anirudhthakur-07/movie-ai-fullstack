@@ -12,8 +12,12 @@ async function handleNyxQuery(req, res) {
   const userId = req.userId;
   const { query, pageContext } = req.body;
 
-  if (!query) {
-    return res.status(400).json({ error: "Missing query property" });
+  if (!query || typeof query !== "string") {
+    return res.status(400).json({ error: "Query is required and must be a string" });
+  }
+
+  if (query.trim().length > 1000) {
+    return res.status(400).json({ error: "Query is too long. Limit is 1000 characters." });
   }
 
   const startTime = Date.now();
