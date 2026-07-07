@@ -1938,10 +1938,14 @@ body.modal-open {
 }
 
 .floating-providers {
-  position: absolute;
-  right: -60px;
-  top: 80px;
-  z-index: 9999;
+  position: relative;
+  right: 0;
+  top: 0;
+  margin: 12px 0 6px 0;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  z-index: 100;
   pointer-events: none;
   opacity: 0;
   transform: scale(0.85);
@@ -1956,15 +1960,15 @@ body.modal-open {
 
 .floating-provider-icons {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  flex-direction: row;
+  gap: 12px;
 }
 
 /* OTT ICON */
 
 .provider-logo {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   pointer-events: auto;
   border-radius: 50%;
@@ -1979,35 +1983,13 @@ body.modal-open {
 }
 
 .provider-logo:hover {
-  transform: translateX(-4px) scale(1.06);
+  transform: scale(1.06);
   border-color: rgba(255,255,255,0.18);
   box-shadow: 0 8px 24px rgba(255,255,255,0.08);
   background: rgba(35,35,35,0.96);
 }
 
 @media (max-width: 768px) {
-  .floating-providers {
-    position: relative !important;
-    right: 0 !important;
-    top: 0 !important;
-    transform: scale(0.85) !important;
-    margin: 15px 0 5px 0 !important;
-    display: flex !important;
-    justify-content: flex-start !important;
-    width: 100% !important;
-    z-index: 100 !important;
-    pointer-events: none !important;
-    opacity: 0 !important;
-    transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) !important;
-  }
-  .floating-providers.show-active {
-    opacity: 1 !important;
-    transform: scale(1) !important;
-    pointer-events: auto !important;
-  }
-  .floating-provider-icons {
-    flex-direction: row !important;
-    gap: 10px !important;
   }
   .provider-logo {
     width: 40px !important;

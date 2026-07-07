@@ -472,17 +472,9 @@ async function renderModalDetailsWithData(fullMovie, movie, requestId) {
         providerContainer.classList.remove("show-active");
         providerContainer.classList.add("hidden");
 
-        if (window.innerWidth <= 768) {
-            const overviewEl = document.getElementById("modalOverview");
-            if (overviewEl) {
-                overviewEl.parentNode.insertBefore(providerContainer, overviewEl.nextSibling);
-            }
-        } else {
-            const modalContentEl = document.querySelector(".modal-content");
-            const modalBodyEl = document.querySelector(".modal-body");
-            if (modalContentEl && modalBodyEl) {
-                modalContentEl.insertBefore(providerContainer, modalBodyEl);
-            }
+        const overviewEl = document.getElementById("modalOverview");
+        if (overviewEl) {
+            overviewEl.parentNode.insertBefore(providerContainer, overviewEl.nextSibling);
         }
     }
 
