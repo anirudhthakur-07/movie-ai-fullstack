@@ -368,8 +368,10 @@ h4 {
   backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 15px;
 }
 
 .modal-content {
@@ -1937,14 +1939,20 @@ body.modal-open {
 
 .floating-providers {
   position: absolute;
-  right: -72px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: -60px;
+  top: 80px;
   z-index: 9999;
-  pointer-events: auto;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-
+.floating-providers.show-active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
 
 .floating-provider-icons {
   display: flex;
@@ -1957,54 +1965,44 @@ body.modal-open {
 .provider-logo {
   width: 48px;
   height: 48px;
-cursor: pointer;
-pointer-events: auto;
-  border-radius: 50%;
-
-  object-fit: cover;
-
   cursor: pointer;
-
+  pointer-events: auto;
+  border-radius: 50%;
+  object-fit: cover;
   background: rgba(20,20,20,0.92);
-
   padding: 4px;
-
   border: 1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,0.35);
-
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
   backdrop-filter: blur(10px);
-
-  transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease,
-    border-color 0.22s ease;
-
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   pointer-events: auto;
 }
 
 .provider-logo:hover {
   transform: translateX(-4px) scale(1.06);
-
   border-color: rgba(255,255,255,0.18);
-
-  box-shadow:
-    0 8px 24px rgba(255,255,255,0.08);
-
+  box-shadow: 0 8px 24px rgba(255,255,255,0.08);
   background: rgba(35,35,35,0.96);
 }
+
 @media (max-width: 768px) {
   .floating-providers {
     position: relative !important;
     right: 0 !important;
     top: 0 !important;
-    transform: none !important;
+    transform: scale(0.85) !important;
     margin: 15px 0 5px 0 !important;
     display: flex !important;
     justify-content: flex-start !important;
     width: 100% !important;
     z-index: 100 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  }
+  .floating-providers.show-active {
+    opacity: 1 !important;
+    transform: scale(1) !important;
     pointer-events: auto !important;
   }
   .floating-provider-icons {

@@ -469,6 +469,7 @@ async function renderModalDetailsWithData(fullMovie, movie, requestId) {
 
     if (providerIcons && providerContainer) {
         providerIcons.innerHTML = "";
+        providerContainer.classList.remove("show-active");
         providerContainer.classList.add("hidden");
 
         if (window.innerWidth <= 768) {
@@ -565,6 +566,11 @@ async function renderModalDetailsWithData(fullMovie, movie, requestId) {
 
         if (currentModalRequest !== requestId) return;
         providerContainer.classList.remove("hidden");
+        setTimeout(() => {
+            if (currentModalRequest === requestId) {
+                providerContainer.classList.add("show-active");
+            }
+        }, 30);
     });
 
     if (currentModalRequest !== requestId) return;
@@ -588,6 +594,12 @@ document.addEventListener("click", (e) => {
     if (e.target.classList.contains("close-modal")) {
         const modal = document.getElementById("movieModal");
         modal.classList.remove("show");
+        
+        const providerContainer = document.getElementById("floatingProviders");
+        if (providerContainer) {
+            providerContainer.classList.remove("show-active");
+        }
+
         setTimeout(() => {
             modal.classList.add("hidden");
             // Hide dots container on close
