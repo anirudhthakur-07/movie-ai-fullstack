@@ -125,17 +125,12 @@ async function getWatchlist(retries = 3) {
         return [];
 
     } catch (err) {
-
         if (retries > 0) {
-
             await new Promise(res =>
                 setTimeout(res, 500)
             );
-
             return getWatchlist(retries - 1);
         }
-
-    } catch (err) {
         return [];
     }
 }
