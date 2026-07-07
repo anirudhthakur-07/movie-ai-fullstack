@@ -262,20 +262,30 @@ if (reasonsBox) {
     }
 }     const trailerUrl = await fetchTrailer(movieId);
         // Clear previously displayed OTT providers
-const providerContainer =
-document.getElementById("floatingProviders");
+      const providerContainer = document.getElementById("floatingProviders");
+      const providerIcons = document.getElementById("providerIcons");
 
-const providerIcons =
-document.getElementById("providerIcons");
+      if (providerIcons && providerContainer) {
+          // instantly clear old icons
+          providerIcons.innerHTML = "";
 
+          // instantly hide dock
+          providerContainer.classList.add("hidden");
 
-if (providerIcons && providerContainer) {
-    // instantly clear old icons
-    providerIcons.innerHTML = "";
-
-    // instantly hide dock
-    providerContainer.classList.add("hidden");
-}
+          // Reposition dynamically for mobile vs desktop layout
+          if (window.innerWidth <= 768) {
+              const overviewEl = document.getElementById("modalOverview");
+              if (overviewEl) {
+                  overviewEl.parentNode.insertBefore(providerContainer, overviewEl.nextSibling);
+              }
+          } else {
+              const modalContentEl = document.querySelector(".modal-content");
+              const modalBodyEl = document.querySelector(".modal-body");
+              if (modalContentEl && modalBodyEl) {
+                  modalContentEl.insertBefore(providerContainer, modalBodyEl);
+              }
+          }
+      }
 
 // Load streaming providers for current movie
 fetchProviders(movieId).then(providers => {
