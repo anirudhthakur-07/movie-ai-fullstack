@@ -3380,11 +3380,38 @@ pointer-events: auto;
 }
 
 .movie-card-skeleton {
-  flex: 0 0 180px;
-  width: 180px;
-  height: 270px;
-  border-radius: 16px;
-  box-sizing: border-box;
+  flex: 0 0 170px !important;
+  width: 170px !important;
+  height: 250px !important;
+  border-radius: 12px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: rgba(20, 20, 26, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.movie-card-skeleton .skeleton-poster {
+  width: 100% !important;
+  height: 190px !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.movie-card-skeleton .skeleton-title-line {
+  height: 11px !important;
+  width: 75% !important;
+  border-radius: 4px !important;
+  margin: 2px 10px 0 !important;
+}
+
+.movie-card-skeleton .skeleton-details-line {
+  height: 7px !important;
+  width: 45% !important;
+  border-radius: 3px !important;
+  margin: 0 10px 8px !important;
 }
 
 /* Grid collection skeleton */

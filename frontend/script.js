@@ -111,9 +111,27 @@ let recPage = 1;
 let watchlistCache = [];
 let watchlistPage = 1;
  
+// SKELETON ROW GENERATOR
+function showRowSkeletons(rowEl, count = 6) {
+  if (!rowEl) return;
+  let skeletonHtml = '<div class="movie-row-skeleton">';
+  for (let i = 0; i < count; i++) {
+    skeletonHtml += `
+      <div class="movie-card-skeleton">
+        <div class="skeleton-poster skeleton-shimmer"></div>
+        <div class="skeleton-title-line skeleton-shimmer"></div>
+        <div class="skeleton-details-line skeleton-shimmer"></div>
+      </div>
+    `;
+  }
+  skeletonHtml += '</div>';
+  rowEl.innerHTML = skeletonHtml;
+}
+
 // MOVIE CATEGORY LOADERS
 // Fetch Trending, Popular & Genre-Based Movies
 async function loadTopRated() {
+  showRowSkeletons(topRatedRow);
   const data = await fetchMovies(`/top-rated`);
 
   if (!data) {
@@ -124,6 +142,7 @@ async function loadTopRated() {
   displayMovies(data, topRatedRow);
 }
 async function loadPopular() {
+  showRowSkeletons(popularRow);
   const data = await fetchMovies(`/popular`);
   if (!data) {
     setTimeout(loadPopular, 2000);
@@ -134,6 +153,7 @@ async function loadPopular() {
 }
 
 async function loadScifi() {
+  showRowSkeletons(scifiRow);
   const data = await fetchMovies(`/scifi`);
   if (!data) {
     setTimeout(loadScifi, 2000);
@@ -144,6 +164,7 @@ async function loadScifi() {
 }
 
 async function loadHorror() {
+  showRowSkeletons(horrorRow);
   const data = await fetchMovies(`/horror`);
 
   if (!data) {
@@ -362,9 +383,13 @@ if (!res) {
   }
 }
 async function loadWatchlistRecommendations(reset = false) {
-
   const text = document.getElementById("refreshText");
   if (text) text.classList.remove("hidden");
+
+  // Show skeletons immediately if loading fresh or empty
+  if (reset || watchlistRecRow.innerHTML === "") {
+    showRowSkeletons(watchlistRecRow);
+  }
 
   const data = await fetchWatchlistRecommendations();
 

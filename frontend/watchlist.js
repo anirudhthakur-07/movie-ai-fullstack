@@ -908,11 +908,31 @@ window.triggerGroupMatch = async function() {
     container.classList.remove("hidden");
     row.innerHTML = `
       <div class="movie-row-skeleton" style="width: 100%;">
-          <div class="movie-card-skeleton skeleton-shimmer"></div>
-          <div class="movie-card-skeleton skeleton-shimmer"></div>
-          <div class="movie-card-skeleton skeleton-shimmer"></div>
-          <div class="movie-card-skeleton skeleton-shimmer"></div>
-          <div class="movie-card-skeleton skeleton-shimmer"></div>
+          <div class="movie-card-skeleton">
+              <div class="skeleton-poster skeleton-shimmer"></div>
+              <div class="skeleton-title-line skeleton-shimmer"></div>
+              <div class="skeleton-details-line skeleton-shimmer"></div>
+          </div>
+          <div class="movie-card-skeleton">
+              <div class="skeleton-poster skeleton-shimmer"></div>
+              <div class="skeleton-title-line skeleton-shimmer"></div>
+              <div class="skeleton-details-line skeleton-shimmer"></div>
+          </div>
+          <div class="movie-card-skeleton">
+              <div class="skeleton-poster skeleton-shimmer"></div>
+              <div class="skeleton-title-line skeleton-shimmer"></div>
+              <div class="skeleton-details-line skeleton-shimmer"></div>
+          </div>
+          <div class="movie-card-skeleton">
+              <div class="skeleton-poster skeleton-shimmer"></div>
+              <div class="skeleton-title-line skeleton-shimmer"></div>
+              <div class="skeleton-details-line skeleton-shimmer"></div>
+          </div>
+          <div class="movie-card-skeleton">
+              <div class="skeleton-poster skeleton-shimmer"></div>
+              <div class="skeleton-title-line skeleton-shimmer"></div>
+              <div class="skeleton-details-line skeleton-shimmer"></div>
+          </div>
       </div>
     `;
     container.scrollIntoView({ behavior: "smooth" });
