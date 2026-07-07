@@ -39,6 +39,11 @@ const nyxRoutes         = require("./routes/nyxRoutes");
 // EXPRESS APPLICATION SETUP
 const app = express();
 const movieRoutes =require("./routes/movieRoutes");
+
+// TRUST PROXY — Required for Render/Vercel deployments
+// Enables express-rate-limit to read client IP from X-Forwarded-For
+// instead of the proxy's internal IP address
+app.set('trust proxy', 1);
 app.use(
   helmet({
     contentSecurityPolicy: {

@@ -158,7 +158,6 @@ async function loadAnalytics() {
             updateSummaryList();
         }
     } catch (err) {
-        console.error("Overview analytics failed", err);
         document.getElementById("totalClicks").innerText = "0";
         document.getElementById("topProvider").innerText = "No Data";
         document.getElementById("topGenre").innerText = "No Data";
@@ -279,7 +278,6 @@ async function loadProfile() {
             updateSummaryList();
         }
     } catch (err) {
-        console.error("Profile load failed", err);
         document.getElementById("profileUsername").innerText = "Guest User";
         document.getElementById("personality").innerText = "Cinematic Explorer";
         document.getElementById("avatarInitials").innerText = "G";
@@ -312,7 +310,7 @@ function renderMovieDNA(genres) {
         const itemHtml = `
             <div class="dna-item">
                 <div class="dna-info">
-                    <span class="dna-label">${genreDisplay}</span>
+                    <span class="dna-label">${escapeHTML(genreDisplay)}</span>
                     <span class="dna-value">${percentage}%</span>
                 </div>
                 <div class="dna-track">
@@ -342,7 +340,7 @@ async function loadAchievements() {
                 const stored = sessionStorage.getItem("celebrated_achievements");
                 if (stored) celebrated = JSON.parse(stored);
             } catch (e) {
-                console.error("Failed to parse celebrated achievements", e);
+                // silent
             }
 
             const currentUnlockedIds = data.achievements.filter(a => a.unlocked).map(a => a.id);
@@ -494,7 +492,7 @@ async function loadAchievements() {
         });
 
     } catch (err) {
-        console.error("Achievements UI render failed:", err);
+        /* silent */
     }
 }
 
@@ -524,7 +522,7 @@ async function updateSummaryList() {
             }
         }
     } catch (err) {
-        console.warn("Failed to load Gemini AI summary, falling back to rule-based summary:", err);
+        /* silent */
     }
 
     // Fallback to rule-based summary if Gemini failed or returned null
@@ -630,7 +628,6 @@ async function loadProviderChart() {
             }
         });
     } catch (err) {
-        console.error("Provider chart load failed", err);
         const ctx = document.getElementById("providerChart");
         if (ctx) ctx.style.display = "none";
     }
@@ -721,7 +718,6 @@ async function loadGenreChart() {
             }
         });
     } catch (err) {
-        console.error("Genre chart load failed", err);
         const ctx = document.getElementById("genreChart");
         if (ctx) ctx.style.display = "none";
     }
@@ -800,9 +796,14 @@ setupTooltipEvents();
 window.logout = async function () {
     try {
         await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
-    } catch (err) {
-        console.warn("Logout request failed:", err);
-    }
+    } catch (e) { /* silent */ }
     sessionStorage.removeItem("sessionActive");
+    localStorage.removeItem("cachedWatchlist");
+    localStorage.removeItem("movieDetailsCache");
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("policyAccepted_") || key.startsWith("unlocked_personas_")) {
+            localStorage.removeItem(key);
+        }
+    });
     window.location.href = "login.html";
 };

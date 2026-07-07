@@ -22,8 +22,6 @@ async function authFetch(url, options = {}) {
     //  SESSION EXPIRED / INVALID
     if (response.status === 401) {
 
-      console.warn("Session expired");
-
       sessionStorage.removeItem("sessionActive");
 
       alert("Session expired. Please login again.");
@@ -36,8 +34,6 @@ async function authFetch(url, options = {}) {
     return response;
 
   } catch (err) {
-
-    console.error("Auth fetch failed:", err);
 
     return null;
   }
@@ -55,7 +51,7 @@ window.trackBehaviorEvent = function(eventType, movieId, movieTitle, genre) {
     },
     credentials: "include",
     body: JSON.stringify({ eventType, movieId, movieTitle, genre })
-  }).catch(err => console.warn("Failed to track behavior event:", err));
+  }).catch(() => {});
 };
 
 // Global HTML Escaper to prevent XSS in template literals
@@ -340,14 +336,11 @@ await fetch(`${API_BASE}${endpoint}`,{
 
     return movies;
   } catch (error) {
-    console.warn(`Retrying ${endpoint}... Attempts left: ${retries}`);
-
     if (retries > 0) {
       await new Promise(res => setTimeout(res, 800));
       return fetchMovies(endpoint, retries - 1);
     }
 
-    console.error("Final failure:", endpoint);
     return null;
   }
 }
@@ -363,7 +356,7 @@ if (!res) return;
     userWatchlist = await res.json();
 
   } catch (err) {
-    console.error("Failed to load watchlist");
+    /* silent */
   }
 }
 async function fetchWatchlistRecommendations() {
@@ -481,11 +474,7 @@ async function loadHistory() {
         renderHistory(history);
 
     } catch (err) {
-
-        console.error(
-            "History load failed",
-            err
-        );
+        /* silent */
     }
 }
 function renderHistory(history) {
@@ -594,12 +583,6 @@ if (historyRes) {
 
         await loadHistory();
 
-    } else {
-
-        console.log(
-            "History not saved:",
-            historyData.error
-        );
     }
 }
 
@@ -665,13 +648,11 @@ function displayMovies(movies, container, replace = false) {
           },
           credentials: "include",
           body: JSON.stringify({ action: "open_recommendation" })
-        }).catch(err => console.log("Tracking open_recommendation failed", err));
+        }).catch(() => {});
       }
 
       if (typeof openModal === "function") {
         openModal(movie);
-      } else {
-        console.error("openModal not loaded");
       }
     });
 
@@ -738,7 +719,6 @@ async function toggleWatchlist(event, btn) {
   };
 
   if (!movie.id) {
-    console.error("Invalid movie ID");
     btn.disabled = false;
     return;
   }
@@ -766,7 +746,6 @@ if (!res) {
     userWatchlist = data;
 
     if (!res.ok) {
-      console.error("Backend error:", data);
       btn.disabled = false;
       return;
     }
@@ -804,7 +783,7 @@ if (!res) {
     }, 500);
 
   } catch (err) {
-    console.error("Watchlist error:", err);
+    /* silent */
   }
 
   btn.disabled = false;
@@ -826,7 +805,7 @@ async function initTrendingAndHero() {
       updateHeroBackground();
     }, 4000);
   } catch (err) {
-    console.error("Trending/hero init error:", err);
+    /* silent */
   }
 }
 
@@ -1253,11 +1232,7 @@ displayMovies(
 }
 }
 } catch (err) {
-
-    console.error(
-      "Analytics recommendation failed",
-      err
-    );
+    /* silent */
   }
 }
  
@@ -1271,10 +1246,16 @@ function openWatchlistPage() {
 async function logout() {
   try {
     await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
-  } catch (err) {
-    console.warn("Logout request failed:", err);
-  }
+  } catch (e) { /* silent */ }
   sessionStorage.removeItem("sessionActive");
+  // Clear user-scoped localStorage to prevent data persistence on shared devices
+  localStorage.removeItem("cachedWatchlist");
+  localStorage.removeItem("movieDetailsCache");
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith("policyAccepted_") || key.startsWith("unlocked_personas_")) {
+      localStorage.removeItem(key);
+    }
+  });
   window.location.href = "login.html";
 }
 function updateScrollButtons(row, leftBtn, rightBtn) {

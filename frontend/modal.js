@@ -54,8 +54,6 @@ async function fetchProviders(movieId) {
         return data;
 
     } catch (err) {
-        console.error("Provider fetch failed");
-
         return [];
     }
 }
@@ -271,13 +269,7 @@ const providerIcons =
 document.getElementById("providerIcons");
 
 
-if (!providerIcons || !providerContainer) {
-    console.warn(
-        "providerIcons element missing"
-    );
-
-} else {
-
+if (providerIcons && providerContainer) {
     // instantly clear old icons
     providerIcons.innerHTML = "";
 
@@ -480,9 +472,7 @@ if (!genreName && movie.genre_ids?.length) {
         genreLookup[movie.genre_ids[0]];
 }
 if (!genreName) {
-
-    console.warn("Genre missing");
-
+    // default set
 }
 await authFetch(`${API_BASE}/provider-click`, {
 
@@ -535,10 +525,8 @@ await authFetch(`${API_BASE}/provider-click`, {
         }
 
     } catch (err) {
-        console.error("MODAL ERROR:", err);
         if (modalRetryCount < 2) {
             modalRetryCount++;
-            console.log(`Retrying fetch for movie ${movieId}. Attempt: ${modalRetryCount}`);
             setTimeout(() => {
                 window.openModal(movie);
             }, 1000);
@@ -633,7 +621,7 @@ function updateWatchlistButtonState(btn, isAdded, movie) {
         }
       }
     } catch (err) {
-      console.error("Failed to toggle watchlist inside modal", err);
+      /* silent */
     } finally {
       btn.disabled = false;
     }

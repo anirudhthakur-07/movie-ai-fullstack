@@ -6,6 +6,19 @@ const ALLOWED_ACTIONS = [
   "openWatchlist"
 ];
 
+const ALLOWED_TYPES = [
+  "recommendation",
+  "movieDNA",
+  "persona",
+  "summary",
+  "warning"
+];
+
+// Strips all HTML tags from a string to prevent XSS via LLM output
+function stripHTML(str) {
+  return String(str).replace(/<[^>]*>/g, '');
+}
+
 // Validates structured JSON responses to filter allowed actions and enforce model schemas
 function validateResponse(json) {
   if (!json || typeof json !== "object") {
@@ -16,21 +29,21 @@ function validateResponse(json) {
     };
   }
 
-  // Enforce required structure properties
+  // Enforce required structure properties with server-side sanitization
   const validated = {
-    type: json.type || "summary",
-    message: json.message || "A silent response from the shadows.",
+    type: ALLOWED_TYPES.includes(json.type) ? json.type : "summary",
+    message: stripHTML(json.message || "A silent response from the shadows."),
     actions: Array.isArray(json.actions) ? json.actions : []
   };
 
   // Filter actions against whitelist to protect client execution
   validated.actions = validated.actions.filter(act => ALLOWED_ACTIONS.includes(act));
 
-  // Add optional elements if present
+  // Add optional elements if present — coerce to safe types
   if (json.movieId) validated.movieId = Number(json.movieId);
   if (json.confidence) validated.confidence = Number(json.confidence);
-  if (json.persona) validated.persona = String(json.persona);
-  if (json.dna) validated.dna = Array.isArray(json.dna) ? json.dna : [];
+  if (json.persona) validated.persona = stripHTML(String(json.persona));
+  if (json.dna) validated.dna = Array.isArray(json.dna) ? json.dna.map(d => stripHTML(String(d))) : [];
 
   return validated;
 }

@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("nyxSendBtn");
 
   if (!orb || !chatWindow || !closeBtn || !chatBody || !input || !sendBtn) {
-    console.warn("[NYX] Interface elements missing in page DOM layout");
     return;
   }
 
@@ -39,9 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
       }
-    } catch (err) {
-      console.warn("[NYX] Failed to parse sessionStorage history", err);
-    }
+    } catch (e) { /* silent */ }
   }
 
   // Save single message item to sessionStorage list
@@ -54,9 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       messages.push({ sender, text });
       sessionStorage.setItem("nyx_chat_history", JSON.stringify(messages));
-    } catch (err) {
-      console.warn("[NYX] Failed to write message to sessionStorage", err);
-    }
+    } catch (e) { /* silent */ }
   }
 
   // Clear chat memory and reset display to initial welcome
@@ -75,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
       clearChatSession("Session expired. The archive has sealed itself due to inactivity.");
-      console.log("[NYX] Chat history wiped due to user inactivity timeout");
     }, INACTIVITY_TIMEOUT);
   }
 
@@ -91,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
                       e.target.closest("[onclick*='logout']");
     if (logoutBtn) {
       clearChatSession();
-      console.log("[NYX] Chat history wiped on user logout click");
     }
   });
 
@@ -212,7 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
     } catch (err) {
-      console.error("[NYX ERROR]", err);
       typingIndicator.remove();
       appendMessage("The archive is calibrating. A temporary network deviation prevents deep reasoning.", "system", false);
     } finally {
@@ -288,7 +280,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Helper: Execute JSON commands returned by the backend OS layer
   function handleActions(actions, data) {
     actions.forEach(action => {
-      console.log(`[NYX ACTION] Executing: ${action}`, data);
 
       if (action === "openMovie" && data.movieId) {
         if (typeof window.openModal === "function") {

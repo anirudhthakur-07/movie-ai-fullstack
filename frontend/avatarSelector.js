@@ -59,7 +59,7 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
             unlockedAchievements = data.achievements.filter(m => m.unlocked).map(m => m.id);
         }
     } catch (err) {
-        console.error("Error fetching achievements for avatar selection:", err);
+        // silent
     }
 
     // 2. Fetch locally recorded unlocked personas to persist history across profile shifts
@@ -247,7 +247,6 @@ async function openAvatarSelector(currentPersonaRaw, currentGender, username, on
                         showAvatarNotification("Failed to update avatar. Please try again.");
                     }
                 } catch (err) {
-                    console.error("Failed to update avatar:", err);
                     showAvatarNotification("Error updating avatar.");
                 }
             });

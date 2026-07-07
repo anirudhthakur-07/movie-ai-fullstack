@@ -135,10 +135,7 @@ async function getWatchlist(retries = 3) {
             return getWatchlist(retries - 1);
         }
 
-        console.error(
-            "Watchlist failed completely"
-        );
-
+    } catch (err) {
         return [];
     }
 }
@@ -189,7 +186,7 @@ async function enrichWatchlistDetails(list) {
                     localStorage.setItem("movieDetailsCache", JSON.stringify(movieDetailsCache));
                 }
             } catch (err) {
-                console.error(`Error fetching movie ${id} details:`, err);
+                // silent
             }
         });
         await Promise.allSettled(promises);
@@ -246,7 +243,6 @@ try {
 
 
         if (!res.ok) {
-            console.error("Remove failed");
             return;
         }
 
@@ -256,7 +252,7 @@ try {
         }
 
     } catch (err) {
-        console.error("Remove error:", err);
+        // silent
     }
 }
 
@@ -645,7 +641,7 @@ window.toggleFavoriteFolder = async function(event, tmdbId) {
             await renderWatchlistPage();
         }
     } catch (err) {
-        console.error("Failed to toggle movie favorite folder:", err);
+        /* silent */
     }
 };
 
@@ -839,10 +835,15 @@ window.addEventListener('scroll', () => {
 window.logout = async function () {
     try {
         await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
-    } catch (err) {
-        console.warn("Logout request failed:", err);
-    }
+    } catch (e) { /* silent */ }
     sessionStorage.removeItem("sessionActive");
+    localStorage.removeItem("cachedWatchlist");
+    localStorage.removeItem("movieDetailsCache");
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("policyAccepted_") || key.startsWith("unlocked_personas_")) {
+            localStorage.removeItem(key);
+        }
+    });
     window.location.href = "login.html";
 };
 
@@ -874,7 +875,6 @@ window.clearAllWatchlist = async function() {
             }
         }
     } catch (err) {
-        console.error("Failed to clear watchlist:", err);
         alert("An error occurred while clearing the watchlist.");
         if (clearBtn) {
             clearBtn.disabled = false;
@@ -981,7 +981,6 @@ window.triggerGroupMatch = async function() {
             `;
         }
     } catch (err) {
-        console.error("Group matching error:", err);
         row.innerHTML = `
           <div class="watchlist-empty-message" style="grid-column: 1 / -1; padding: 45px 20px; width: 100%; box-sizing: border-box; margin: 10px 0;">
             <i class="fas fa-wifi" style="font-size: 1.8rem; color: #ff3b30; margin-bottom: 8px;"></i>
