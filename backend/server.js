@@ -265,24 +265,35 @@ app.use(
     "/api",
     authRoutes
 );
+const sensitiveRouteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { error: "Too many requests to this endpoint. Please try again later." }
+});
+
 app.use(
     "/api/watchlist",
+    sensitiveRouteLimiter,
     watchlistRoutes
 );
 app.use(
     "/api/analytics",
+    sensitiveRouteLimiter,
     analyticsRoutes
 );
 app.use(
     "/api",
+    sensitiveRouteLimiter,
     profileRoutes
 );
 app.use(
     "/api/achievements",
+    sensitiveRouteLimiter,
     achievementRoutes
 );
 app.use(
     "/api/behavior",
+    sensitiveRouteLimiter,
     behaviorRoutes
 );
 app.use(
