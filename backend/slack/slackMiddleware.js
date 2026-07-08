@@ -1,8 +1,16 @@
 const crypto = require("crypto");
 
 function verifySlackSignature(req, res, next) {
+  let body = req.body;
+  if (!body && req.rawBody) {
+    try {
+      body = JSON.parse(req.rawBody.toString());
+    } catch (e) {}
+  }
+
   // Bypass signature validation for Slack's URL verification handshake challenge
-  if (req.body && req.body.type === "url_verification") {
+  if (body && body.type === "url_verification") {
+    req.body = body; // Inject parsed body object back for downstream controller
     return next();
   }
 
