@@ -258,6 +258,12 @@ new ProviderClick({
 });
 
 
+// SLACK INTEGRATION ROUTES (mounted before auth-protected /api routes)
+app.use(
+    "/api/slack",
+    slackRoutes
+);
+
 // APPLICATION ROUTES
 app.use(
     "/api",
@@ -309,10 +315,6 @@ app.use(
 app.use(
     "/api/nyx",
     nyxRoutes
-);
-app.use(
-    "/api/slack",
-    slackRoutes
 );
 // SERVER STARTUP
 app.listen(PORT, () => {
