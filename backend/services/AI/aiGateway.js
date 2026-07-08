@@ -272,12 +272,12 @@ class PriorityQueue {
 }
 const requestQueue = new PriorityQueue(2);
 
-// Zentral model failover list (prioritized by free tier rate metrics)
+// Central model failover list (prioritized by free tier rate metrics and capacity)
 const MODELS = [
   "gemini-2.0-flash-lite", // 30 RPM / 1500 RPD
   "gemini-2.0-flash",      // 15 RPM / 1500 RPD
   "gemini-3.1-flash-lite", // 15 RPM / 500 RPD
-  "gemini-2.5-flash"       // 5 RPM / 20 RPD
+  "gemini-1.5-flash"       // 15 RPM / 1500 RPD (Replaced 2.5-flash to unlock higher rate boundaries)
 ];
 
 // Standard call gateway execution
