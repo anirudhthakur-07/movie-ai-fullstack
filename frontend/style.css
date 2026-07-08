@@ -4752,8 +4752,25 @@ body {
 .slide-out-right { animation: slideOutRight 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
 @media (max-width: 768px) {
-  .modal-nav-arrow {
-    display: none !important;
+  @media (hover: none) and (pointer: coarse) {
+    .modal-nav-arrow {
+      display: none !important;
+    }
+  }
+  @media (hover: hover), (pointer: fine) {
+    .modal-nav-arrow.prev-arrow {
+      left: 10px !important;
+    }
+    .modal-nav-arrow.next-arrow {
+      right: 10px !important;
+    }
+    .modal-nav-arrow {
+      width: 32px !important;
+      height: 64px !important;
+      font-size: 16px !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+      border-radius: 4px !important;
+    }
   }
 }
 
