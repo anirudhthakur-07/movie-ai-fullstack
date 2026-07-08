@@ -388,7 +388,7 @@ function renderOptimisticModalDOM(movie, requestId) {
     }
 }
 
-function renderFullModalDOM(fullMovie, requestId) {
+async function renderFullModalDOM(fullMovie, requestId) {
     if (currentModalRequest !== requestId) return;
 
     const modalImg = document.getElementById('modalImg');
