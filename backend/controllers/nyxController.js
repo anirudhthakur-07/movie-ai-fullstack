@@ -1,6 +1,7 @@
 const { detectLocalIntent } = require("../services/AI/intentDetector");
 const { buildUserContext } = require("../services/AI/contextBuilder");
 const { buildPrompt } = require("../services/AI/promptBuilder");
+const { executeNyxQuery } = require("../services/AI/nyxOrchestrator");
 const { callLLM, callLLMStream } = require("../services/AI/aiGateway");
 const { cleanAndParseJSON } = require("../utils/jsonParser");
 const { validateResponse } = require("../services/AI/responseValidator");
@@ -167,149 +168,8 @@ async function handleNyxQuery(req, res) {
     }
 
     // 7. Non-Streaming Normal Mode
-    const startGemini = performance.now();
-    const rawResult = await callLLM(prompt);
-    const geminiLatency = Math.round(performance.now() - startGemini);
-
-    let finalResponse;
-    const promptTokens = Math.ceil(promptSize / 4);
-    const responseTokens = Math.ceil(rawResult.length / 4);
-
-    if (rawResult.startsWith('{"toolCalls":')) {
-      const parsedCall = JSON.parse(rawResult);
-      const call = parsedCall.toolCalls[0];
-      toolCalled = call.name;
-
-      finalResponse = {
-        type: "summary",
-        message: "Executing curated platform command.",
-        actions: []
-      };
-
-      // Map native tool commands to client action array payloads
-      if (call.name === "navigate") {
-        const target = call.args.target;
-        finalResponse.type = "navigation";
-        if (target === "dashboard") {
-          finalResponse.message = "Opening your main control center.";
-          finalResponse.actions = ["openDashboard"];
-        } else if (target === "watchlist") {
-          finalResponse.message = "Opening your saved collection folder.";
-          finalResponse.actions = ["openWatchlist"];
-        } else if (target === "home") {
-          finalResponse.message = "Returning to the dark cinema gate.";
-          finalResponse.actions = ["openHome"];
-        } else if (target === "settings") {
-          finalResponse.message = "Opening configurations.";
-          finalResponse.actions = ["openSettings"];
-        }
-      } else if (call.name === "openMovie") {
-        finalResponse.type = "recommendation";
-        finalResponse.message = "Displaying cinematic insights.";
-        finalResponse.actions = ["openMovie"];
-        finalResponse.movieId = Number(call.args.movieId);
-      } else if (call.name === "searchMovie") {
-        finalResponse.type = "recommendation";
-        finalResponse.message = `Executing movie search query: "${call.args.query}".`;
-        finalResponse.actions = ["searchMovie"];
-        finalResponse.query = call.args.query;
-      } else if (call.name === "showPersona") {
-        finalResponse.type = "persona";
-        finalResponse.message = "Focusing on your active taste persona archetype.";
-        finalResponse.actions = ["showPersona"];
-      } else if (call.name === "showMovieDNA") {
-        finalResponse.type = "movieDNA";
-        finalResponse.message = "Locating your movie DNA indicators.";
-        finalResponse.actions = ["showMovieDNA"];
-      } else if (call.name === "showAnalytics") {
-        finalResponse.type = "analytics";
-        finalResponse.message = "Opening provider click analytics insights.";
-        finalResponse.actions = ["showAnalytics"];
-      } else if (call.name === "showWatchlist") {
-        finalResponse.type = "navigation";
-        finalResponse.message = "Opening your saved watchlist shelf.";
-        finalResponse.actions = ["openWatchlist"];
-      } else if (call.name === "showDashboard") {
-        finalResponse.type = "navigation";
-        finalResponse.message = "Opening your main control center.";
-        finalResponse.actions = ["openDashboard"];
-      } else if (call.name === "showAchievements") {
-        finalResponse.type = "navigation";
-        finalResponse.message = "Revealing your unlocked milestones.";
-        finalResponse.actions = ["openDashboard", "highlightAchievements"];
-      } else if (call.name === "showCollectionInsights") {
-        finalResponse.type = "navigation";
-        finalResponse.message = "Showing collection summary logs.";
-        finalResponse.actions = ["openDashboard", "showCollectionInsights"];
-      } else if (call.name === "showRecommendation") {
-        finalResponse.type = "recommendation";
-        finalResponse.message = "Scrolling to recommendations grid.";
-        finalResponse.actions = ["scrollRecommendation"];
-      } else if (call.name === "showStreamingProviders") {
-        finalResponse.type = "navigation";
-        finalResponse.message = "Displaying provider click analytics chart.";
-        finalResponse.actions = ["openDashboard", "showAnalytics"];
-      } else if (call.name === "compareMovies") {
-        finalResponse.type = "recommendation";
-        finalResponse.message = "Comparing select titles side-by-side.";
-        finalResponse.actions = ["compareMovies"];
-        finalResponse.movieIds = call.args.movieIds;
-      } else if (call.name === "playTrailer") {
-        finalResponse.type = "recommendation";
-        finalResponse.message = "Initializing video player for movie trailer.";
-        finalResponse.actions = ["playTrailer"];
-        finalResponse.movieId = Number(call.args.movieId);
-      } else if (call.name === "highlightSection") {
-        finalResponse.type = "navigation";
-        finalResponse.message = `Focusing on target section: ${call.args.sectionId}.`;
-        finalResponse.actions = ["highlightSection"];
-        finalResponse.sectionId = call.args.sectionId;
-      } else if (call.name === "scrollToMovie") {
-        finalResponse.type = "recommendation";
-        finalResponse.message = "Focusing on selected movie card.";
-        finalResponse.actions = ["scrollToMovie"];
-        finalResponse.movieId = Number(call.args.movieId);
-      } else if (call.name === "showRecentSearches") {
-        finalResponse.type = "summary";
-        finalResponse.message = "Displaying recent search logs.";
-        finalResponse.actions = ["showRecentSearches"];
-      } else if (call.name === "summarizeWatchlist") {
-        finalResponse.type = "watchlist";
-        finalResponse.message = "Aggregating your saved watchlist statistics.";
-        finalResponse.actions = ["summarizeWatchlist"];
-      }
-    } else {
-      try {
-        finalResponse = cleanAndParseJSON(rawResult);
-      } catch (jsonErr) {
-        finalResponse = {
-          type: "summary",
-          message: rawResult,
-          actions: []
-        };
-      }
-    }
-
-    const validated = validateResponse(finalResponse);
-    cacheService.set(cacheKey, validated);
-
-    const totalLatency = Math.round(performance.now() - startTotal);
-    aiLogger.logRequest({
-      userId,
-      intent,
-      confidence,
-      promptSize,
-      completionLength: rawResult.length,
-      promptTokens,
-      responseTokens,
-      backendLatency,
-      geminiLatency,
-      cacheHit: false,
-      success: true,
-      toolCalled
-    });
-
-    return res.json(validated);
+    const response = await executeNyxQuery({ query, userId, clientState });
+    return res.json(response);
   } catch (err) {
     const totalLatency = Math.round(performance.now() - startTotal);
     aiLogger.logRequest({
