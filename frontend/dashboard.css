@@ -159,9 +159,11 @@ body {
 .glass-card .subtitle {
     text-align: left !important;
     margin-top: 4px !important;
-    margin-bottom: 20px !important;
-    font-size: 0.85rem !important;
-    color: var(--text-muted) !important;
+    margin-bottom: 16px !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.2px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .card-hover:hover {
@@ -184,9 +186,12 @@ body {
 }
 
 .card-header .subtitle {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 3px;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.2px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin-top: 4px !important;
+    margin-bottom: 0 !important;
 }
 
 .icon-gradient {
@@ -229,7 +234,7 @@ body {
     display: flex;
     align-items: center;
     gap: 24px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     z-index: 1;
 }
 
@@ -288,7 +293,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .username-row h2 {

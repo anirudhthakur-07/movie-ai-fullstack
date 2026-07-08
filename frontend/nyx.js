@@ -32,9 +32,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Dynamic Suggestion Chips Builder
   function renderSuggestionChips() {
-    let chipsContainer = document.getElementById("chatSuggestionChips");
-    if (!chipsContainer) {
-      chipsContainer = document.createElement("div");
+    let wrapper = document.getElementById("chatSuggestionWrapper");
+    if (!wrapper) {
+      wrapper = document.createElement("div");
+      wrapper.id = "chatSuggestionWrapper";
+      wrapper.className = "nyx-suggestion-wrapper";
+
+      const leftBtn = document.createElement("button");
+      leftBtn.className = "chip-scroll-btn scroll-left-btn";
+      leftBtn.innerHTML = "❮";
+
+      const rightBtn = document.createElement("button");
+      rightBtn.className = "chip-scroll-btn scroll-right-btn";
+      rightBtn.innerHTML = "❯";
+
+      const chipsContainer = document.createElement("div");
       chipsContainer.id = "chatSuggestionChips";
       chipsContainer.className = "nyx-suggestion-chips";
       
@@ -55,10 +67,39 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         chipsContainer.appendChild(btn);
       });
+
+      wrapper.appendChild(leftBtn);
+      wrapper.appendChild(chipsContainer);
+      wrapper.appendChild(rightBtn);
+
+      leftBtn.onclick = () => {
+        chipsContainer.scrollBy({ left: -120, behavior: 'smooth' });
+      };
+      rightBtn.onclick = () => {
+        chipsContainer.scrollBy({ left: 120, behavior: 'smooth' });
+      };
+
+      // Show/hide scroll buttons depending on scroll width
+      const updateScrollButtons = () => {
+        const hasScroll = chipsContainer.scrollWidth > chipsContainer.clientWidth;
+        if (hasScroll) {
+          leftBtn.style.display = chipsContainer.scrollLeft > 5 ? "flex" : "none";
+          rightBtn.style.display = chipsContainer.scrollLeft + chipsContainer.clientWidth < chipsContainer.scrollWidth - 5 ? "flex" : "none";
+        } else {
+          leftBtn.style.display = "none";
+          rightBtn.style.display = "none";
+        }
+      };
+
+      chipsContainer.addEventListener("scroll", updateScrollButtons);
+      window.addEventListener("resize", updateScrollButtons);
       
+      // Delay check slightly to let container render and clientWidth/scrollWidth to register
+      setTimeout(updateScrollButtons, 150);
+
       const inputArea = document.querySelector(".nyx-chat-input-area");
       if (inputArea) {
-        inputArea.parentNode.insertBefore(chipsContainer, inputArea);
+        inputArea.parentNode.insertBefore(wrapper, inputArea);
       }
     }
   }

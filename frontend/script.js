@@ -621,6 +621,10 @@ function displayMovies(movies, container, replace = false) {
   movies.forEach(movie => {
     if (!movie || !movie.id || !movie.title) return;
 
+    if (window.movieRegistry) {
+      window.movieRegistry.set(movie.id, movie);
+    }
+
     let primaryGenre = "";
     if (movie.genre_ids && movie.genre_ids.length > 0) {
         const genreLookup = {

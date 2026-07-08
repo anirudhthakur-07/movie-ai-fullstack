@@ -4226,7 +4226,7 @@ body.modal-open {
   .nav-right {
     width: 100% !important;
     display: flex !important;
-    justify-content: space-between !important;
+    justify-content: flex-end !important;
     align-items: center !important;
     gap: 8px !important;
   }
@@ -4865,4 +4865,54 @@ body {
 #intro-overlay.fade-out {
     opacity: 0;
     visibility: hidden;
+}
+
+/* Chatbot Suggestion Chips Scroll Controls */
+.nyx-suggestion-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: rgba(10, 10, 12, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.nyx-suggestion-wrapper .nyx-suggestion-chips {
+  border-top: none !important;
+  flex: 1;
+}
+
+.chip-scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: rgba(15, 15, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.7);
+  display: none; /* dynamically toggled in JS */
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+}
+
+.chip-scroll-btn:hover {
+  background: #e50914;
+  color: white;
+  border-color: #e50914;
+}
+
+.chip-scroll-btn.scroll-left-btn {
+  left: 4px;
+}
+
+.chip-scroll-btn.scroll-right-btn {
+  right: 4px;
 }

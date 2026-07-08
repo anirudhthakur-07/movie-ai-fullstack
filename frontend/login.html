@@ -275,6 +275,12 @@
         }
         
         function playIgnitionTransition() {
+            // Hide the login card immediately so it doesn't show when fading out
+            const wrapper = document.querySelector(".login-wrapper");
+            if (wrapper) {
+                wrapper.style.display = "none";
+            }
+
             const overlay = document.createElement("div");
             overlay.id = "intro-overlay";
             

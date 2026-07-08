@@ -691,11 +691,15 @@ function displayWatchlist(list, container, isFilterSubCall = false) {
     filteredList.forEach(movie => {
         const card = document.createElement('div');
         card.classList.add('watch-card');
+        const mId = movie.tmdbId || movie.id;
         card._movieData = {
-            id: movie.tmdbId || movie.id,
+            id: mId,
             title: movie.title || "Unknown",
             poster_path: movie.poster || movie.poster_path || ""
         };
+        if (window.movieRegistry) {
+            window.movieRegistry.set(mId, card._movieData);
+        }
 
         card.addEventListener("click", () => {
             openModal(card._movieData, card);
@@ -758,11 +762,15 @@ function displayRowMovies(movies, container, isRecommendation = false) {
     movies.forEach(movie => {
         const card = document.createElement("div");
         card.className = "movie-card";
+        const mId = movie.tmdbId || movie.id;
         card._movieData = {
-            id: movie.tmdbId || movie.id,
+            id: mId,
             title: movie.title || "Unknown",
             poster_path: movie.poster || movie.poster_path || ""
         };
+        if (window.movieRegistry) {
+            window.movieRegistry.set(mId, card._movieData);
+        }
         card.addEventListener("click", () => {
             openModal(card._movieData, card);
         });
