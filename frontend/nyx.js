@@ -282,7 +282,22 @@ document.addEventListener("DOMContentLoaded", () => {
               const data = JSON.parse(dataStr);
               if (data.chunk) {
                 fullResponseText += data.chunk;
-                textEl.innerHTML = safeSanitize(fullResponseText);
+                const parsed = splitReasoningAndText(fullResponseText);
+                let renderedHTML = "";
+                
+                if (parsed.reasoning.length > 0) {
+                  renderedHTML += `<div class="nyx-reasoning-container">`;
+                  parsed.reasoning.forEach(step => {
+                    renderedHTML += `<div class="nyx-reasoning-step"><span class="nyx-reasoning-icon">⚙️</span> ${safeSanitize(step)}</div>`;
+                  });
+                  renderedHTML += `</div>`;
+                }
+                
+                if (parsed.content.trim()) {
+                  renderedHTML += `<div class="nyx-content-body">${safeSanitize(parsed.content)}</div>`;
+                }
+                
+                textEl.innerHTML = renderedHTML || safeSanitize(fullResponseText);
                 chatBody.scrollTop = chatBody.scrollHeight;
               } else if (data.error) {
                 textEl.innerHTML = safeSanitize(data.error);
@@ -445,6 +460,26 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/&lt;\/p&gt;/g, '</p>');
   }
 
+  function splitReasoningAndText(text) {
+    const lines = text.split("\n");
+    const reasoningLines = [];
+    const contentLines = [];
+    
+    for (const line of lines) {
+      if (line.trim().startsWith("[Reasoning:") && line.trim().endsWith("]")) {
+        const trace = line.trim().substring(11, line.trim().length - 1);
+        reasoningLines.push(trace);
+      } else {
+        contentLines.push(line);
+      }
+    }
+    
+    return {
+      reasoning: reasoningLines,
+      content: contentLines.join("\n")
+    };
+  }
+
   // Helper: Append Message Bubble to chat drawer
   function appendMessage(content, sender, saveToStorage = true) {
     const msgEl = document.createElement("div");
@@ -452,7 +487,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const textEl = document.createElement("div");
     textEl.classList.add("nyx-text");
-    textEl.innerHTML = safeSanitize(content);
+
+    if (sender === "system") {
+      const parsed = splitReasoningAndText(content);
+      let renderedHTML = "";
+      
+      if (parsed.reasoning.length > 0) {
+        renderedHTML += `<div class="nyx-reasoning-container">`;
+        parsed.reasoning.forEach(step => {
+          renderedHTML += `<div class="nyx-reasoning-step"><span class="nyx-reasoning-icon">⚙️</span> ${safeSanitize(step)}</div>`;
+        });
+        renderedHTML += `</div>`;
+      }
+      
+      if (parsed.content.trim()) {
+        renderedHTML += `<div class="nyx-content-body">${safeSanitize(parsed.content)}</div>`;
+      }
+      
+      textEl.innerHTML = renderedHTML || safeSanitize(content);
+    } else {
+      textEl.innerHTML = safeSanitize(content);
+    }
 
     msgEl.appendChild(textEl);
     chatBody.appendChild(msgEl);

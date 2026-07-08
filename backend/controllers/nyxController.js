@@ -129,6 +129,27 @@ async function handleNyxQuery(req, res) {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
+      // Inject Predefined Agentic Reasoning Traces
+      try {
+        let step1 = "[Reasoning: Activating Taste DNA neural processor...]\n";
+        let step2 = "[Reasoning: Consulting cached cinematic recommendations...]\n";
+
+        if (intent === "navigation" || intent === "settings" || intent === "dashboard" || intent === "watchlist") {
+          step1 = "[Reasoning: Identifying target viewport layout...]\n";
+          step2 = "[Reasoning: Resolving client interface coordinates...]\n";
+        } else if (intent === "search" || intent === "watchlist_count" || intent === "genreFilter") {
+          step1 = "[Reasoning: Accessing Mongo user collections...]\n";
+          step2 = "[Reasoning: Synthesizing database record keys...]\n";
+        }
+
+        res.write(`data: ${JSON.stringify({ chunk: step1 })}\n\n`);
+        await new Promise(resolve => setTimeout(resolve, 150));
+        res.write(`data: ${JSON.stringify({ chunk: step2 })}\n\n`);
+        await new Promise(resolve => setTimeout(resolve, 150));
+      } catch (e) {
+        console.error("Reasoning inject failed:", e);
+      }
+
       let streamedText = "";
       const startGemini = performance.now();
 
