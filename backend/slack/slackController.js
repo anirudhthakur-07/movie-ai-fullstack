@@ -5,7 +5,7 @@ const { handleCommand } = require("./slackCommands");
 async function handleSlackEvent(req, res) {
   // Handle Slack URL validation challenge on initial webhook setup
   if (req.body && req.body.type === "url_verification") {
-    return res.status(200).send({ challenge: req.body.challenge });
+    return res.status(200).contentType("text/plain").send(req.body.challenge);
   }
 
   // Respond immediately back to Slack (under 3s requirement) to prevent retries

@@ -1,6 +1,11 @@
 const crypto = require("crypto");
 
 function verifySlackSignature(req, res, next) {
+  // Bypass signature validation for Slack's URL verification handshake challenge
+  if (req.body && req.body.type === "url_verification") {
+    return next();
+  }
+
   const signature = req.headers["x-slack-signature"];
   const timestamp = req.headers["x-slack-request-timestamp"];
   const signingSecret = process.env.SLACK_SIGNING_SECRET;
