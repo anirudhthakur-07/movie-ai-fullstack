@@ -1,7 +1,7 @@
 const { detectLocalIntent } = require("../services/AI/intentDetector");
 const { buildUserContext } = require("../services/AI/contextBuilder");
 const { buildPrompt } = require("../services/AI/promptBuilder");
-const { callLLM } = require("../services/AI/aiGateway");
+const { callLLM, callLLMStream } = require("../services/AI/aiGateway");
 const { cleanAndParseJSON } = require("../utils/jsonParser");
 const { validateResponse } = require("../services/AI/responseValidator");
 const { getFallbackResponse } = require("../utils/fallbackResponses");
@@ -11,7 +11,7 @@ const { performance } = require("perf_hooks");
 
 async function handleNyxQuery(req, res) {
   const userId = req.userId;
-  const { query } = req.body;
+  const { query, clientState = {}, stream = false } = req.body;
 
   if (!query || typeof query !== "string") {
     return res.status(400).json({ error: "Query is required and must be a string" });
@@ -44,14 +44,22 @@ async function handleNyxQuery(req, res) {
 
       // Resolve watchlist count dynamically from context builder
       if (localClassification.type === "watchlist_count" || localClassification.intent === "watchlist_count") {
-        const context = await buildUserContext(userId);
+        const context = await buildUserContext(userId, clientState);
         response.type = "watchlist";
-        response.message = `You currently have exactly ${context ? context.watchlistCount : 0} movies saved in your watchlist database.`;
+        response.message = `You currently have exactly ${context ? context.watchlistCount : 0} movies saved in your watchlist.`;
         response.actions = ["openWatchlist"];
+      } else if (localClassification.intent === "search") {
+        response.type = "recommendation";
+        response.query = localClassification.parameters?.query;
+      } else if (localClassification.intent === "genreFilter") {
+        response.genre = localClassification.parameters?.genre;
+      } else if (localClassification.parameters?.target) {
+        response.target = localClassification.parameters?.target;
       }
 
       const totalLatency = Math.round(performance.now() - startTotal);
       aiLogger.logRequest({
+        userId,
         intent,
         confidence,
         promptSize,
@@ -66,9 +74,9 @@ async function handleNyxQuery(req, res) {
 
     // 2. Resolve ambiguous confidence threshold (< 70%)
     if (confidence < 0.70 && query.trim().split(/\s+/).length < 2) {
-      // Guard against chaotic inputs with gentle Operating System clarification
       const totalLatency = Math.round(performance.now() - startTotal);
       aiLogger.logRequest({
+        userId,
         intent,
         confidence,
         promptSize,
@@ -89,6 +97,7 @@ async function handleNyxQuery(req, res) {
       cacheHit = true;
       const totalLatency = Math.round(performance.now() - startTotal);
       aiLogger.logRequest({
+        userId,
         intent: cached.type || "cached",
         confidence,
         promptSize,
@@ -103,28 +112,69 @@ async function handleNyxQuery(req, res) {
 
     // 4. Build user dynamic context
     const startBackend = performance.now();
-    const context = await buildUserContext(userId);
+    const context = await buildUserContext(userId, clientState);
     if (!context) {
       throw new Error("Failed to construct user data context");
     }
     const backendLatency = Math.round(performance.now() - startBackend);
 
-    // 5. Assemble prompt with strict memory length limitations (capped to last 3 conversational turns)
+    // 5. Assemble prompt with strict memory length limitations
     const prompt = buildPrompt(query, context, intent);
     promptSize = prompt.length;
 
-    // 6. Query Gemini API with Native Tool declarations
+    // 6. Streaming Mode Check
+    if (stream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      let streamedText = "";
+      const startGemini = performance.now();
+
+      try {
+        await callLLMStream(prompt, (chunk) => {
+          streamedText += chunk;
+          res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+        });
+
+        const geminiLatency = Math.round(performance.now() - startGemini);
+        const promptTokens = Math.ceil(promptSize / 4);
+        const responseTokens = Math.ceil(streamedText.length / 4);
+
+        // Telemetry Logging
+        aiLogger.logRequest({
+          userId,
+          intent,
+          confidence,
+          promptSize,
+          completionLength: streamedText.length,
+          promptTokens,
+          responseTokens,
+          backendLatency,
+          geminiLatency,
+          cacheHit: false,
+          success: true
+        });
+
+        res.write("data: [DONE]\n\n");
+        return res.end();
+      } catch (streamErr) {
+        console.error("Streaming error in handler:", streamErr.message);
+        res.write(`data: ${JSON.stringify({ error: "Failed to generate stream response" })}\n\n`);
+        res.write("data: [DONE]\n\n");
+        return res.end();
+      }
+    }
+
+    // 7. Non-Streaming Normal Mode
     const startGemini = performance.now();
     const rawResult = await callLLM(prompt);
     const geminiLatency = Math.round(performance.now() - startGemini);
 
     let finalResponse;
-    
-    // Approximate tokens for logging purposes (standard 4-chars-per-token ratio)
     const promptTokens = Math.ceil(promptSize / 4);
     const responseTokens = Math.ceil(rawResult.length / 4);
 
-    // 7. Parse if Gemini executed a tool/function call
     if (rawResult.startsWith('{"toolCalls":')) {
       const parsedCall = JSON.parse(rawResult);
       const call = parsedCall.toolCalls[0];
@@ -229,7 +279,6 @@ async function handleNyxQuery(req, res) {
         finalResponse.actions = ["summarizeWatchlist"];
       }
     } else {
-      // 8. General narrative explanation (parse JSON, fallback to plain text envelope)
       try {
         finalResponse = cleanAndParseJSON(rawResult);
       } catch (jsonErr) {
@@ -241,15 +290,16 @@ async function handleNyxQuery(req, res) {
       }
     }
 
-    // 9. Validate final actions schema
     const validated = validateResponse(finalResponse);
     cacheService.set(cacheKey, validated);
 
     const totalLatency = Math.round(performance.now() - startTotal);
     aiLogger.logRequest({
+      userId,
       intent,
       confidence,
       promptSize,
+      completionLength: rawResult.length,
       promptTokens,
       responseTokens,
       backendLatency,
@@ -263,6 +313,7 @@ async function handleNyxQuery(req, res) {
   } catch (err) {
     const totalLatency = Math.round(performance.now() - startTotal);
     aiLogger.logRequest({
+      userId,
       intent,
       confidence,
       promptSize,
@@ -273,7 +324,6 @@ async function handleNyxQuery(req, res) {
       error: err
     });
 
-    // Circuit Breaker & Fallback System
     const fallback = getFallbackResponse(intent, query);
     return res.json(fallback);
   }

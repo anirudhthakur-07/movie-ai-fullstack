@@ -3,8 +3,8 @@ const ProviderClick = require("../../models/ProviderClick");
 const SearchHistory = require("../../models/SearchHistory");
 const { buildUserProfile } = require("../profileEngine");
 
-// Compiles a token-trimmed, semantically dense contextual view of the user's active dashboard state
-async function buildUserContext(userId) {
+// Compiles user taste profile, clicks, searches, and active client-side page state
+async function buildUserContext(userId, clientState = {}) {
   try {
     const user = await User.findById(userId);
     if (!user) return null;
@@ -25,45 +25,37 @@ async function buildUserContext(userId) {
       }
     });
 
-    // Extract recent searches (max 5) from the database collection
+    // Extract recent searches (max 5)
     const searchDocs = await SearchHistory.find({ userId: user._id })
       .sort({ searchedAt: -1 })
       .limit(5);
     const recentSearches = searchDocs.map(s => s.query);
 
-    // Watchlist details (max 5 titles to keep context small)
+    // Watchlist details
     const watchlistCount = user.watchlist ? user.watchlist.length : 0;
     const sampleWatchlist = (user.watchlist || [])
       .slice(-5)
       .map(w => w.title);
 
-    // SEMANTIC DENSITY: Extract Top 5 Most Recent and Top 5 Most Frequent interactions from Provider Click History
-    const [recentClicksDocs, frequentClicksAgg] = await Promise.all([
-      // Top 5 most recent interactions
-      ProviderClick.find({ userId: user._id })
-        .sort({ clickedAt: -1 })
-        .limit(5)
-        .select("movieTitle genre -_id"),
-      
-      // Top 5 most frequent interactions
-      ProviderClick.aggregate([
-        { $match: { userId: user._id } },
-        { $group: { _id: { title: "$movieTitle", genre: "$genre" }, count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-        { $limit: 5 }
-      ])
-    ]);
-
+    // Extract recent clicks (max 5)
+    const recentClicksDocs = await ProviderClick.find({ userId: user._id })
+      .sort({ clickedAt: -1 })
+      .limit(5)
+      .select("movieTitle genre -_id");
     const recentInteractions = recentClicksDocs.map(c => ({
       title: c.movieTitle,
       genre: c.genre
     }));
 
-    const frequentInteractions = frequentClicksAgg.map(f => ({
-      title: f._id.title,
-      genre: f._id.genre,
-      frequency: f.count
-    }));
+    // Standardize client state from active browser view
+    const pageState = {
+      currentPage: clientState.currentPage || "home",
+      currentMovie: clientState.currentMovie || null,
+      currentGenre: clientState.currentGenre || null,
+      currentProvider: clientState.currentProvider || null,
+      activeFilters: clientState.activeFilters || {},
+      recommendationSection: clientState.recommendationSection || null
+    };
 
     return {
       username: user.username,
@@ -74,9 +66,9 @@ async function buildUserContext(userId) {
       topGenres: (profile.topGenres || []).slice(0, 3).map(tg => tg.genre),
       recentSearches,
       recentInteractions,
-      frequentInteractions,
       providerClicks: clicksMap,
-      totalClicks
+      totalClicks,
+      clientState: pageState
     };
   } catch (err) {
     console.error("Context builder failed:", err);

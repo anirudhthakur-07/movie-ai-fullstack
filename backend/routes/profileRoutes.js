@@ -57,8 +57,11 @@ router.post("/profile/gender", auth, async (req, res) => {
     }
 });
 
-// GET AI TASTE PROFILE SUMMARY (Gemini API)
-router.get("/profile/ai-summary", auth, async (req, res) => {
+const AICache = require("../models/AICache");
+const rateLimiter = require("../middleware/rateLimiter");
+
+// GET AI TASTE PROFILE SUMMARY (Gemini API with Cache & Rate Limit)
+router.get("/profile/ai-summary", auth, rateLimiter, async (req, res) => {
     try {
         const user = await User.findById(req.userId);
         if (!user) {
@@ -71,6 +74,17 @@ router.get("/profile/ai-summary", auth, async (req, res) => {
         }
 
         const totalClicks = await ProviderClick.countDocuments({ userId: req.userId });
+        
+        // CHECK CACHE LAYER
+        const cacheKey = `profile_summary_${req.userId}`;
+        const cached = await AICache.findOne({ key: cacheKey });
+        
+        if (cached && cached.watchlistCount === profile.watchlistCount && cached.expiresAt > new Date()) {
+            console.log(`[PROFILE CACHE] Cache hit for user ${req.userId}`);
+            return res.json({ summary: cached.value });
+        }
+        
+        console.log(`[PROFILE CACHE] Cache miss or invalid for user ${req.userId}. Querying Gemini.`);
 
         // Generate actual summary via Gemini API
         const summary = await generateProfileSummary(
@@ -81,6 +95,21 @@ router.get("/profile/ai-summary", auth, async (req, res) => {
             totalClicks,
             profile.activityLevel
         );
+
+        if (summary) {
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 Hours TTL
+            await AICache.findOneAndUpdate(
+                { key: cacheKey },
+                { 
+                    type: "profile_summary",
+                    value: summary,
+                    watchlistCount: profile.watchlistCount,
+                    updatedAt: new Date(),
+                    expiresAt
+                },
+                { upsert: true, new: true }
+            );
+        }
 
         res.json({ summary });
     } catch (err) {

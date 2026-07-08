@@ -8,6 +8,8 @@ const auth = require("../middleware/auth");
 const tmdbApi = require("../config/tmdb");
 const {buildUserProfile} = require("../services/profileEngine");
 const { generateRecommendationExplanations } = require("../services/aiService");
+const AICache = require("../models/AICache");
+const rateLimiter = require("../middleware/rateLimiter");
 const genreMap = {
   28: "Action",
   12: "Adventure",
@@ -150,7 +152,7 @@ router.get('/recommend', async (req, res) => {
 // WATCHLIST-BASED RECOMMENDATIONS
 // Personalized Recommendations Based On
 // User Viewing Preferences & Favorite Genres
-router.get('/recommend/watchlist', auth, async (req, res) => {
+router.get('/recommend/watchlist', auth, rateLimiter, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     if (!user) {
@@ -406,19 +408,64 @@ if (top3.length > 0) {
   try {
     const watchlistTitles = user.watchlist.map(w => w.title);
     const favoriteGenres = profile.topGenres?.map(tg => tg.genre) || [];
-    const aiExplanations = await generateRecommendationExplanations(
-      user.username,
-      favoriteGenres,
-      watchlistTitles,
-      top3.map(m => ({ id: m.id, title: m.title, overview: m.overview }))
-    );
-    if (aiExplanations) {
-      top3.forEach(m => {
-        if (aiExplanations[m.id]) {
-          m.explanations = [aiExplanations[m.id], ...(m.explanations || [])].slice(0, 3);
-        }
-      });
+    
+    const finalExplanations = {};
+    const uncachedMovies = [];
+
+    // Look up cached explanations per recommended movie ID
+    for (const m of top3) {
+      const cacheKey = `movie_explanation_${req.userId}_${m.id}`;
+      const cached = await AICache.findOne({ key: cacheKey });
+      
+      if (cached && cached.watchlistCount === user.watchlist.length && cached.expiresAt > new Date()) {
+        finalExplanations[m.id] = cached.value;
+      } else {
+        uncachedMovies.push(m);
+      }
     }
+
+    // Only query Gemini if there are uncached items
+    if (uncachedMovies.length > 0) {
+      console.log(`[EXPLANATIONS CACHE] Cache miss for ${uncachedMovies.length} movies. Querying Gemini.`);
+      const freshExplanations = await generateRecommendationExplanations(
+        user.username,
+        favoriteGenres,
+        watchlistTitles,
+        uncachedMovies.map(m => ({ id: m.id, title: m.title, overview: m.overview }))
+      );
+
+      if (freshExplanations) {
+        for (const movieId in freshExplanations) {
+          const explanationText = freshExplanations[movieId];
+          finalExplanations[movieId] = explanationText;
+
+          // Save each result to database cache (expires in 7 days)
+          const cacheKey = `movie_explanation_${req.userId}_${movieId}`;
+          const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+          
+          await AICache.findOneAndUpdate(
+            { key: cacheKey },
+            {
+              type: "recommendation_explanation",
+              value: explanationText,
+              watchlistCount: user.watchlist.length,
+              updatedAt: new Date(),
+              expiresAt
+            },
+            { upsert: true }
+          ).catch(e => console.error("Cache save error:", e.message));
+        }
+      }
+    } else {
+      console.log(`[EXPLANATIONS CACHE] Cache hit for all ${top3.length} recommendations!`);
+    }
+
+    // Attach explanations back to recommendation objects
+    top3.forEach(m => {
+      if (finalExplanations[m.id]) {
+        m.explanations = [finalExplanations[m.id], ...(m.explanations || [])].slice(0, 3);
+      }
+    });
   } catch (aiErr) {
     console.warn("Gemini explanations generation failed, falling back to rule-based:", aiErr.message);
   }

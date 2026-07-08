@@ -1,3 +1,5 @@
+const AILog = require("../../models/AILog");
+
 // Enterprise AI Observability Platform Logger
 // Tracks and aggregates rich AI usage statistics, latencies, tokens, and estimated cost metrics.
 class AILogger {
@@ -16,15 +18,19 @@ class AILogger {
   }
 
   logRequest({ 
+    userId = "anonymous",
     intent, 
     confidence = 1.0,
     promptSize = 0, 
+    completionLength = 0,
     promptTokens = 0, 
     responseTokens = 0, 
     backendLatency = 0, 
     geminiLatency = 0, 
+    modelUsed = "local",
     cacheHit = false, 
     success = true, 
+    fallbackUsed = false,
     toolCalled = null,
     error = null 
   }) {
@@ -40,6 +46,7 @@ class AILogger {
 
     const entry = {
       timestamp: new Date().toISOString(),
+      userId,
       intent,
       confidenceScore: Number(confidence) || 1.0,
       promptSize,
@@ -53,9 +60,11 @@ class AILogger {
         gemini: geminiLatency,
         total: totalDuration
       },
+      modelUsed,
       costUSD,
       cacheHit: !!cacheHit,
       success: !!success,
+      fallbackUsed: !!fallbackUsed,
       toolCalled: toolCalled || null,
       error: error ? error.message || error : null
     };
@@ -83,6 +92,25 @@ class AILogger {
     if (this.logs.length > 500) {
       this.logs.shift(); // Cap logs to latest 500 events
     }
+
+    // Persist to MongoDB database collection for observability
+    AILog.create({
+      userId,
+      intent,
+      modelUsed,
+      promptLength: promptSize,
+      completionLength,
+      tokens: {
+        prompt: promptTokens,
+        response: responseTokens,
+        total: promptTokens + responseTokens
+      },
+      latency: totalDuration,
+      cacheHit: !!cacheHit,
+      success: !!success,
+      fallbackUsed: !!fallbackUsed,
+      errorType: error ? error.message || error : null
+    }).catch(err => console.error("Failed to write AI observability log to DB:", err.message));
 
     console.log(
       `[NYX METRIC] Intent: ${intent} | Success: ${success} | Tool: ${toolCalled || "none"} | ` +

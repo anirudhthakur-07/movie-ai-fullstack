@@ -197,30 +197,118 @@ const NYX_TOOLS = [
   }
 ];
 
-// Standardized gateway controller to run LLM queries with tools retry mechanism and timeout thresholds
-async function callLLM(prompt, retries = 1, timeoutMs = 8000) {
+// CENTRALIZED CIRCUIT BREAKER PATTERN FOR LLM RESILIENCE
+const breakerState = {
+  state: "CLOSED", // CLOSED, OPEN, HALF-OPEN
+  failureCount: 0,
+  failureThreshold: 3,
+  cooldownMs: 20000, // 20s cooldown
+  nextAttemptTime: 0
+};
+
+function recordBreakerSuccess() {
+  breakerState.state = "CLOSED";
+  breakerState.failureCount = 0;
+}
+
+function recordBreakerFailure() {
+  breakerState.failureCount++;
+  if (breakerState.failureCount >= breakerState.failureThreshold) {
+    breakerState.state = "OPEN";
+    breakerState.nextAttemptTime = Date.now() + breakerState.cooldownMs;
+    console.warn(`[CIRCUIT BREAKER] Threshold breached. State is now OPEN. Cooldown until ${new Date(breakerState.nextAttemptTime).toISOString()}`);
+  }
+}
+
+function checkBreakerStatus() {
+  if (breakerState.state === "OPEN") {
+    if (Date.now() >= breakerState.nextAttemptTime) {
+      breakerState.state = "HALF-OPEN";
+      console.log("[CIRCUIT BREAKER] Cooldown elapsed. Entering HALF-OPEN state for verification check.");
+      return true;
+    }
+    return false;
+  }
+  return true;
+}
+
+function getCircuitBreakerState() {
+  return { ...breakerState };
+}
+
+// CENTRALIZED CONCURRENCY REQUEST QUEUE
+class PriorityQueue {
+  constructor(concurrency = 2) {
+    this.concurrency = concurrency;
+    this.running = 0;
+    this.queue = [];
+  }
+
+  enqueue(task) {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ task, resolve, reject });
+      this.next();
+    });
+  }
+
+  next() {
+    if (this.running >= this.concurrency || this.queue.length === 0) return;
+    
+    this.running++;
+    const { task, resolve, reject } = this.queue.shift();
+    
+    task()
+      .then(res => {
+        this.running--;
+        resolve(res);
+        this.next();
+      })
+      .catch(err => {
+        this.running--;
+        reject(err);
+        this.next();
+      });
+  }
+}
+const requestQueue = new PriorityQueue(2);
+
+// Zentral model failover list (prioritized by free tier rate metrics)
+const MODELS = [
+  "gemini-2.0-flash-lite", // 30 RPM / 1500 RPD
+  "gemini-2.0-flash",      // 15 RPM / 1500 RPD
+  "gemini-3.1-flash-lite", // 15 RPM / 500 RPD
+  "gemini-2.5-flash"       // 5 RPM / 20 RPD
+];
+
+// Standard call gateway execution
+async function callLLM(prompt, retries = 2, timeoutMs = 8000) {
+  if (!checkBreakerStatus()) {
+    throw new Error("Circuit breaker open. Gemini API is temporarily offline.");
+  }
+
+  const task = () => executeLLMWithFailover(prompt, retries, timeoutMs);
+  return requestQueue.enqueue(task);
+}
+
+async function executeLLMWithFailover(prompt, retries, timeoutMs) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("Gemini API key missing in environment variables");
   }
-
   const ai = new GoogleGenerativeAI(apiKey);
-  // Supported models listed in order of preference
-  const MODELS = ["gemini-2.0-flash-lite", "gemini-2.5-flash-lite", "gemini-3.1-flash-lite"];
-
+  
   let attempt = 0;
   while (attempt <= retries) {
     const modelName = MODELS[attempt] || MODELS[0];
-    // Initialize the model with native tools definition
+    console.log(`[NYX GATEWAY] Call attempt ${attempt + 1} using model: ${modelName}`);
+    
     const model = ai.getGenerativeModel({ 
       model: modelName,
       tools: NYX_TOOLS
     });
-    console.log(`[NYX GATEWAY] Call attempt ${attempt + 1} using model: ${modelName} (Tools active)`);
+
     try {
       const apiCall = model.generateContent(prompt);
-      
-      // Enforce timeout via Promise.race
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
       );
@@ -231,28 +319,99 @@ async function callLLM(prompt, retries = 1, timeoutMs = 8000) {
       }
 
       const response = result.response;
-      
-      // Check if Gemini wants to call a tool/function
+      recordBreakerSuccess();
+
       const functionCalls = response.functionCalls();
       if (functionCalls && functionCalls.length > 0) {
-        console.log("[NYX GATEWAY] Native function call detected:", JSON.stringify(functionCalls));
         return JSON.stringify({ toolCalls: functionCalls });
       }
 
       const text = response.text();
       if (!text) {
-        throw new Error("Blank response text received from Gemini API");
+        throw new Error("Blank response text received");
       }
+
       return text.trim();
     } catch (err) {
+      console.warn(`[NYX GATEWAY] Attempt ${attempt + 1} (${modelName}) failed:`, err.message);
+      recordBreakerFailure();
       attempt++;
-      console.warn(`[NYX GATEWAY] Call attempt ${attempt} failed:`, err.message);
       if (attempt > retries) {
         throw err;
       }
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
   }
 }
 
-module.exports = { callLLM };
+// SSE Streaming support gateway execution
+async function callLLMStream(prompt, onChunk, retries = 2, timeoutMs = 10000) {
+  if (!checkBreakerStatus()) {
+    throw new Error("Circuit breaker open. Gemini API is temporarily offline.");
+  }
+
+  const task = () => executeLLMStreamWithFailover(prompt, onChunk, retries, timeoutMs);
+  return requestQueue.enqueue(task);
+}
+
+async function executeLLMStreamWithFailover(prompt, onChunk, retries, timeoutMs) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API key missing in environment variables");
+  }
+  const ai = new GoogleGenerativeAI(apiKey);
+  
+  let attempt = 0;
+  while (attempt <= retries) {
+    const modelName = MODELS[attempt] || MODELS[0];
+    console.log(`[NYX STREAM GATEWAY] Stream attempt ${attempt + 1} using model: ${modelName}`);
+    
+    const model = ai.getGenerativeModel({ 
+      model: modelName,
+      tools: NYX_TOOLS
+    });
+
+    try {
+      const apiCall = model.generateContentStream(prompt);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Stream request timed out")), timeoutMs)
+      );
+
+      const resultStream = await Promise.race([apiCall, timeoutPromise]);
+      recordBreakerSuccess();
+
+      let streamContainsContent = false;
+      for await (const chunk of resultStream.stream) {
+        const textChunk = chunk.text();
+        if (textChunk) {
+          streamContainsContent = true;
+          onChunk(textChunk);
+        }
+      }
+
+      if (!streamContainsContent) {
+        // Fallback for native tools trigger
+        const response = await resultStream.response;
+        const functionCalls = response.functionCalls();
+        if (functionCalls && functionCalls.length > 0) {
+          onChunk(JSON.stringify({ toolCalls: functionCalls }));
+        }
+      }
+      return;
+    } catch (err) {
+      console.warn(`[NYX STREAM GATEWAY] Attempt ${attempt + 1} (${modelName}) failed:`, err.message);
+      recordBreakerFailure();
+      attempt++;
+      if (attempt > retries) {
+        throw err;
+      }
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+  }
+}
+
+module.exports = { 
+  callLLM, 
+  callLLMStream, 
+  getCircuitBreakerState 
+};
