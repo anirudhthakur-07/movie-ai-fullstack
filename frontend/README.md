@@ -17,9 +17,9 @@ This directory houses the user-facing web interface for the **DARK AI Movie Plat
 ## 1. Interface Modules & Layouts
 
 The client app is divided into three distinct functional pages:
-*   **[`index.html`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/index.html) (Discovery Hub):** Serves weekly trending movie sliders, popularity rows, synopses, YouTube trailer overlays, and local search fields.
-*   **[`dashboard.html`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/dashboard.html) (Profile Analytics):** Renders computed genre affinities, streaming provider click percentages, experience progress meters, and unlocked badges.
-*   **[`watchlist.html`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/watchlist.html) (Curated Folder):** Lists the user's saved movies and shows automated matching recommendation sliders (e.g. *"Because you watched Dune"*).
+*   **[`index.html`](./index.html) (Discovery Hub):** Serves weekly trending movie sliders, popularity rows, synopses, YouTube trailer overlays, and local search fields.
+*   **[`dashboard.html`](./dashboard.html) (Profile Analytics):** Renders computed genre affinities, streaming provider click percentages, experience progress meters, and unlocked badges.
+*   **[`watchlist.html`](./watchlist.html) (Curated Folder):** Lists the user's saved movies and shows automated matching recommendation sliders (e.g. *"Because you watched Dune"*).
 
 ---
 
@@ -71,7 +71,7 @@ To support notch cutouts and home indicator overlays on iOS/Android viewports, t
 
 ## 4. The Nyx SSE Console Client
 
-The chatbot interface [nyx.js](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/nyx.js) coordinates streaming interactions and command-execution tasks:
+The chatbot interface [nyx.js](./nyx.js) coordinates streaming interactions and command-execution tasks:
 *   **SSE Chunk Reader:** Reads chunks using a standard readable stream reader (`res.body.getReader()`), decodes bytes using `TextDecoder`, and progressively updates the bubble's innerHTML.
 *   **Structured Action Router:** Intercepts JSON tool calls (e.g., `{"toolCalls": [{"name": "openMovie", "args": {"movieId": 27205}}]}`). It removes the blank bubble, parses the command, and dispatches the action (such as opening the detail modal or scrolling to a section).
 *   **Vercel clean subdirectories support:** Evaluates path prefixes to map `openWatchlist` and `showPersona` actions cleanly on Vercel's clean subdirectories (e.g., `/watchlist` or `/dashboard`).

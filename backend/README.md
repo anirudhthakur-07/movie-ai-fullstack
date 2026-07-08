@@ -45,7 +45,7 @@ Incoming Request -> [Interface Adapter] -> nyxOrchestrator.js -> [Context Engine
 
 ## 3. The Nyx Orchestration Engine
 
-The centralized cognitive reasoning engine is structured under [backend/services/AI/](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/services/AI/):
+The centralized cognitive reasoning engine is structured under [backend/services/AI/](./services/AI/):
 1. **Local Intent Detector (`intentDetector.js`):** Parses user input using fast offline regular expressions to intercept commands that do not require LLM calls.
 2. **Context Engine (`contextBuilder.js`):** Assembles a sliced JSON snapshot of the user's active Profile DNA, Watchlist metrics, and clicked platforms.
 3. **Resilient AI Gateway (`aiGateway.js`):** Connects to the Generative Model, presenting tool definitions and managing rate rotation lists and circuit breakers.

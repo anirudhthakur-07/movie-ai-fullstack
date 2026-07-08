@@ -34,16 +34,16 @@ Unlike typical monolithic projects where web and chat layers are coupled, DARK u
 
 ### A. Core LLM Reasoning & Prompt Optimization
 - **Implemented Logic:** The `aiGateway.js` wrapper handles prompt registries and restricts user contexts using dynamic context templates (`contextBuilder.js`), reducing prompt payload size by over 60%.
-- **Verification file:** [`backend/services/AI/aiGateway.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/services/AI/aiGateway.js)
+- **Verification file:** [`backend/services/AI/aiGateway.js`](../backend/services/AI/aiGateway.js)
 
 ### B. Workspace Collaboration & Webhooks
 - **Implemented Logic:** Implements Bolt listener endpoints validating HMAC signatures. It compiles movie data, synopses, and ratings into rich interactive Slack Block Kit templates.
-- **Verification files:** [`backend/slack/slackRoutes.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/slack/slackRoutes.js) and [`backend/slack/BlockKitBuilder.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/slack/BlockKitBuilder.js)
+- **Verification files:** [`backend/slack/slackRoutes.js`](../backend/slack/slackRoutes.js) and [`backend/slack/BlockKitBuilder.js`](../backend/slack/BlockKitBuilder.js)
 
 ### C. Agentic Tool Routing & Planning Loops
 - **Implemented Logic:** Gemini returns structured JSON commands binding instructions to frontend actions (e.g. scrolling lists, highlights, trailer modals). Offline intent routes bypass the LLM entirely for basic commands (like redirects) to maximize speeds.
-- **Verification files:** [`backend/services/AI/nyxOrchestrator.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/services/AI/nyxOrchestrator.js) and [`frontend/nyx.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/nyx.js)
+- **Verification files:** [`backend/services/AI/nyxOrchestrator.js`](../backend/services/AI/nyxOrchestrator.js) and [`frontend/nyx.js`](../frontend/nyx.js)
 
 ### D. Analytical Personas & UI Aesthetics
 - **Implemented Logic:** Uses Mongo aggregation pipelines (`profileEngine.js`) to weight preferences. The frontend displays custom interactive layouts using notches, safe-area parameters, glassmorphic filters, and level badges.
-- **Verification files:** [`backend/services/profileEngine.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/services/profileEngine.js) and [`frontend/style.css`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/style.css)
+- **Verification files:** [`backend/services/profileEngine.js`](../backend/services/profileEngine.js) and [`frontend/style.css`](../frontend/style.css)
