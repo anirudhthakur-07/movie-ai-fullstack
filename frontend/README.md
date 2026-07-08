@@ -1,135 +1,37 @@
-# 🎨 Movie Recommendation System - Frontend
+# 🎨 DARK — Frontend Client Manual
 
-[← Back to Root README](../README.md)
-
-## Overview
-
-The Movie Recommendation System Frontend is a modern web application built using HTML5, CSS3, and JavaScript (ES6+). It provides an interactive movie discovery experience with personalized recommendations, watchlists, streaming platform integration, analytics dashboards, gamified levels, and secure user authentication.
-
-The frontend communicates with a Node.js and Express.js backend and retrieves movie data from TMDB API proxies to deliver real-time recommendations and movie details.
+This directory contains the premium, high-end vanilla web client interface for the **DARK AI Movie Platform**. It is structured as a glassmorphic dashboard optimized for both desktop viewports and touch-first mobile screens.
 
 ---
 
-# Features
+## 1. File Structure & Component Map
 
-## 🔐 User Authentication
-- User Registration & Login switcher.
-- JWT Token Authentication.
-- **Session Management:** Secure tab-scoped token storage inside `sessionStorage` (automatic session termination on tab close).
-- **Protected Pages:** Auto-redirects unauthenticated sessions back to `login.html`.
-
-## 🎥 Movie Discovery
-- Curated categories: Trending, Popular, Top Rated, Sci-Fi, and Horror.
-- Interactive movie detail modals with casts list, trailers, and regional OTT providers.
-- Smooth horizontal carousels with swipe controls and scroll buttons.
-
-## 🔍 Smart Search System
-- Debounced query handler (begins searching 500ms after user pauses typing).
-- Displays search results along with similar movie recommendations.
-- Saves query inputs to search history logs.
-
-## 🤖 Taste Curation Engine
-Curation widgets suggest titles based on multiple interaction signals:
-- **Search-Based Recommendations:** Movies similar to search query inputs.
-- **Watchlist-Based Recommendations:** Suggestions computed from watchlist genre profiles (complete with *"Because you watched"* explanation flags).
-
-## ❤️ Watchlist Management
-- Toggle movies in/out of watchlists instantly.
-- **Persistent Synchronization:** Synchronizes saved watchlists with MongoDB.
-- **Watchlist Persona Card:** Large hero card displaying computed taste personas (e.g. *Horror Seeker*, *Action Addict*).
-
-## 🏆 Gamification & Avatars
-- **XP Progression:** Track experience points and user levels on the profile card.
-- **Achievements:** 11 unlockable badges displayed as neon-glowing cards.
-- **Avatar Selector:** Interactive UI to unlock and save 40 custom persona-mapped profile avatars.
-
-## 📊 Analytics Dashboard
-Visualizes user tastes and click logs using responsive Chart.js canvases:
-- **Streaming platform distribution:** Donut chart mapping OTT usage.
-- **Genre preferences:** Bar chart displaying genre affinity scores.
-- **Genre distribution:** Donut chart summarizing watchlist compositions.
+- **`index.html`:** The main landing feed housing the discovery rows (Weekly Trending, Popular, Top Rated, Sci-Fi, and Horror).
+- **`dashboard.html`:** The user metrics viewport displaying computed taste profiles, click analytics, and unlocked badges.
+- **`watchlist.html`:** A dedicated grid viewport showing saved curation cards and recommended list rows.
+- **`login.html`:** Secure user registration and login gate.
+- **`script.js`:** The controller for Carousel row loaders, fetch requests, search handlers, and local state management.
+- **`modal.js`:** The interactive details modal script, tracking streaming clicks and embedded YouTube trailers.
+- **`dashboard.js`:** Hooks for Chart.js rendering and experience level progression animations.
+- **`avatarSelector.js`:** Controller mapping unlocked levels to custom user avatars.
+- **`nyx.js`:** The SSE streaming chat drawer interface.
+- **`style.css` & `dashboard.css`:** CSS design token registries.
 
 ---
 
-# User Interface Features
+## 2. Responsive Layout Tokens & Notch Safe-Areas
 
-- **Hero Banner:** Dynamic featured sections displaying backdrop graphics.
-- **Horizontal scrolling rows:** Smooth scroll containers with gradient overlays and button navigations.
-- **Glassmorphic Theme:** Dark design system featuring translucent cards and glowing accents.
-- **Responsive Layouts:** Mobile-optimized views containing safe-area padding adjustments for notches and home indicators.
+The styling follows notches and safe-area margins for high-end mobile rendering:
 
----
-
-# Performance Optimizations
-
-- **Client Caching:** 
-  - **Auth token:** Stored in `sessionStorage` (session scope) to secure connections.
-  - **Watchlist cache:** Stored in `localStorage` (`cachedWatchlist`) to render collection grids instantly.
-  - **Movie metadata:** Stored in `localStorage` (`movieDetailsCache`) to prevent redundant genre and rating lookups.
-- **API Retries:** Automatic request retry logic for failed watchlist updates.
-- **Progressive loading:** Offscreen images defer loading using the browser-native `loading="lazy"` attribute.
-- **Skeleton shimmers:** Shimmer loader animations render while awaiting API responses.
+- **Viewport Containment:** Utilizes `padding: env(safe-area-inset-bottom)` and `margin: env(safe-area-inset-right)` to prevent navigation bars or notch cutouts from overlapping text on iPhone and high-end Android viewports.
+- **Responsive Sizing Clamps:** Uses CSS variables with `clamp()` configurations (e.g. `font-size: clamp(1rem, 2vw, 1.5rem)`) to scale font scales and button sizes fluidly between desktop screens and mobile displays.
 
 ---
 
-# 🛠️ Technology Stack
+## 3. Streaming Chat Widget Controller (`nyx.js`)
 
-- **Frontend:** HTML5, CSS3, JavaScript (ES6+).
-- **Visualization:** Chart.js (v4.x).
-- **Authentication:** JWT (tab-scoped verification).
-- **Typography:** Google Fonts Outfit.
-
----
-
-# 📂 Frontend Structure
-
-```text
-frontend/
-│
-├── index.html                  # Discovery Feed and Search layout
-├── login.html                  # Registration and Login credentials form
-├── dashboard.html              # Analytics graphs and Achievements grid layout
-├── watchlist.html              # Watchlist grid and Insights panel layout
-│
-├── config.js                   # Client API base URL configuration
-├── script.js                   # Discovery rows logic and search debouncer
-├── modal.js                    # Movie detail modal, trailer player, and provider click logger
-├── dashboard.js                # Profile load, Chart.js integrations, and achievements grid
-├── watchlist.js                # LocalStorage cache loaders and watchlist rendering
-├── avatarSelector.js           # Avatar grid selection and unlocked persistence
-│
-├── style.css                   # Global responsive design tokens
-├── dashboard.css               # Glowing glassmorphic widget overlays
-│
-└── assets/
-    ├── avatars/                # 40 custom profile avatar images
-    └── videos/                 # Background mp4 video loops (bg.mp4)
-```
-
----
-
-# 🔄 Application Flow
-
-```text
-                        User Login (login.html)
-                                 │
-                                 ▼
-                     Credentials Authentication
-                                 │
-                                 ▼
-                       Home Page (index.html)
-                                 │
-           ┌─────────────────────┼─────────────────────┐
-           │                     │                     │
-           ▼                     ▼                     ▼
-     Search Query        Watchlist Grid          Dashboard Profile
-  (script.js debouncer) (watchlist.js cache)   (dashboard.js charts)
-           │                     │                     │
-           ▼                     ▼                     ▼
-    Recommendations      Genre Insights        OTT Click Tracking
-   Similar Movie Row    (Genre Affinity)      (ProviderClick logs)
-```
----
-
-## 👨‍💻 Developer
-Developed as a premium, highly responsive glassmorphic frontend for the Dark Movie Recommendation Platform.
+The chat widget implements a custom **Server-Sent Events (SSE) Reader**:
+- **Progressive Chunk Rendering:** Reads chunks using a standard readable stream reader (`res.body.getReader()`), decodes bytes using `TextDecoder`, and progressively updates the bubble's innerHTML.
+- **Command Routing:** Intercepts JSON tool calls (e.g., `{"toolCalls": [{"name": "openMovie", "args": {"movieId": 27205}}]}`). It removes the blank bubble, parses the command, and dispatches the action (such as opening the detail modal or scrolling to a section).
+- **Redirection Helpers:** Evaluates path prefixes to map `openWatchlist` and `showPersona` actions cleanly on Vercel's clean subdirectories (e.g., `/watchlist` or `/dashboard`).
+- **Orb Transition Handler:** Listens to toggle actions. When the chat drawer window is visible, it triggers a `.chat-open` class on the container to fade out and scale down the red launcher orb, preventing layout overlapping.
