@@ -24,11 +24,22 @@ require("../server.js");
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function runTests() {
-  console.log("\n[TEST RUNNER] Waiting 3 seconds for database and server to initialize...");
-  await sleep(3000);
+  console.log("\n[TEST RUNNER] Waiting for database and server to initialize...");
+  
+  // Poll for MongoDB readiness instead of a static sleep
+  const maxWait = 15000;
+  const start = Date.now();
+  while (mongoose.connection.readyState !== 1) {
+    if (Date.now() - start > maxWait) {
+      console.error("[TEST FATAL] MongoDB did not connect within 15 seconds.");
+      process.exit(1);
+    }
+    await sleep(500);
+  }
+  console.log(`[TEST RUNNER] MongoDB ready after ${Date.now() - start}ms.`);
 
   const testUser = {
-    username: "test_verify_runner",
+    username: "test_verify_" + Date.now(),
     password: "test_password_123",
     gender: "male"
   };

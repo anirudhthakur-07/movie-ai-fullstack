@@ -562,7 +562,7 @@ h4 {
 .modal-meta-extra {
   font-size: 0.88rem;
   color: #999;
-  margin-top: -10px;
+  margin-top: 4px;
   margin-bottom: 20px;
   display: flex;
   flex-wrap: wrap;
@@ -2481,11 +2481,18 @@ body.modal-open {
     margin-bottom: 6px !important;
     line-height: 1.25 !important;
   }
-  .modal-meta, .modal-meta-extra {
+  .modal-meta {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
     margin-bottom: 6px !important;
+  }
+  .modal-meta-extra {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+    margin-top: 4px !important;
   }
   .modal-meta span, .modal-meta-extra span, .modal-meta-extra button {
     font-size: 0.7rem !important;

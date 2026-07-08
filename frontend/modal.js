@@ -510,6 +510,7 @@ async function renderModalDetailsWithData(fullMovie, movie, requestId) {
             });
             if (!isAllowed) return;
             if (seen.has(normalized)) return;
+            if (!provider.logo_path) return;
             seen.add(normalized);
             uniqueProviders.push(provider);
         });
@@ -519,6 +520,13 @@ async function renderModalDetailsWithData(fullMovie, movie, requestId) {
             img.src = `https://image.tmdb.org/t/p/original${provider.logo_path}`;
             img.className = "provider-logo";
             img.title = provider.provider_name;
+            img.onerror = () => {
+                img.remove();
+                if (providerIcons.children.length === 0) {
+                    providerContainer.classList.add("hidden");
+                    providerContainer.classList.remove("show-active");
+                }
+            };
             img.onclick = async () => {
                 const cleanName = provider.provider_name.toLowerCase()
                     .replace("with ads", "").replace("standard", "").replace("premium", "")

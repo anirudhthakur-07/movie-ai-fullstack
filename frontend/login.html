@@ -273,6 +273,37 @@
             document.getElementById("regTerms").checked = true;
             closePolicy();
         }
+        
+        function playIgnitionTransition() {
+            const overlay = document.createElement("div");
+            overlay.id = "intro-overlay";
+            
+            overlay.innerHTML = `
+                <div class="intro-content">
+                    <div class="shutter-icon">
+                        <div class="blade b1"></div>
+                        <div class="blade b2"></div>
+                    </div>
+                    <h1 class="intro-title">DARK<span>AI</span></h1>
+                    <p class="intro-subtitle">Engine started...</p>
+                    <div class="boot-bar-container">
+                        <div class="boot-bar" style="animation-duration: 1.6s;"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Wait 2.0 seconds, then trigger the CSS fade out
+            setTimeout(() => {
+                overlay.classList.add("fade-out");
+                
+                // Redirect once transition finishes
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 600);
+            }, 2000);
+        }
 
         async function login() {
             const loginBtn = document.querySelector(".login-btn");
@@ -321,11 +352,7 @@
                     localStorage.setItem("authToken", data.token);
                 }
                 
-                // Fade page out transition
-                document.body.classList.add("fade-out");
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 600);
+                playIgnitionTransition();
 
             } catch (err) {
                 console.error("Login failure:", err);
@@ -392,11 +419,7 @@
                 }
                 localStorage.setItem("just_registered", "true");
                 
-                // Fade page out transition
-                document.body.classList.add("fade-out");
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 600);
+                playIgnitionTransition();
 
             } catch (err) {
                 console.error("Registration failure:", err);
