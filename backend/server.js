@@ -114,14 +114,23 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 // GLOBAL MIDDLEWARE
 // CORS, JSON Parsing, Input Sanitization
-app.use(cors({
-  origin: [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? ["https://movie-ai-fullstack.vercel.app"]
+  : [
+      "http://127.0.0.1:5500",
+      "http://localhost:5500",
       "http://127.0.0.1:5502",
-  "http://localhost:5502",
-    "https://movie-ai-fullstack.vercel.app"
-  ],
+      "http://localhost:5502"
+    ];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS policy blocks this origin'), false);
+    }
+    return callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json({

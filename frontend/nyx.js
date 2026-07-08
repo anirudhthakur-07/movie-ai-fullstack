@@ -338,10 +338,10 @@ document.addEventListener("DOMContentLoaded", () => {
                   renderedHTML += `<div class="nyx-content-body">${safeSanitize(parsed.content)}</div>`;
                 }
                 
-                textEl.innerHTML = renderedHTML || safeSanitize(fullResponseText);
+                secureRenderHTML(renderedHTML || safeSanitize(fullResponseText), textEl);
                 chatBody.scrollTop = chatBody.scrollHeight;
               } else if (data.error) {
-                textEl.innerHTML = safeSanitize(data.error);
+                secureRenderHTML(safeSanitize(data.error), textEl);
               }
             } catch (e) {
               // Ignore boundary split JSON fragments
@@ -501,6 +501,57 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/&lt;\/p&gt;/g, '</p>');
   }
 
+  function secureRenderHTML(htmlString, targetEl) {
+    if (!htmlString) {
+      targetEl.innerHTML = "";
+      return;
+    }
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, "text/html");
+    
+    const allowedClasses = [
+      "nyx-reasoning-container",
+      "nyx-reasoning-step",
+      "nyx-reasoning-icon",
+      "nyx-content-body"
+    ];
+
+    const cleanNodes = (node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const className = node.className;
+        
+        while (node.attributes.length > 0) {
+          node.removeAttribute(node.attributes[0].name);
+        }
+        
+        if (className && allowedClasses.includes(className)) {
+          node.className = className;
+        }
+        
+        const tag = node.tagName.toLowerCase();
+        const allowed = ["strong", "em", "br", "p", "div", "span"];
+        if (!allowed.includes(tag)) {
+          const textNode = doc.createTextNode(node.outerHTML);
+          node.parentNode.replaceChild(textNode, node);
+        }
+      }
+      
+      let child = node.firstChild;
+      while (child) {
+        const next = child.nextSibling;
+        cleanNodes(child);
+        child = next;
+      }
+    };
+    
+    cleanNodes(doc.body);
+    
+    targetEl.innerHTML = "";
+    while (doc.body.firstChild) {
+      targetEl.appendChild(doc.body.firstChild);
+    }
+  }
+
   function splitReasoningAndText(text) {
     const lines = text.split("\n");
     const reasoningLines = [];
@@ -545,9 +596,9 @@ document.addEventListener("DOMContentLoaded", () => {
         renderedHTML += `<div class="nyx-content-body">${safeSanitize(parsed.content)}</div>`;
       }
       
-      textEl.innerHTML = renderedHTML || safeSanitize(content);
+      secureRenderHTML(renderedHTML || safeSanitize(content), textEl);
     } else {
-      textEl.innerHTML = safeSanitize(content);
+      secureRenderHTML(safeSanitize(content), textEl);
     }
 
     msgEl.appendChild(textEl);

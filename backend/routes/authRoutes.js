@@ -46,10 +46,11 @@ router.post('/register', authLimiter, async (req, res) => {
       { expiresIn: "14d" }
     );
 
+    const samesiteVal = process.env.COOKIE_SAMESITE || "none";
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: samesiteVal,
       maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
     });
     res.json({ success: true, token });
@@ -85,10 +86,11 @@ router.post('/register', authLimiter, async (req, res) => {
       { expiresIn: "14d" }
     );
 
+    const samesiteVal = process.env.COOKIE_SAMESITE || "none";
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: samesiteVal,
       maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
     });
     res.json({ success: true, token });
@@ -103,12 +105,12 @@ router.post('/register', authLimiter, async (req, res) => {
   }
 });
 
-// LOGOUT ROUTE
 router.post('/logout', (req, res) => {
+  const samesiteVal = process.env.COOKIE_SAMESITE || "none";
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
-    sameSite: "none"
+    sameSite: samesiteVal
   });
   res.json({ success: true });
 });
