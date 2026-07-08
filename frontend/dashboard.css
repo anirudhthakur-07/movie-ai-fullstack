@@ -1165,15 +1165,58 @@ body {
 }
 
 @media (max-width: 600px) {
+    #profileHeroContent {
+        display: grid !important;
+        grid-template-columns: auto 1fr !important;
+        gap: 12px !important;
+        align-items: center !important;
+    }
     .profile-header-top {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 15px !important;
+        display: contents !important;
+    }
+    .profile-avatar-container {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: 70px !important;
+        height: 70px !important;
     }
     .profile-level-badge {
-        text-align: left !important;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        justify-self: end !important;
+        text-align: right !important;
+        padding: 10px 16px !important;
+        border-radius: 14px !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    .profile-level-badge .lvl-val {
+        font-size: 1.4rem !important;
+    }
+    .profile-level-badge .lvl-label {
+        font-size: 0.6rem !important;
+    }
+    .profile-level-progress {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
         width: 100% !important;
-        box-sizing: border-box !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+    }
+    .profile-meta-info {
+        grid-column: 1 / -1 !important;
+        grid-row: 3 !important;
+        width: 100% !important;
+        text-align: left !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+    .username-row h2 {
+        font-size: 1.6rem !important;
+    }
+    .persona-tagline {
+        font-size: 0.95rem !important;
     }
 }
 

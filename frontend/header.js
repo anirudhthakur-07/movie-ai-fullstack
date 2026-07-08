@@ -236,19 +236,39 @@ document.addEventListener("DOMContentLoaded", () => {
         .toast-card {
             display: flex !important;
             align-items: center !important;
-            gap: 16px !important;
-            background: rgba(18, 18, 22, 0.95) !important;
-            backdrop-filter: blur(15px) !important;
-            -webkit-backdrop-filter: blur(15px) !important;
-            border: 1px solid rgba(255, 46, 67, 0.3) !important;
-            border-radius: 12px !important;
-            padding: 14px 18px !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 46, 67, 0.1) !important;
+            gap: 14px !important;
+            background: rgba(18, 18, 22, 0.97) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(255, 46, 67, 0.2) !important;
+            border-radius: 16px !important;
+            padding: 16px 20px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03) inset !important;
             pointer-events: auto !important;
             transform: translateY(20px) scale(0.95) !important;
             opacity: 0 !important;
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease !important;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease !important;
             box-sizing: border-box !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+        .toast-card::after {
+            content: '' !important;
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            height: 3px !important;
+            width: 100% !important;
+            background: linear-gradient(90deg, #e50914, #ff2e43) !important;
+            animation: toastProgress 3.5s linear forwards !important;
+            border-radius: 0 0 16px 16px !important;
+        }
+        .toast-card.level-up-toast::after {
+            background: linear-gradient(90deg, #ffd700, #ffaa00) !important;
+        }
+        @keyframes toastProgress {
+            from { transform: scaleX(1); transform-origin: left; }
+            to { transform: scaleX(0); transform-origin: left; }
         }
         .toast-card.show {
             transform: translateY(0) scale(1) !important;
@@ -267,12 +287,19 @@ document.addEventListener("DOMContentLoaded", () => {
             text-shadow: 0 0 8px rgba(255, 215, 0, 0.5) !important;
         }
         .toast-icon {
-            font-size: 1.5rem !important;
+            font-size: 1.3rem !important;
             color: #ff2e43 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            min-width: 32px !important;
+            min-width: 38px !important;
+            height: 38px !important;
+            background: rgba(229, 9, 20, 0.1) !important;
+            border-radius: 10px !important;
+            flex-shrink: 0 !important;
+        }
+        .toast-card.level-up-toast .toast-icon {
+            background: rgba(255, 215, 0, 0.1) !important;
         }
         .toast-details {
             display: flex !important;
@@ -342,9 +369,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 max-width: 290px !important;
             }
             .toast-card {
-                padding: 10px 14px !important;
+                padding: 12px 16px !important;
                 gap: 12px !important;
-                border-radius: 10px !important;
+                border-radius: 14px !important;
                 transform: translateY(-15px) scale(0.95) !important;
             }
             .toast-card.show {
@@ -354,17 +381,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 transform: translateY(-8px) scale(0.9) !important;
             }
             .toast-icon {
-                font-size: 1.15rem !important;
-                min-width: 26px !important;
+                font-size: 1.1rem !important;
+                min-width: 32px !important;
+                height: 32px !important;
+                border-radius: 8px !important;
             }
             .toast-title {
-                font-size: 0.8rem !important;
+                font-size: 0.82rem !important;
             }
             .toast-alert-title {
                 font-size: 0.65rem !important;
             }
             .toast-xp {
-                font-size: 0.68rem !important;
+                font-size: 0.7rem !important;
             }
             
             /* Navbar mobile compact adjustments */
