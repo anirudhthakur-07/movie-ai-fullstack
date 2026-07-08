@@ -1,37 +1,71 @@
-# 🎨 DARK — Frontend Client Manual
+# 🎨 DARK — Frontend Client Architecture
 
-This directory contains the premium, high-end vanilla web client interface for the **DARK AI Movie Platform**. It is structured as a glassmorphic dashboard optimized for both desktop viewports and touch-first mobile screens.
-
----
-
-## 1. File Structure & Component Map
-
-- **`index.html`:** The main landing feed housing the discovery rows (Weekly Trending, Popular, Top Rated, Sci-Fi, and Horror).
-- **`dashboard.html`:** The user metrics viewport displaying computed taste profiles, click analytics, and unlocked badges.
-- **`watchlist.html`:** A dedicated grid viewport showing saved curation cards and recommended list rows.
-- **`login.html`:** Secure user registration and login gate.
-- **`script.js`:** The controller for Carousel row loaders, fetch requests, search handlers, and local state management.
-- **`modal.js`:** The interactive details modal script, tracking streaming clicks and embedded YouTube trailers.
-- **`dashboard.js`:** Hooks for Chart.js rendering and experience level progression animations.
-- **`avatarSelector.js`:** Controller mapping unlocked levels to custom user avatars.
-- **`nyx.js`:** The SSE streaming chat drawer interface.
-- **`style.css` & `dashboard.css`:** CSS design token registries.
+A glassmorphic dashboard interface optimized for mobile and desktop screens. It is built as a single-page discovery application utilizing vanilla ES6 modules.
 
 ---
 
-## 2. Responsive Layout Tokens & Notch Safe-Areas
+## 1. Directory to UI Component Mapping
 
-The styling follows notches and safe-area margins for high-end mobile rendering:
-
-- **Viewport Containment:** Utilizes `padding: env(safe-area-inset-bottom)` and `margin: env(safe-area-inset-right)` to prevent navigation bars or notch cutouts from overlapping text on iPhone and high-end Android viewports.
-- **Responsive Sizing Clamps:** Uses CSS variables with `clamp()` configurations (e.g. `font-size: clamp(1rem, 2vw, 1.5rem)`) to scale font scales and button sizes fluidly between desktop screens and mobile displays.
+| Frontend Resource | Type | UI / UX Role |
+| :--- | :--- | :--- |
+| **[`index.html`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/index.html)** | Layout | Discovery feed rows, search inputs, and modal portals. |
+| **[`dashboard.html`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/dashboard.html)** | Layout | Visual taste profiles, progress bars, and achievement cards. |
+| **[`watchlist.html`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/watchlist.html)** | Layout | Curation grid and recommended rows. |
+| **[`script.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/script.js)** | Controller | Fetching carousel rows, sign-in state, and local search methods. |
+| **[`modal.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/modal.js)** | Controller | Details drawer, youtube trailer frame, and click trackers. |
+| **[`nyx.js`](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/frontend/nyx.js)** | Client | SSE streaming parser and system command dispatcher. |
 
 ---
 
-## 3. Streaming Chat Widget Controller (`nyx.js`)
+## 2. Interactive Widget Lifecycle (nyx.js)
 
-The chat widget implements a custom **Server-Sent Events (SSE) Reader**:
-- **Progressive Chunk Rendering:** Reads chunks using a standard readable stream reader (`res.body.getReader()`), decodes bytes using `TextDecoder`, and progressively updates the bubble's innerHTML.
-- **Command Routing:** Intercepts JSON tool calls (e.g., `{"toolCalls": [{"name": "openMovie", "args": {"movieId": 27205}}]}`). It removes the blank bubble, parses the command, and dispatches the action (such as opening the detail modal or scrolling to a section).
-- **Redirection Helpers:** Evaluates path prefixes to map `openWatchlist` and `showPersona` actions cleanly on Vercel's clean subdirectories (e.g., `/watchlist` or `/dashboard`).
-- **Orb Transition Handler:** Listens to toggle actions. When the chat drawer window is visible, it triggers a `.chat-open` class on the container to fade out and scale down the red launcher orb, preventing layout overlapping.
+This diagram shows how the floating chat widget manages toggle transitions and client-side actions:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed: Initial State (Orb visible)
+    
+    Closed --> Open: Click Orb (Toggles hidden off)
+    note right of Open: Orb fades out, chat Window opens
+    
+    Open --> Processing: Submit Query
+    Processing --> Streaming: Start Server SSE Stream
+    Streaming --> Streaming: Decode text fragments
+    
+    Streaming --> Closed: Click Outside / Header Close Button
+    
+    Streaming --> ActionRoute: Parse {"toolCalls": ...}
+    note left of ActionRoute: Trim spaces and strip streaming bubble
+    
+    ActionRoute --> OpenModal: action="openMovie"
+    ActionRoute --> SearchIndex: action="searchMovie"
+    ActionRoute --> HighlightCard: action="showPersona"/"showMovieDNA"
+    ActionRoute --> RedirectPage: page not index/watchlist/dashboard
+    
+    OpenModal --> Open
+    SearchIndex --> Open
+    HighlightCard --> Open
+    RedirectPage --> [*]: Reload page
+```
+
+---
+
+## 3. Responsive Notch CSS Safe-Areas
+
+To ensure elements are not cut off by hardware notches or navigation bars, the CSS implements safe-area margin offsets:
+
+```css
+/* Notch safe-areas and padding clamps */
+.nyx-orb-container {
+  bottom: clamp(15px, 4vw, 25px);
+  right: clamp(15px, 4vw, 25px);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nyx-chat-window {
+  bottom: clamp(72px, 12vh, 80px);
+  max-height: calc(100vh - 100px - env(safe-area-inset-bottom));
+}
+```
+- **Clamp Scaling:** Smoothly scales widget heights and widths across varying mobile and desktop viewport dimensions.
+- **Hardware-Accelerated Transitions:** Uses CSS `will-change: transform` and cubic-bezier timings to provide stutter-free animations.

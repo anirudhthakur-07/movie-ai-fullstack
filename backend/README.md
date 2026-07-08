@@ -1,57 +1,73 @@
-# ⚙️ DARK — Backend Services Manual
+# ⚙️ DARK — Backend System Architecture & Routing
 
-This directory contains the secure Express API, MongoDB Atlas schemas, and AI integration services for the **DARK AI Platform**.
-
----
-
-## 1. Directory Blueprint & Service Mapping
-
-- **`server.js`:** Express bootstrap file. Configures security headers (Helmet), CORS, JSON raw body capture hooks, rate limiters, and mounts routers.
-- **`models/`:** MongoDB data models:
-  - `User.js`: User profiles, credentials, watchlist elements, and levels/XP metrics.
-  - `Movie.js`: Temporary metadata cache with a **15-day TTL index** to avoid redundant TMDB requests.
-  - `ProviderClick.js`: Analytics events tracking provider click frequencies.
-  - `SearchHistory.js`: User query history records.
-  - `BehaviorEvent.js`: XP interaction points configuration weights.
-- **`routes/`:** Routing controllers validating tokens via JWT middleware:
-  - `authRoutes.js`: Login, signup, and profile bootstrapping.
-  - `movieRoutes.js`: TMDb proxy router.
-  - `watchlistRoutes.js`: CRUD endpoints managing saved watchlists.
-  - `analyticsRoutes.js`: Aggregation queries for user charts.
-- **`services/AI/`:** Core AI OS domain (The Nyx Brain):
-  - `aiGateway.js`: Gemini failover model list, Priority concurrency queue, and circuit breakers.
-  - `nyxOrchestrator.js`: Hexagonal query orchestrator.
-  - `contextBuilder.js`: Compiles user profiles, watchlist count, and recent clicks into dynamic context snippets.
-  - `intentDetector.js`: Local regex classification routing.
-- **`slack/`:** Slack Integration:
-  - `slackRoutes.js`: Endpoint routes.
-  - `slackMiddleware.js`: HMAC SHA256 cryptographic signature validator.
-  - `slackHelpers.js`: Bridge connecting Slack events to `nyxOrchestrator.js`.
-  - `BlockKitBuilder.js`: Presenter mapping JSON payloads to Slack UI cards.
+The backend is a Node.js/Express API designed using the **Hexagonal Ports & Adapters** pattern, ensuring the core AI and business services are completely decoupled from delivery interfaces.
 
 ---
 
-## 2. Ports & Adapters Execution Boundary
+## 1. Directory to Service Blueprint Mapping
 
-To prevent logic duplication, all interfaces (Web HTTPS, SSE streaming, and Slack webhooks) invoke the centralized orchestrator:
+| Directory / File | Design Pattern | System Responsibility |
+| :--- | :--- | :--- |
+| **`server.js`** | Bootstrap | Express configuration, Helmet security headers, raw body verify parsers, and route mounts. |
+| **`models/User.js`** | Domain Model | User authentication states, watchlists, and computed leveling/XP. |
+| **`models/Movie.js`** | Caching | TMDb details cache featuring an automatic **15-day TTL expiry index**. |
+| **`services/AI/nyxOrchestrator.js`** | Orchestrator Port | Central entry point coordinate reasoning loops for all interfaces. |
+| **`services/AI/aiGateway.js`** | Gateway Adapter | Gemini API rotating fallback list, request queues, and circuit breakers. |
+| **`slack/slackMiddleware.js`** | Security Filter | HMAC SHA256 signature verification and request timestamp checks. |
+| **`slack/BlockKitBuilder.js`** | Presenter | Maps JSON tool results to interactive Slack Block Kit cards. |
 
-```text
-Incoming Request -> [Interface Adapter] -> nyxOrchestrator.js -> [Context Engine] -> AIGateway
+---
+
+## 2. Decoupled Processing Pipeline
+
+This sequence chart visualizes how incoming HTTP Web and Slack events are routed through standard verification layers and the unified AI ports:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Web/Slack Client
+    participant API as Express Router
+    participant Guard as Middleware (JWT/HMAC)
+    participant Core as nyxOrchestrator
+    participant Context as contextBuilder
+    participant DB as MongoDB Atlas
+    participant AI as aiGateway (Gemini)
+
+    Client->>API: Post Query / Event
+    API->>Guard: Validate Authentication Headers
+    alt Authentication Valid
+        Guard-->>API: Grant Authorization
+        API->>Core: executeNyxQuery(query, userId)
+        Core->>Context: buildUserContext(userId)
+        Context->>DB: Fetch Watchlist & Taste DNA
+        DB-->>Context: Return Profile JSON
+        Context-->>Core: Return Context Snippet
+        Core->>AI: callLLM(prompt, context)
+        AI-->>Core: Return JSON Actions Payload
+        Core-->>API: Return Structured Action
+        API-->>Client: Respond with UI Modal / Block Kit
+    else Authentication Fails
+        Guard-->>Client: Return 401 Unauthorized
+    end
 ```
 
-- **Web (Non-Streaming):** Calls `executeNyxQuery()` and returns JSON.
-- **Web (Streaming SSE):** Bypasses the static orchestrator to stream raw text chunks via `callLLMStream` directly to the Express response stream.
-- **Slack (Slash / Mentions):** Calls `executeNyxQuery()` via `slackHelpers.js`, then translates the output into Slack Block Kit payload formats.
-
 ---
 
-## 3. Secure Environment Guidelines
+## 3. Environment Configurations (`.env`)
 
-Environment keys are strictly maintained on the hosting server (Render) and are **never** committed to Git. A `.env.example` file is included in this folder as a structural template.
+Backend keys are managed strictly via system parameters. The following variables are required for system bootstrap:
 
-### Critical Keys:
-- `MONGO_URI`: Atlas connection string.
-- `JWT_SECRET`: Signing secret for token cryptography.
-- `TMDB_API_KEY`: API key for movie metadata proxies.
-- `GEMINI_API_KEY`: Key for LLM reasoning models.
-- `SLACK_SIGNING_SECRET` & `SLACK_BOT_TOKEN`: Keys for verifying webhook requests.
+```ini
+# Database & Cryptography Configuration
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/dark
+JWT_SECRET=your_32_character_signing_key_here
+
+# Cinematic API Proxy Configurations
+TMDB_API_KEY=your_themoviedb_org_api_key
+
+# Reasoning Model & Slack Webhooks Configuration
+GEMINI_API_KEY=your_google_ai_studio_gemini_key
+SLACK_SIGNING_SECRET=your_slack_app_signing_secret
+SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
+```
+*Note: Exclude standard configuration files from source control via `.gitignore`.*
