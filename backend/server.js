@@ -129,6 +129,12 @@ app.use(express.json({
     req.rawBody = buf;
   }
 }));
+app.use(express.urlencoded({
+  extended: true,
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(mongoSanitize());
 
 // Custom Cookie Parser Middleware
