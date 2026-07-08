@@ -1,165 +1,144 @@
-# 🎬 Dark — Full-Stack Movie Recommendation & Gamified Curation Platform
+# 🎬 DARK — Enterprise-Grade Multi-Channel AI Movie Intelligence Platform
 
-A full-stack movie recommendation platform that combines intelligent movie discovery, personalized curation, watchlist management, streaming platform tracking, and user analytics into a modern, gamified Netflix-inspired experience.
+DARK is an advanced, production-ready AI Movie Curation & Taste Intelligence Platform. Designed with a decoupled Hexagonal Ports & Adapters architecture, it powers multiple interaction interfaces—a gamified glassmorphic web portal and a collaborative Slack workspace adapter—using a single source of truth AI reasoning orchestrator.
 
----
-
-# 📌 Overview
-
-**Dark** is a full-stack web application designed to eliminate streaming fatigue. By building user behavior profiles, tracking streaming provider clicks, and analyzing watchlists, the platform dynamically computes user personas, unlocks gamified achievements, and builds visual taste graphs.
-
-The application uses pure HTML5, CSS3 (with notch/safe-area mobile responsiveness), and Vanilla JS on the client side, powered by a secure Node.js/Express REST API and a MongoDB Atlas data layer.
-
----
-## Live Demo
-- **Frontend App:** [https://movie-ai-fullstack.vercel.app](https://movie-ai-fullstack.vercel.app)
+DARK is built for submission to multiple international hackathons:
+*   **Code with Gemini API Challenge:** Optimization, resilience, model rotation, and caching.
+*   **Slack Agent Builder Challenge:** Interactive Block Kit layouts, verified webhooks, and workspace linking.
+*   **Agentic AI Innovation Challenge:** Schema-driven tool execution and dynamic context slicing.
+*   **Next Byte Hacks / Hack The Limit:** Hexagonal architecture, modular DevSecOps, SRE resiliency patterns, and clean code.
+*   **Aethera / LUMA Hacks:** Taste DNA personas, visual dashboard analytics, and premium dark aesthetics.
 
 ---
 
-# ✨ Key Features
-
-## 🔐 Authentication & Security
-- **Secure Logins:** Password hashing with `bcryptjs` and stateless session tracking with JWT.
-- **Tab-Scoped Sessions:** Session tokens stored securely in `sessionStorage` to prevent cross-tab reuse.
-- **Error Standardization:** Muted, generic authentication error messages to block username harvesting.
-- **API Defense:** Rate-limiting limits API abuse, `helmet` enforces strict HTTP headers, and input sanitization cleans database queries against NoSQL injection.
-
-## 🎥 Movie Discovery
-- Curated horizontal movie rows: Weekly Trending, Popular, Top Rated, Sci-Fi, and Horror.
-- Full details modals showing runtime, synopsis, cast, and embedded YouTube trailers.
-- Real-time OTT streaming provider availability detection powered by TMDB.
-
-## 🤖 Personalized Curation
-- **Self-Healing Metadata:** Background pipeline automatically checks and fetches missing genre details for saved movies when profiles load.
-- **Movie DNA Mapping:** Aggregates user search history, genre distributions, and provider click events into weighted taste scores.
-- **Watchlist Recommendations:** Contextual recommendations showing matching explanation rows (e.g. *"Because you watched Inception"*).
-
-## 🏆 Gamification & Avatars
-- **User XP & Leveling:** Experience points awarded dynamically for user interactions (searches, profile views, provider clicks).
-- **Achievements System:** 11 unlockable badges tracking progress (e.g. *Collector*, *Genre Explorer*, *Cinephile*).
-- **Custom Avatars:** 40 custom, persona-mapped profile avatars available to unlock based on user levels.
-
-## 📊 Analytics Dashboard
-- **Favorite Genre & Provider:** Displays the user's top genre and most frequently clicked streaming platform.
-- **Dynamic Charts:** Genre Distribution (Donut Chart), Genre Affinity (Bar Chart), and Streaming Platform Usage (Donut Chart) rendered client-side using `Chart.js`.
+## 🔗 Live Deployments
+*   **Web Dashboard App:** [https://movie-ai-fullstack.vercel.app](https://movie-ai-fullstack.vercel.app)
+*   **Production API Server:** [https://movie-ai-backend-ql2a.onrender.com](https://movie-ai-backend-ql2a.onrender.com)
+*   **Slack Integration Webhook:** `https://movie-ai-backend-ql2a.onrender.com/api/slack/events`
 
 ---
 
-# 🛠️ Technology Stack
+## 🏗️ Decoupled Hexagonal Architecture (Ports & Adapters)
 
-### Frontend
-- **HTML5 & CSS3:** Responsive layouts optimized for mobile safe-areas (notches and home indicators).
-- **JavaScript (ES6):** Vanilla controller modules with debounced search queries and skeleton shim loaders.
-- **Chart.js:** Responsive canvas charts for dashboard visualizations.
-
-### Backend
-- **Node.js & Express.js:** Layered REST API routing requests through JWT middleware to services.
-- **MongoDB Atlas & Mongoose:** Persistent document database utilizing automatic 15-day TTL expiry indexes on cached movie metadata.
-
----
-
-# 🏗️ System Architecture
+DARK separates core movie intelligence domain services from integration delivery adapters (Express Web APIs, Slack Webhook listeners, future Discord/Mobile clients).
 
 ```text
-                    User Browser (HTML5, Glassmorphic CSS3, Vanilla JS)
-                                              │
-                                              ▼
-                             Express API Gateway (Render.com)
-                       ┌──────────────────────┼──────────────────────┐
-                       │ (Helmet, Cors, Rate Limiters, Sanitizers)   │
-                       ▼                                             ▼
-                 Protected Routes                            Public Auth Routes
-             (JWT Auth Middleware Guard)                 (/api/login, /api/register)
-                       │
-       ┌───────────────┼───────────────┐
-       ▼               ▼               ▼
-Curation Services  Search Engine   Analytics Engine
-(profileEngine.js) (tmdbService.js) (Mongo Aggregations)
-       │               │               │
-       └───────────────┼───────────────┘
-                       │
-                       ├──────────────────────────────┐
-                       ▼                              ▼
-                 MongoDB Atlas                   TMDB API Proxy
-            (User Watchlists, Events)           (Metadata, OTT Details)
+                     +---------------------------------------+
+                     |             Incoming Channels         |
+                     +-------------------+-------------------+
+                                         |
+                       [Web HTTPS / SSE] | [Slack events/commands]
+                                         v
+                     +-------------------+-------------------+
+                     |         Controllers / Adapters        |
+                     |  (nyxController.js / slackAdapter.js) |
+                     +-------------------+-------------------+
+                                         |
+                                         v
+                     +-------------------+-------------------+
+                     |               Nyx Port                |
+                     |      (nyxOrchestrator.js)             |
+                     +-------------------+-------------------+
+                                         |
+     +-------------------+---------------+---------------+-------------------+
+     |                   |                               |                   |
+     v                   v                               v                   v
++----+----+     +--------+--------+             +--------+--------+     +----+----+
+| Intent  |     | Context Builder |             |   AI Gateway    |     | Cache   |
+| Router  |     |   (Taste DNA)   |             | (Gemini/Tokens) |     | Service |
++---------+     +-----------------+             +-----------------+     +---------+
 ```
+
+*   **Nyx Core Orchestrator:** The single brain (`nyxOrchestrator.js`) that processes natural language queries, resolves local intents, builds context snapshots, calls the LLM, and returns structured commands.
+*   **Thin Adapters:** Express API routes (`nyxRoutes.js`) and Slack Bolt webhooks (`slackRoutes.js`) contain zero business logic. They simply pass queries to the Core and translate the structured response into HTML modals or Slack Block Kit layouts.
 
 ---
 
-# 📂 Project Structure
+## 🤖 Gemini API Optimization & Resiliency Gateway
+
+DARK features a custom, high-end SRE AI Gateway (`aiGateway.js`) designed to optimize rate usage and defend against API disruptions:
+1. **Model Rotation List:** Loops dynamically through a priority list (`gemini-2.0-flash-lite`, `gemini-2.0-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`) based on error status and rate limits.
+2. **Circuit Breaker:** Implements a sliding-window failure monitor that temporarily opens the circuit to protect backend services if the Gemini API goes down.
+3. **Priority Concurrency Queue:** Throttles concurrent API requests to prevent HTTP `429 Too Many Requests` status blocks on the free tier.
+4. **Local Response Caching:** Avoids redundant LLM invocations by caching query responses for identical user profiles.
+5. **Observability Log Aggregator:** Track metrics (prompt sizes, response tokens, token cost, API latency) in a structured metrics logger (`aiLogger.js`).
+
+---
+
+## ⚡ Agentic Tool-Use & Planning Engine
+
+Nyx maps user instructions directly to functional platform capabilities using Gemini native Tool/Function Declarations:
+*   **Structural Commands:** When a user queries `"open my watchlist"` or `"search interstellar"`, the model responds with structured commands (e.g. `navigate(target: "watchlist")` or `searchMovie(query: "interstellar")`).
+*   **Dynamic UI Handlers:** The frontend controller parses the structured response and triggers responsive UI changes (smooth scrolling to grids, launching trailer modal players, or highlighting dashboard charts).
+*   **Context Slicing Engine:** Assembles a compressed snapshot of the user's active Taste DNA, unlocking milestones, and history so the LLM has zero redundant context, minimizing token sizes.
+
+---
+
+## 💬 Slack Collaborative Workspace Adapter
+
+DARK includes a complete enterprise Slack integration located inside the [backend/slack/](file:///c:/Users/Anirudh%20thakur/OneDrive/Desktop/movie-ai-fullstack/backend/slack/) folder:
+*   **Webhook Endpoints:** Handles Slack `app_mention` events and `/nyx` slash commands.
+*   **Secure Signature Verification:** Cryptographic HMAC SHA256 request validator defends against replay attacks by enforcing a 5-minute request timestamp window.
+*   **Raw Body Capture:** Express JSON and Urlencoded parsers utilize raw buffer hooks to preserve request signatures.
+*   **Block Kit Builder:** Generates premium visual Slack components with movie poster images, ratings, YouTube trailers, and links to the web app dashboard.
+*   **Tenant Mapping:** Links Slack member IDs to local MongoDB profile documents.
+
+---
+
+## ✨ Primary Platform Capabilities
+
+### 🔐 Authentication & Security
+- stateless session tracking with JWT and securely hashed passwords.
+- Input sanitization blocks NoSQL injection attacks, and `helmet` guards HTTP headers.
+
+### 🏆 Gamification & Avatars
+- **User XP & Leveling:** Experience points awarded dynamically for user interactions (searches, profile views, provider clicks).
+- **Achievements System:** 11 unlockable badges tracking progress (e.g. *Collector*, *Genre Explorer*, *Cinephile*).
+- **Custom Avatars:** 40 custom, persona-mapped profile avatars unlocked based on user levels.
+
+### 📊 Curation & Analytics Dashboard
+- **Movie DNA Mapping:** Analyzes user search histories and genre preferences into weighted taste scores.
+- **Provider Analytics:** Displays your favorite genre and OTT platform with live `Chart.js` rendering.
+- **Self-Healing Metadata:** Background service automatically checks and restores missing genre tags on load.
+
+---
+
+## 📂 Project Structure
 
 ```text
 movie-ai-fullstack/
-│
-├── README.md                   # Master project manual
-│
 ├── backend/
-│   ├── .env.example            # Backend environment variables template
-│   ├── server.js               # API bootstrap and global middleware chains
-│   ├── package.json            # Node project configuration
+│   ├── server.js               # Express bootstrap with verify parser hooks
+│   ├── models/                 # MongoDB schemas (User, Click, Movie)
+│   ├── controllers/            # Web query controllers
+│   ├── routes/                 # API route mapping
 │   │
-│   ├── config/
-│   │   └── tmdb.js             # TMDB HTTP Client setup
+│   ├── services/AI/            # Core AI OS Layer (The Nyx Brain)
+│   │   ├── aiGateway.js        # Model rotation, circuit breaker, tools schema
+│   │   ├── nyxOrchestrator.js  # Unified hexagonal query orchestrator
+│   │   ├── contextBuilder.js   # Taste DNA context slicing
+│   │   ├── intentDetector.js   # Offline regex intent classification
+│   │   ├── promptRegistry.js   # Dynamic system prompt modules
+│   │   └── aiLogger.js         # Telemetry metrics aggregator
 │   │
-│   ├── middleware/
-│   │   └── auth.js             # JWT verification middleware
-│   │
-│   ├── models/
-│   │   ├── User.js             # User data schema + watchlist subdocuments
-│   │   ├── Movie.js            # Cached movie documents (15-day TTL index)
-│   │   ├── ProviderClick.js    # OTT platform interaction logs
-│   │   ├── SearchHistory.js    # Search query records
-│   │   └── BehaviorEvent.js    # XP behavior weights
-│   │
-│   ├── routes/
-│   │   ├── achievementRoutes.js# Achievements status API
-│   │   ├── analyticsRoutes.js  # Chart aggregates and stats API
-│   │   ├── authRoutes.js       # Register and login API
-│   │   ├── behaviorRoutes.js   # XP interaction tracker API
-│   │   ├── movieRoutes.js      # TMDB search, detail, and provider proxy API
-│   │   ├── profileRoutes.js    # Dynamic user profile details API
-│   │   ├── recommendationRoutes.js # Search and watchlist curation API
-│   │   ├── searchHistoryRoutes.js # User query history API
-│   │   └── watchlistRoutes.js  # Add/remove watchlist items API
-│   │
-│   └── services/
-│       ├── profileEngine.js    # XP math, persona assignment, and self-healing
-│       └── tmdbService.js      # Raw external metadata parsing client
+│   └── slack/                  # Slack Adapter Layer
+│       ├── slackRoutes.js      # Verified slack webhook paths
+│       ├── slackMiddleware.js  # HMAC SHA256 verification middleware
+│       ├── slackHelpers.js     # Dispatcher connecting Slack to Nyx core
+│       └── BlockKitBuilder.js  # Presenter mapping JSON to Slack UI
 │
-├── frontend/
-│   ├── index.html              # Discovery feed layout
-│   ├── login.html              # Sign-up and login gate
-│   ├── dashboard.html          # User profile analytics dashboard layout
-│   ├── watchlist.html          # Curation feed and grid layout
-│   │
-│   ├── config.js               # Global client API base configuration
-│   ├── script.js               # Discovery controllers and feed rendering
-│   ├── modal.js                # Detail modal, casts, and provider trackers
-│   ├── dashboard.js            # Chart.js rendering and achievements grid
-│   ├── watchlist.js            # LocalStorage caching loader and watchlist grids
-│   ├── avatarSelector.js       # Avatar selector UI and unlocks
-│   │
-│   ├── style.css               # Global responsive design tokens
-│   ├── dashboard.css           # Glowing glassmorphic widget styles
-│   │
-│   └── assets/
-│       ├── avatars/            # 40 persona-mapped avatar images
-│       └── videos/             # Background mp4 video loops
-│
-└── screenshots/                # Application demonstration screenshots
+└── frontend/                   # Vite / Vanilla frontend Client
+    ├── index.html              # Glassmorphic discovery viewport
+    ├── nyx.js                  # Frontend floating chat widget (SSE reader)
+    ├── script.js               # Carousel loaders and search methods
+    └── style.css               # notched safe-area mobile styles
 ```
 
 ---
 
-# 🚀 Installation & Local Development
+## 🚀 Installation & Local Development
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/movie-ai-fullstack.git
-cd movie-ai-fullstack
-```
-
-### 2. Backend Setup
+### 1. Backend Setup
 1. Navigate to the backend directory and install dependencies:
    ```bash
    cd backend
@@ -169,65 +148,24 @@ cd movie-ai-fullstack
    ```bash
    cp .env.example .env
    ```
-3. Open `backend/.env` and configure your credentials:
-   - `MONGO_URI`: Your MongoDB connection string.
-   - `JWT_SECRET`: A secure key used for signing tokens (minimum 32 characters).
-   - `TMDB_API_KEY`: A free API key from [themoviedb.org](https://www.themoviedb.org).
+3. Configure `backend/.env`:
+   - `MONGO_URI`: MongoDB connection string.
+   - `JWT_SECRET`: A secure session signing key.
+   - `TMDB_API_KEY`: API key from [themoviedb.org](https://www.themoviedb.org).
+   - `GEMINI_API_KEY`: API key from Google AI Studio.
+   - `SLACK_SIGNING_SECRET` & `SLACK_BOT_TOKEN`: Keys from Slack Developer Console.
 4. Start the server:
    ```bash
    npm start
    ```
-   *The server runs by default on `http://localhost:5000`.*
 
-### 3. Frontend Setup
-1. Open `frontend/config.js` and set the `API_BASE` variable:
+### 2. Frontend Setup
+1. Open `frontend/config.js` and set your API base:
    ```javascript
    const API_BASE = "http://localhost:5000/api";
    ```
-2. Serve the `frontend/` directory using a local web server (like VS Code Live Server) or via npm:
+2. Serve the `frontend/` folder locally:
    ```bash
    cd ../frontend
    npx serve -l 3000
    ```
-3. Visit `http://localhost:3000` in your web browser.
-
----
-
-# 📸 Screenshots
-
-### Home Page — Discovery Hub
-![Home](screenshots/HomePage.png)
-
-### Movie Detail Modal & Cast Details
-![Search](screenshots/Search.png)
-
-### Watchlist — Collection Manager
-![Watchlist](screenshots/Watchlist.png)
-
-### Analytics Dashboard — Movie DNA & Persona
-![Dashboard](screenshots/Dashboard.png)
-
----
-
-# 🔮 Future Enhancements
-- **Adaptive Recommendations:** Machine Learning models trained on user watchlist genre weights.
-- **Redis Caching:** Memory cache layer for fast API response speeds on repeat details.
-- **Docker Support:** Dockerfile container setup for automated deployments.
-- **Social Features:** Co-viewing chatrooms and watchlist sharing profiles.
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
-
----
-
-# 🙏 Acknowledgements
-- **TMDB (The Movie Database):** For providing rich media metadata.
-- **Chart.js:** For client-side dashboard charts.
-- **MongoDB Atlas:** For cloud database systems.
-
----
-
-⚠️ *This product uses the TMDB API but is not officially endorsed or certified by TMDB.*
