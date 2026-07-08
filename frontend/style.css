@@ -3570,7 +3570,7 @@ body.modal-open {
   display: none !important;
 }
 
-/* MOBILE VIEW CARD SCALE ALIGNMENT */
+/* MOBILE VIEW CARD SCALE ALIGNMENT & ULTRA-SMOOTH SCROLLING OPTIMIZATIONS */
 @media (max-width: 768px) {
   .movie-card,
   .watch-card,
@@ -3582,6 +3582,24 @@ body.modal-open {
     min-height: 195px !important;
     max-height: 195px !important;
     border-radius: 12px !important;
+    /* Force GPU layering to prevent redraw/repaint lag during scroll */
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  /* Disable scaling transformations on hover/touch to prevent scrolling stutter */
+  .movie-card:hover,
+  .watch-card:hover {
+    transform: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* Enable momentum inertia scrolling on iOS and modern touch devices */
+  .movie-row {
+    -webkit-overflow-scrolling: touch !important;
+    will-change: transform;
   }
   
   .watchlist-grid,
