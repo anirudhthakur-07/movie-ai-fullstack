@@ -1,27 +1,65 @@
-# 🎬 DARK — Enterprise AI Movie Curation & Taste Intelligence Platform
+# DARK — Enterprise-Grade Multi-Channel AI Movie Curation & Taste Intelligence Platform
 
-DARK is an advanced, production-ready AI Movie Curation & Taste Intelligence Platform. Powered by **Nyx**, a centralized AI Operating System orchestrator, DARK translates natural language queries into structured system actions, creating a unified cinematic experience across both our web dashboard client and collaborative Slack adapter interfaces.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](#)
+[![PRs](https://img.shields.io/badge/PRs-welcome-orange.svg)](#)
+[![Vercel](https://img.shields.io/badge/deployment-Vercel-black.svg)](https://movie-ai-fullstack.vercel.app)
+[![Node version](https://img.shields.io/badge/node-%3E%3D%2018.0.0-green.svg)](#)
+[![MongoDB](https://img.shields.io/badge/database-MongoDB-green.svg)](#)
 
----
-
-## 🔗 Live Deployments
-*   **Web Dashboard App:** [https://movie-ai-fullstack.vercel.app](https://movie-ai-fullstack.vercel.app)
-
----
-
-## 💡 The Problem We Solve
-Traditional movie recommendation sites suffer from three primary constraints:
-1. **Streaming fatigue:** Users spend more time scrolling through grids than watching movies because algorithms suggest titles based on raw popularity rather than deep cinematic taste.
-2. **Siloed interaction channels:** Users must leave their active workflows (like collaborative team chats) to open a website, search for movies, and copy-paste links.
-3. **Lack of transparency:** Traditional recommender engines behave like black boxes, providing zero visibility into *why* a movie is recommended or how the user's taste persona evolves.
-
-**DARK resolves this** by introducing a dynamic **Movie DNA engine** and **Nyx**, a conversational, state-aware AI Curator that interacts directly with your team chat (Slack) and dashboard, decoding your profile DNA to recommend and explain content with absolute transparency.
+DARK is an advanced, production-ready AI Movie Curation & Taste Intelligence Platform. Designed using a decoupled **Hexagonal Ports & Adapters** architecture, it transforms standard recommendation engines into an interactive experience powered by **Nyx**, a centralized, conversational AI Operating System. DARK curates, analyzes, and executes user instructions across a gamified dashboard web portal and a collaborative Slack adapter workspace.
 
 ---
 
-## 🏗️ Hexagonal System Architecture
+## 📌 Table of Contents
+1. [Core Features & Innovations](#-core-features--innovations)
+2. [Problem Statement & Solution](#-problem-statement--solution)
+3. [System Architecture & Visual Flows](#%EF%B8%8F-system-architecture--visual-flows)
+4. [Technology Stack](#%EF%B8%8F-technology-stack)
+5. [Folder Structure](#-folder-structure)
+6. [API Specifications](#-api-specifications)
+7. [Performance & Resiliency Features](#-performance--resiliency-features)
+8. [Installation & Local Setup](#-installation--local-setup)
+9. [Deployment Protocols](#-deployment-protocols)
+10. [Future Roadmap](#-future-roadmap)
 
-DARK separates core movie intelligence domain services from delivery adapters (Express Web APIs, Slack Webhook listeners) using a decoupled **Ports & Adapters** layout.
+---
+
+## ✨ Core Features & Innovations
+
+### 1. The Nyx AI Operating System
+Unlike standard search inputs, **Nyx** operates as the platform's cognitive reasoning brain. It maps user queries directly to native system triggers (such as launching trailer modals, scrolling to lists, or highlighting dashboard widgets) using structured tools.
+
+### 2. Weighted Movie DNA Engine
+DARK continuously aggregates user search inputs, watchlist updates, and streaming provider interactions into a dynamic Taste DNA registry. This data is converted into weighted profiles, giving users transparent insight into their entertainment preferences.
+
+### 3. Dynamic Archetype Personas
+User activities dynamically update their Taste Persona. These personas represent specific entertainment profiles (e.g., *Adventure Explorer*) and unlock a tiered selection of 40 custom avatars and 11 gamified achievements.
+
+### 4. Enterprise Slack Adapter Channel
+A secure Slack adapter allows users to query Nyx and share watchlists directly from team chat channels via slash commands (`/nyx`) and events. It renders recommendations inside premium Slack Block Kit layouts.
+
+---
+
+## 💡 Problem Statement & Solution
+
+### The Decision Fatigue Problem
+* **Siloed Experiences:** Movie search sites require users to navigate complex interfaces to find recommendations, which are then manual copy-pasted to share with friends or teams.
+* **Algorithmic Black Boxes:** Recommender systems suggest titles based on raw platform popularity rather than the user's specific cinematic context.
+* **Loss of Curation Control:** Watchlists are static lists of items that offer no dynamic insights or interactive tools.
+
+### The DARK Solution
+DARK decodes your watchlist metadata, searches, and clicks on-the-fly, transforming movie curation into an interactive interface:
+* **Interface Independence:** Users can manage collections via a web portal or straight from their corporate team chat (Slack).
+* **Conversational Control:** Users tell Nyx what they want (e.g., *"recommend sci fi"* or *"show movie dna"*), and the system automatically scrolls the grid, highlights charts, or plays trailers.
+* **Transparent Profile Science:** Renders interactive distribution charts (Donut, Bar) displaying your actual genre affinity and streaming preference weights.
+
+---
+
+## 🏗️ System Architecture & Visual Flows
+
+### 1. Hexagonal Ports & Adapters Architecture
+DARK is built around a decoupled Ports & Adapters interface. Web HTTPS clients, SSE streams, and Slack event loops are treated as external presentation adapters, which route data through the central AI orchestrator port:
 
 ```mermaid
 graph TB
@@ -61,114 +99,174 @@ graph TB
     I -->|Fetch Metadata| K
 ```
 
-### Architectural Execution Flow:
-1. **Request Ingestion:** The web client or Slack events adapter dispatches a natural language query to the server.
-2. **Intent Classification:** The orchestrator runs local regex filters to resolve simple instructions (like page navigation or direct search terms) instantly without calling the LLM.
-3. **Context Assembly:** If LLM reasoning is required, the context engine builds a dynamic, sliced snapshot of the user's taste persona and metrics.
-4. **Resilient AI execution:** The query is routed through a rate-limiting concurrency queue to Gemini, utilizing a rotating list of models (`gemini-2.0-flash-lite`, `gemini-2.0-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`) for failover safety.
-5. **JSON Contract Dispatch:** The model outputs structured JSON actions (e.g. `openMovie(movieId: 27205)`), which the UI adapters translate into HTML modals or Slack Block Kit components.
+### 2. Unified Nyx Reasoning Sequence
+When a request is submitted, it flows through these decoupled steps:
 
----
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Web/Slack Adapter
+    participant Core as nyxOrchestrator
+    participant Context as contextBuilder
+    participant DB as MongoDB Atlas
+    participant AI as aiGateway (Gemini)
 
-## 🛠️ Feature Suite & Implementation Blueprint
+    Client->>Core: Process Query (Text, userId, clientState)
+    Core->>Core: Detect Local Intent (Offline regex)
+    alt Intent is Local / Navigation
+        Core-->>Client: Dispatch direct Action (e.g., search/scroll)
+    else Intent is Ambient / Reasoning
+        Core->>Context: compileDynamicContext(userId)
+        Context->>DB: Query User Taste DNA & Watchlist
+        DB-->>Context: Return User Profile Document
+        Context-->>Core: Return Compressed Context Snippet
+        Core->>AI: callLLM(prompt, context)
+        AI-->>Core: Return JSON Actions Payload
+        Core-->>Client: Respond with formatted UI / Block Kit Commands
+    end
+```
 
-### 1. Unified AI Curation Engine
-- **Implementation:** Built on `nyxOrchestrator.js`. It utilizes Google Generative AI bindings with tool schemas to execute platform commands (like opening trailer players or scrolling to grids) based on user text queries.
-- **SRE Gateways:** Implements state-aware circuit breakers, request queues, and caches to prevent rate-limit blocks.
+### 3. Slack adapter Interaction Path
+The Slack adapter acts as a secure translator channel:
 
-### 2. Custom Taste DNA & Personas
-- **Implementation:** Powered by `profileEngine.js` and Mongo aggregation pipelines. It weights search logs, genres, and provider click frequencies to compute active archetypes (e.g., "Adventure Explorer") and output visual dashboard charts.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Slack as Slack Server
+    participant Mid as Verification Middleware
+    participant Controller as slackController
+    participant Helper as slackHelpers
+    participant Core as nyxOrchestrator
+    participant Presenter as BlockKitBuilder
 
-### 3. Gamified Explorer Milestones
-- **Implementation:** A dynamic database model (`models/User.js`) tracking user XP levels and unlocking 11 different badges (e.g., *Collector*, *Genre Explorer*, *Cinephile*).
-
-### 4. Interactive Slack Workspaces
-- **Implementation:** Utilizes Slack Bolt events protected by cryptographic HMAC SHA256 validation middleware (`slackMiddleware.js`). It posts structured Block Kit recommendations directly into Slack channels.
-
----
-
-## 🚀 Creative & Innovative Engineering
-
-1. **Decoupled Ports & Adapters Design:** Unlike standard apps where Slack is a separate code project, Slack in DARK is merely a **thin presentation client**. Both Web and Slack interfaces consume the same unified query orchestrator, meaning future features (like mood searches) are inherited instantly by Slack with zero duplication.
-2. **Schema-Driven Client Manipulation:** Gemini does not generate conversational responses for commands; it returns JSON functions (e.g., `highlightSection(sectionId: "dna")`). The frontend reads this JSON stream and executes the layout changes (scrolling and pulsing neon highlighting) dynamically.
-3. **Dynamic Context Slicing:** To prevent token waste and prompt bloat, the context engine dynamically generates custom text templates containing only the fields relevant to the current user query, cutting prompt overhead by over 60%.
-4. **Smart UI State Transitions:** We built a custom transition hook in the CSS. The moment the user opens the slide-out chat drawer, the floating red launcher orb fades out (`opacity: 0`) and scales down (`scale(0.7)`) to prevent overlapping input text fields on compact mobile viewports.
-
----
-
-## ⚡ Challenges Faced & Resolution
-
-### 1. The 401 Unauthorized Block on Webhooks
-* **The Challenge:** When verifying Slack commands, the requests were blocked by our global JWT authorization middleware before reaching the Slack routes. Furthermore, Express parsed request bodies into JSON, corrupting the raw byte strings required for HMAC SHA256 verification.
-* **The Resolution:** We modified `server.js` to capture raw body buffers during parsing:
-  ```javascript
-  app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
-  app.use(express.urlencoded({ extended: true, verify: (req, res, buf) => { req.rawBody = buf; } }));
-  ```
-  We then restructured the route order in `server.js` so that the webhook routes are declared *before* any global JWT auth guards.
-
-### 2. Routing Loops on Production Clean URLs
-* **The Challenge:** Redirect actions (e.g. `openWatchlist`) used `window.location.pathname.includes("watchlist.html")`. On production Vercel servers where clean URLs are enabled, the pathname is `/watchlist` (without `.html`). This caused `nyx.js` to get stuck in infinite redirect loops.
-* **The Resolution:** Replaced string-containment checks with robust predicate helpers that support clean path configurations:
-  ```javascript
-  const isWatchlistPage = () => window.location.pathname.endsWith("/watchlist.html") || window.location.pathname.endsWith("/watchlist");
-  ```
-
----
-
-## 📂 Project Structure
-
-```text
-movie-ai-fullstack/
-├── README.md                   # Master project manual (this file)
-├── SECURITY.md                 # Security manuals and signature designs
-│
-├── backend/
-│   ├── README.md               # Backend architecture and API endpoints documentation
-│   ├── server.js               # API bootstrap and Express middleware
-│   ├── models/                 # Mongoose database models (User, Click, Movie)
-│   ├── services/AI/            # Core AI OS Layer (The Nyx Orchestrator)
-│   └── slack/                  # Slack Adapter (Routes, Middlewares, Presenters)
-│
-└── frontend/
-    ├── README.md               # Frontend layout and design tokens documentation
-    ├── index.html              # Discovery feed layout
-    ├── nyx.js                  # Frontend chat SSE controller
-    └── style.css               # notched safe-area mobile styles
+    Slack->>Mid: Post event (x-slack-signature, timestamp, rawBody)
+    Mid->>Mid: Validate signature & replay window (< 5m)
+    alt Validation Passes
+        Mid->>Controller: Route request
+        Controller->>Helper: Process payload
+        Helper->>Core: executeNyxQuery(query, userId)
+        Core-->>Helper: Return structured JSON
+        Helper->>Presenter: buildBlockKit(jsonResponse)
+        Presenter-->>Helper: Return Block Kit elements
+        Helper->>Slack: HTTPS Post chat.postMessage (blocks)
+    else Validation Fails
+        Mid-->>Slack: Return 401 Unauthorized
+    end
 ```
 
 ---
 
-## 🚀 Installation & Local Development
+## 🛠️ Technology Stack
 
-### 1. Backend Setup
+| Platform Layer | Technology | Version | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Frontend UI** | HTML5, CSS3, Vanilla JS | ES6 | Notched mobile-responsive UI, custom session controls. |
+| **Charts** | Chart.js | 4.x | Renders genre donut/bar and provider charts client-side. |
+| **Backend Core** | Node.js, Express.js | 18.x+ | Scalable routing, secure middleware, and JSON parsers. |
+| **Database** | MongoDB Atlas, Mongoose | 7.x | User profiles, event tracking, and self-healing caches. |
+| **Security** | Helmet, bcryptjs, JWT | HS256 | Cryptographic encryption, cookie protection, and sanitizers. |
+| **AI Reasoning** | Gemini API | 1.5+ | Core semantic engine executing structural JSON functions. |
+
+---
+
+## 📂 Folder Structure
+
+```text
+movie-ai-fullstack/
+├── backend/                    # API and AI Service Layer
+│   ├── config/                 # Service configurations
+│   ├── middleware/             # Route authentication and security guards
+│   ├── models/                 # Database Mongoose schemas
+│   ├── routes/                 # Express API endpoint files
+│   ├── services/AI/            # Cognitive reasoning engine (Nyx OS Core)
+│   └── slack/                  # Slack workspace Bolt integration
+│
+├── frontend/                   # Client application assets
+│   ├── index.html              # Landing discovery feed
+│   ├── dashboard.html          # Curation statistics panels
+│   ├── watchlist.html          # Personal saved collections
+│   ├── script.js               # Web layouts coordinator
+│   └── nyx.js                  # SSE chat widget reader
+│
+├── SECURITY.md                 # Encryption and signature protection logs
+└── README.md                   # Master system documentation (this file)
+```
+
+---
+
+## 🔌 API Specifications
+
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/register` | Public | Register a new user profile. |
+| **POST** | `/api/auth/login` | Public | Login credentials check, issues signed JWT. |
+| **POST** | `/api/nyx/chat` | JWT | Submit a query to Nyx (supports streaming chunks). |
+| **POST** | `/api/slack/events` | HMAC | Webhook interface for Slack mentions and loops. |
+| **POST** | `/api/slack/commands` | HMAC | Webhook receiver for Slack slash commands (`/nyx`). |
+| **POST** | `/api/provider-click` | JWT | Track user clicks on OTT platform cards. |
+
+---
+
+## 🚀 Performance & Resiliency Features
+
+### 1. Resilient AI Gateway
+The gateway features a robust fallback strategy designed to optimize rate usage and handle disruptions:
+* **Rotating Model List:** Queries loop dynamically through `gemini-2.0-flash-lite`, `gemini-2.0-flash`, `gemini-3.1-flash-lite`, and `gemini-2.5-flash` in case of rate limit limits or failures.
+* **Circuit Breaker:** Implements a sliding-window failure monitor that temporarily breaks the circuit if the Gemini API goes down.
+* **Priority Concurrency Queue:** Throttles concurrent API requests to prevent HTTP `429` status blocks.
+
+### 2. Dual-Layer Caching
+* **Metadata Cache:** Movie information retrieved from TMDb is saved to MongoDB with a **15-day TTL index**. This prevents duplicate HTTP requests to TMDB.
+* **LLM Query Cache:** Nyx hashes user queries. If the query matches a recently cached request for the same profile, it returns the stored response instantly.
+
+---
+
+## ⚙️ Installation & Local Setup
+
+### Prerequisites
+*   Node.js (version 18.0.0 or higher)
+*   MongoDB local instance or Atlas URI credentials
+
+### 1. Setup Backend Environment
 1. Navigate to the backend directory and install dependencies:
    ```bash
    cd backend
    npm install
    ```
-2. Create a `.env` file from the example:
+2. Create a `.env` file from the template:
    ```bash
    cp .env.example .env
    ```
-3. Configure `backend/.env`:
-   - `MONGO_URI`: MongoDB connection string.
-   - `JWT_SECRET`: Secure session key (minimum 32 characters).
+3. Open `backend/.env` and configure:
+   - `MONGO_URI`: Atlas connection string.
+   - `JWT_SECRET`: Secure 32-character key for signing sessions.
    - `TMDB_API_KEY`: API key from [themoviedb.org](https://www.themoviedb.org).
    - `GEMINI_API_KEY`: API key from Google AI Studio.
+   - `SLACK_SIGNING_SECRET` & `SLACK_BOT_TOKEN`: Webhook credentials from Slack Developer Console.
 4. Start the server:
    ```bash
    npm start
    ```
 
-### 2. Frontend Setup
-1. Open `frontend/config.js` and set the `API_BASE` variable:
-   ```javascript
-   const API_BASE = "http://localhost:5000/api";
-   ```
-2. Serve the `frontend/` directory:
+### 2. Start Frontend
+1. Serve the `frontend/` directory:
    ```bash
    cd ../frontend
    npx serve -l 3000
    ```
-3. Visit `http://localhost:3000` in your web browser.
+2. Open `http://localhost:3000` in your web browser.
+
+---
+
+## 🌐 Deployment Protocols
+
+*   **Vercel:** Frontend is deployed with Clean URLs enabled (resolving `/dashboard` and `/watchlist` automatically).
+*   **Render:** Backend runs as a persistent service connected to MongoDB Atlas.
+
+---
+
+## 🗺️ Future Roadmap
+
+- [ ] **MCP Server Port:** Build a Model Context Protocol tool server to expose taste profiles to native Claude/Gemini desktop clients.
+- [ ] **Collaborative Team DNA:** Extend Slack interactions to merge multiple users' profiles into shared recommendations.
+- [ ] **Interchangeable Providers:** Integrate Qwen Cloud and Llama model gateways under the central client abstraction.
