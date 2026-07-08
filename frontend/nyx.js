@@ -17,6 +17,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let inactivityTimer;
   const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes session duration
 
+  const isIndexPage = () => {
+    const path = window.location.pathname;
+    return path === "/" || path.endsWith("/index.html") || path.endsWith("/index") || path.endsWith("/");
+  };
+  const isWatchlistPage = () => {
+    const path = window.location.pathname;
+    return path.endsWith("/watchlist.html") || path.endsWith("/watchlist");
+  };
+  const isDashboardPage = () => {
+    const path = window.location.pathname;
+    return path.endsWith("/dashboard.html") || path.endsWith("/dashboard");
+  };
+
   // Dynamic Suggestion Chips Builder
   function renderSuggestionChips() {
     let chipsContainer = document.getElementById("chatSuggestionChips");
@@ -29,8 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Tell me my statistics",
         "Recommend Sci-Fi Movies",
         "Show Movie DNA",
-        "Open Watchlist",
-        "Search Batman"
+        "Open Watchlist"
       ];
       
       chips.forEach(text => {
@@ -129,18 +141,27 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Toggle Chat window view
-  orb.addEventListener("click", () => {
-    chatWindow.classList.toggle("hidden");
-    if (!chatWindow.classList.contains("hidden")) {
+  function setChatWindowState(isOpen) {
+    if (isOpen) {
+      chatWindow.classList.remove("hidden");
+      container.classList.add("chat-open");
       input.focus();
       renderSuggestionChips();
+    } else {
+      chatWindow.classList.add("hidden");
+      container.classList.remove("chat-open");
     }
+  }
+
+  // Toggle Chat window view
+  orb.addEventListener("click", () => {
+    const isOpen = chatWindow.classList.contains("hidden");
+    setChatWindowState(isOpen);
   });
 
   closeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    chatWindow.classList.add("hidden");
+    setChatWindowState(false);
   });
 
   // Simple validation for gibberish and profanity to protect API key usage
@@ -274,9 +295,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Check if response contains tool/function calls payload
-      if (fullResponseText.startsWith('{"toolCalls":')) {
+      const trimmedResponse = fullResponseText.trim();
+      if (trimmedResponse.startsWith('{"toolCalls":')) {
         msgEl.remove();
-        const parsed = JSON.parse(fullResponseText);
+        const parsed = JSON.parse(trimmedResponse);
         const call = parsed.toolCalls[0];
 
         const mockData = {
@@ -482,22 +504,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "openWatchlist") {
-        if (!window.location.pathname.includes("watchlist.html")) {
+        if (!isWatchlistPage()) {
           window.location.href = "watchlist.html";
         }
       }
       else if (action === "openProfile" || action === "openDashboard") {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           window.location.href = "dashboard.html";
         }
       }
       else if (action === "openHome") {
-        if (!window.location.pathname.includes("index.html")) {
+        if (!isIndexPage()) {
           window.location.href = "index.html";
         }
       }
       else if (action === "openSettings") {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           window.location.href = "dashboard.html";
         }
       }
@@ -510,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "showPersona") {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           sessionStorage.setItem("nyx_pending_highlight", "showPersona");
           window.location.href = "dashboard.html";
         } else {
@@ -518,7 +540,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "showMovieDNA") {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           sessionStorage.setItem("nyx_pending_highlight", "showMovieDNA");
           window.location.href = "dashboard.html";
         } else {
@@ -526,7 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "showAnalytics") {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           sessionStorage.setItem("nyx_pending_highlight", "showAnalytics");
           window.location.href = "dashboard.html";
         } else {
@@ -534,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "highlightAchievements") {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           sessionStorage.setItem("nyx_pending_highlight", "highlightAchievements");
           window.location.href = "dashboard.html";
         } else {
@@ -542,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "searchMovie" && data.query) {
-        if (!window.location.pathname.includes("index.html")) {
+        if (!isIndexPage()) {
           sessionStorage.setItem("nyx_pending_search", data.query);
           window.location.href = "index.html";
         } else {
@@ -550,6 +572,11 @@ document.addEventListener("DOMContentLoaded", () => {
           if (searchInput) {
             searchInput.value = data.query;
             searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          if (typeof window.searchMovie === "function") {
+            window.searchMovie(data.query);
+          } else if (typeof searchMovie === "function") {
+            searchMovie(data.query);
           }
         }
       }
@@ -572,7 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       else if (action === "highlightSection" && data.sectionId) {
-        if (!window.location.pathname.includes("dashboard.html")) {
+        if (!isDashboardPage()) {
           const mapping = data.sectionId === "dna" ? "showMovieDNA" : 
                           data.sectionId === "persona" ? "showPersona" : 
                           data.sectionId === "analytics" ? "showAnalytics" : "highlightAchievements";
@@ -595,7 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", (e) => {
     if (!chatWindow.classList.contains("hidden")) {
       if (!chatWindow.contains(e.target) && !container.contains(e.target)) {
-        chatWindow.classList.add("hidden");
+        setChatWindowState(false);
       }
     }
   });
@@ -604,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
   resetInactivityTimer();
 
   const pendingHighlight = sessionStorage.getItem("nyx_pending_highlight");
-  if (pendingHighlight && window.location.pathname.includes("dashboard.html")) {
+  if (pendingHighlight && isDashboardPage()) {
     sessionStorage.removeItem("nyx_pending_highlight");
     setTimeout(() => {
       if (pendingHighlight === "showPersona") highlightElement("#personality");
@@ -615,13 +642,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const pendingSearch = sessionStorage.getItem("nyx_pending_search");
-  if (pendingSearch && window.location.pathname.includes("index.html")) {
+  if (pendingSearch && isIndexPage()) {
     sessionStorage.removeItem("nyx_pending_search");
     setTimeout(() => {
       const searchInput = document.getElementById("searchInput");
       if (searchInput) {
         searchInput.value = pendingSearch;
         searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (typeof window.searchMovie === "function") {
+        window.searchMovie(pendingSearch);
+      } else if (typeof searchMovie === "function") {
+        searchMovie(pendingSearch);
       }
     }, 1000);
   }

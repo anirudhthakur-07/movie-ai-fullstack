@@ -3779,6 +3779,14 @@ body.modal-open {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Fade out and disable the floating launcher orb when the chat window is active */
+.nyx-orb-container.chat-open .nyx-orb {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.7) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
 .nyx-orb {
   width: 56px;
   height: 56px;
