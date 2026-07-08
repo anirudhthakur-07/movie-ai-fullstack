@@ -665,3 +665,30 @@ function getLanguageName(code) {
   };
   return langs[code.toLowerCase()] || code.toUpperCase();
 }
+
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("close-modal") || e.target.id === "movieModal") {
+        const modal = document.getElementById("movieModal");
+        if (!modal || modal.classList.contains("hidden")) return;
+        
+        modal.classList.remove("show");
+        
+        const providerContainer = document.getElementById("floatingProviders");
+        if (providerContainer) {
+            providerContainer.classList.remove("show-active");
+        }
+
+        setTimeout(() => {
+            modal.classList.add("hidden");
+            const dots = document.getElementById("modalDotsContainer");
+            if (dots) dots.style.display = "none";
+        }, 300);
+
+        // Restore background scroll position cleanly
+        document.body.classList.remove("modal-open");
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, window.modalScrollY || 0);
+    }
+});
