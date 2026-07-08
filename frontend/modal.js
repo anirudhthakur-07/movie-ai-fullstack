@@ -243,7 +243,13 @@ window.openModal = async function (movie, cardElement) {
 
     modal.classList.remove('hidden');
     setTimeout(() => modal.classList.add('show'), 10);
+    
+    // Save scroll position and lock background scroll on mobile
+    window.modalScrollY = window.scrollY;
     document.body.classList.add("modal-open");
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${window.modalScrollY}px`;
+    document.body.style.width = '100%';
 
     setupSwipeGestures();
     setupModalArrows();
@@ -583,8 +589,10 @@ async function renderModalDetailsWithData(fullMovie, movie, requestId) {
 }
 
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("close-modal")) {
+    if (e.target.classList.contains("close-modal") || e.target.id === "movieModal") {
         const modal = document.getElementById("movieModal");
+        if (!modal || modal.classList.contains("hidden")) return;
+        
         modal.classList.remove("show");
         
         const providerContainer = document.getElementById("floatingProviders");
@@ -598,7 +606,13 @@ document.addEventListener("click", (e) => {
             const dots = document.getElementById("modalDotsContainer");
             if (dots) dots.style.display = "none";
         }, 300);
+
+        // Restore background scroll position cleanly
         document.body.classList.remove("modal-open");
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, window.modalScrollY || 0);
     }
 });
 // TRAILER PLAYER
