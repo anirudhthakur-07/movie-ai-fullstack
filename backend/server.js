@@ -36,6 +36,7 @@ const profileRoutes =require("./routes/profileRoutes");
 const achievementRoutes = require("./routes/achievementRoutes");
 const behaviorRoutes    = require("./routes/behaviorRoutes");
 const nyxRoutes         = require("./routes/nyxRoutes");
+const slackRoutes       = require("./slack/slackRoutes");
 // EXPRESS APPLICATION SETUP
 const app = express();
 const movieRoutes =require("./routes/movieRoutes");
@@ -123,7 +124,11 @@ app.use(cors({
   ],
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(mongoSanitize());
 
 // Custom Cookie Parser Middleware
@@ -304,6 +309,10 @@ app.use(
 app.use(
     "/api/nyx",
     nyxRoutes
+);
+app.use(
+    "/api/slack",
+    slackRoutes
 );
 // SERVER STARTUP
 app.listen(PORT, () => {
