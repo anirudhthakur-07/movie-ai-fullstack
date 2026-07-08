@@ -17,6 +17,24 @@
 
 <body class="login-body">
 
+    <!-- The Master Cinematic Intro Overlay -->
+    <div id="intro-overlay">
+        <div class="intro-content">
+            <!-- Part 1: Animated Cinema Shutter Icon -->
+            <div class="shutter-icon">
+                <div class="blade b1"></div>
+                <div class="blade b2"></div>
+            </div>
+            <!-- Part 2: The Neural Text Ignition -->
+            <h1 class="intro-title">DARK<span>AI</span></h1>
+            <p class="intro-subtitle">Initializing Recommendation Engine...</p>
+            <!-- Part 3: Premium Cyber Bar Loading -->
+            <div class="boot-bar-container">
+                <div class="boot-bar"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Seamless Looping Cinematic Background Canvas -->
     <canvas id="cinematic-bg" style="position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -2; background: #050508;"></canvas>
 
@@ -520,6 +538,25 @@
             
             requestAnimationFrame(animate);
         })();
+    </script>
+
+    <!-- Cinematic Shutter & Neural Ignition Intro Animation Automation -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const intro = document.getElementById("intro-overlay");
+            
+            // Exactly 2.3 seconds of theatrical animation, then trigger the clean fade
+            setTimeout(() => {
+                if (intro) {
+                    intro.classList.add("fade-out");
+                    
+                    // Remove completely from DOM after animation completes to free up GPU memory
+                    setTimeout(() => {
+                        intro.remove();
+                    }, 600);
+                }
+            }, 2300);
+        });
     </script>
 </body>
 

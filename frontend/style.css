@@ -4693,3 +4693,113 @@ body {
     display: none !important;
   }
 }
+
+/* --- CINEMATIC SHUTTER INTRO ANIMATION OVERLAY --- */
+/* Master Overlay Container */
+#intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #000000;
+    z-index: 9999; /* Forces it over everything else */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.6s;
+}
+
+/* Centralizing Content */
+.intro-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Movie Shutter Icon Animation */
+.shutter-icon {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: rotateShutter 2s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+}
+
+.shutter-icon .blade {
+    position: absolute;
+    background: #ff2e43; /* Your Brand Premium Red */
+    width: 100%;
+    height: 4px;
+    top: 50%;
+    left: 0;
+    transform-origin: center;
+}
+.shutter-icon .blade.b1 { transform: translateY(-50%) rotate(45deg) scaleX(0.7); }
+.shutter-icon .blade.b2 { transform: translateY(-50%) rotate(-45deg) scaleX(0.7); }
+
+/* Text Title Glow (The "Ignition") */
+.intro-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: #ffffff;
+    margin: 10px 0;
+    text-shadow: 0 0 20px rgba(255, 46, 67, 0.6);
+    animation: textPulse 1.5s ease-in-out infinite alternate;
+}
+
+.intro-title span {
+    color: #ff2e43;
+}
+
+.intro-subtitle {
+    color: #888888;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+}
+
+/* Cyber Loading Progress Bar */
+.boot-bar-container {
+    width: 180px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.boot-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, #ff2e43, transparent);
+    transform: translateX(-100%);
+    animation: loadBar 1.8s cubic-bezier(0.85, 0, 0.15, 1) infinite;
+}
+
+/* --- KEYFRAMES --- */
+@keyframes rotateShutter {
+    0% { transform: rotate(0deg) scale(0.9); }
+    50% { transform: rotate(180deg) scale(1.1); filter: drop-shadow(0 0 15px #ff2e43); }
+    100% { transform: rotate(360deg) scale(0.9); }
+}
+
+@keyframes textPulse {
+    from { opacity: 0.7; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes loadBar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Class to trigger smoothly via JS */
+#intro-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
