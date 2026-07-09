@@ -364,11 +364,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Check if response contains tool/function calls payload
-      const trimmedResponse = fullResponseText.trim();
-      if (trimmedResponse.startsWith('{"toolCalls":')) {
+      // Check if response contains tool/function calls payload (possibly preceded by reasoning steps)
+      const parsedSplit = splitReasoningAndText(fullResponseText);
+      const contentText = parsedSplit.content.trim();
+      
+      if (contentText.startsWith('{"toolCalls":')) {
         msgEl.remove();
-        const parsed = JSON.parse(trimmedResponse);
+        const parsed = JSON.parse(contentText);
         const call = parsed.toolCalls[0];
 
         const mockData = {
@@ -467,9 +469,12 @@ document.addEventListener("DOMContentLoaded", () => {
           mockData.actions = ["summarizeWatchlist"];
         }
 
-        // Re-append clean message block for final command
-        appendMessage(mockData.message, "system", true);
-        chatHistory.push({ query: text, response: mockData.message });
+        // Re-append clean message block with reasoning logs preserved for final command
+        const reasoningPrefix = parsedSplit.reasoning.map(r => `[Reasoning: ${r}]`).join("\n");
+        const finalMessageText = reasoningPrefix ? `${reasoningPrefix}\n${mockData.message}` : mockData.message;
+
+        appendMessage(finalMessageText, "system", true);
+        chatHistory.push({ query: text, response: finalMessageText });
 
         if (mockData.actions && mockData.actions.length > 0) {
           handleActions(mockData.actions, mockData);
