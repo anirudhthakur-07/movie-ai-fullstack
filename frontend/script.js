@@ -1249,11 +1249,28 @@ function openWatchlistPage() {
   window.location.href = "watchlist.html";
 }
 async function logout() {
+  const overlay = document.createElement("div");
+  overlay.id = "intro-overlay";
+  overlay.innerHTML = `
+    <div class="intro-content">
+      <div class="shutter-icon">
+        <div class="blade b1"></div>
+        <div class="blade b2"></div>
+      </div>
+      <h1 class="intro-title">DARK</h1>
+      <p class="intro-subtitle">Engine stop...</p>
+      <div class="boot-bar-container">
+        <div class="boot-bar" style="animation-duration: 1.5s;"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
   try {
     await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
   } catch (e) { /* silent */ }
+  
   sessionStorage.removeItem("sessionActive");
-  // Clear user-scoped localStorage to prevent data persistence on shared devices
   localStorage.removeItem("authToken");
   localStorage.removeItem("cachedWatchlist");
   localStorage.removeItem("movieDetailsCache");
@@ -1262,7 +1279,13 @@ async function logout() {
       localStorage.removeItem(key);
     }
   });
-  window.location.href = "login.html";
+
+  setTimeout(() => {
+    overlay.classList.add("fade-out");
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 600);
+  }, 1600);
 }
 function updateScrollButtons(row, leftBtn, rightBtn) {
   const maxScroll = row.scrollWidth - row.clientWidth;

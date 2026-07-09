@@ -794,9 +794,27 @@ setupAchievementsModal();
 setupTooltipEvents();
 
 window.logout = async function () {
+    const overlay = document.createElement("div");
+    overlay.id = "intro-overlay";
+    overlay.innerHTML = `
+        <div class="intro-content">
+            <div class="shutter-icon">
+                <div class="blade b1"></div>
+                <div class="blade b2"></div>
+            </div>
+            <h1 class="intro-title">DARK</h1>
+            <p class="intro-subtitle">Engine stop...</p>
+            <div class="boot-bar-container">
+                <div class="boot-bar" style="animation-duration: 1.5s;"></div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
     try {
         await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
     } catch (e) { /* silent */ }
+    
     sessionStorage.removeItem("sessionActive");
     localStorage.removeItem("authToken");
     localStorage.removeItem("cachedWatchlist");
@@ -806,5 +824,11 @@ window.logout = async function () {
             localStorage.removeItem(key);
         }
     });
-    window.location.href = "login.html";
+
+    setTimeout(() => {
+        overlay.classList.add("fade-out");
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 600);
+    }, 1600);
 };
