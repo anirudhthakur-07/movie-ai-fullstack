@@ -282,11 +282,25 @@ document.addEventListener("DOMContentLoaded", () => {
         credentials: "include"
       });
 
-      typingIndicator.remove();
-
       if (!res.ok) {
+        typingIndicator.remove();
         throw new Error(`API returned HTTP error ${res.status}`);
       }
+
+      const contentType = res.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        typingIndicator.remove();
+        const data = await res.json();
+        appendMessage(data.message || "Query processed.", "system", true);
+        chatHistory.push({ query: text, response: data.message });
+
+        if (data.actions && data.actions.length > 0) {
+          handleActions(data.actions, data);
+        }
+        return;
+      }
+
+      typingIndicator.remove();
 
       // Read chunk-by-chunk using readable stream reader
       const reader = res.body.getReader();
