@@ -1144,24 +1144,50 @@ h1 {
 }
 
 
-.brand {
-  font-size: 36px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 12px;
-  background: linear-gradient(90deg, #ffffff, #bbbbbb);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow:
-    0 0 8px rgba(255, 255, 255, 0.15),
-    0 0 20px rgba(229, 9, 20, 0.2);
-  letter-spacing: -0.5px;
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
   animation: titleFade 0.8s ease;
 }
 
-.brand .icon {
-  color: var(--primary);
+.brand-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.brand-svg {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.4));
+}
+
+.brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #ffffff, #dcdcdc);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-transform: uppercase;
+}
+
+.brand-tagline {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #94a3b8, #64748b);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 @keyframes titleFade {
@@ -4171,13 +4197,23 @@ body.modal-open {
     padding: 12px !important;
     box-sizing: border-box !important;
   }
-  .login-card .brand {
-    font-size: 22px !important;
-    margin-bottom: 6px !important;
-    line-height: 1.2 !important;
+  .brand-header {
+    margin-bottom: 16px !important;
   }
-  .login-card .brand .icon {
-    font-size: 24px !important;
+  .brand-logo-row {
+    gap: 8px !important;
+  }
+  .brand-svg {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  .brand-name {
+    font-size: 28px !important;
+  }
+  .brand-tagline {
+    font-size: 11px !important;
+    margin-top: 4px !important;
+    letter-spacing: 0.5px !important;
   }
   .login-card .subtitle {
     font-size: 11px !important;
