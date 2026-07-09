@@ -530,9 +530,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const tag = node.tagName.toLowerCase();
         const allowed = ["strong", "em", "br", "p", "div", "span"];
-        if (!allowed.includes(tag)) {
+        if (node !== doc.body && !allowed.includes(tag)) {
           const textNode = doc.createTextNode(node.outerHTML);
           node.parentNode.replaceChild(textNode, node);
+          return;
         }
       }
       
