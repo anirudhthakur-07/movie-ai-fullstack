@@ -23,10 +23,9 @@ router.get("/overview", auth, async (req, res) => {
             { $match: { userId: uid } },
             { $project: { lowerProvider: { $toLower: "$provider" } } },
             { $group: { _id: "$lowerProvider", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 1 }
+            { $sort: { count: -1, _id: 1 } }
         ]);
-        const topProvider = providerAgg.length > 0 ? providerAgg[0]._id : "No Data";
+        const topProvider = (providerAgg.length > 0 && providerAgg[0]._id) ? providerAgg[0]._id : "netflix";
 
         const genreAgg = await ProviderClick.aggregate([
             { $match: { userId: uid } },

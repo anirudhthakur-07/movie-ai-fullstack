@@ -1161,81 +1161,44 @@ if (moreMovies) {
     // PROVIDER SECTION
 
   if (
-  data.topProvider &&
-  data.topProvider !== "Unknown" &&
-  data.topProvider !== "No Data"
-)   {
-
-  document
-  .getElementById(
-    "providerAnalyticsSection"
-  )
-  .classList.remove("hidden");
-
-  document
-  .getElementById(
-    "providerAnalyticsTitle"
-  )
-  .innerText =
-
-  `Streaming on ${data.topProvider}`;
-
-  // FETCH MOVIES
-const providerMovies =
-await fetchMovies(
-  `/provider-content/${encodeURIComponent(
-      data.topProvider
-  )}`
-);
-if (
-  providerMovies &&
-  providerMovies.length > 0
-) {
-
-    displayMovies(
-      providerMovies,
-      document.getElementById(
-        "providerAnalyticsRow"
-      )
+    data.topProvider &&
+    data.topProvider !== "Unknown" &&
+    data.topProvider !== "No Data"
+  ) {
+    const providerMovies = await fetchMovies(
+      `/provider-content/${encodeURIComponent(data.topProvider)}`
     );
-   const providerRow =
-document.getElementById(
-  "providerAnalyticsRow"
-);
 
-if (
-  !providerRow.dataset.listenerAdded
-) {
+    const providerSection = document.getElementById("providerAnalyticsSection");
+    const providerRow = document.getElementById("providerAnalyticsRow");
 
-  providerRow.dataset.listenerAdded =
-  "true";
+    if (providerMovies && providerMovies.length > 0) {
+      providerSection.classList.remove("hidden");
+      document.getElementById("providerAnalyticsTitle").innerText = `Streaming on ${data.topProvider}`;
 
-  setupAutoScroll(
-    providerRow,
-    async () => {
+      displayMovies(providerMovies, providerRow);
 
-  
-analyticsProviderPage++;
-
-const moreMovies =
-await fetchMovies(
-  `/provider-content/${encodeURIComponent(
-      data.topProvider
-  )}?page=${analyticsProviderPage}`
-);
-if (moreMovies) {
-displayMovies(
-    moreMovies,
-    document.getElementById(
-      "providerAnalyticsRow"
-    )
-);
-}
-}
-);
-}
-}
-}
+      if (!providerRow.dataset.listenerAdded) {
+        providerRow.dataset.listenerAdded = "true";
+        setupAutoScroll(
+          providerRow,
+          async () => {
+            analyticsProviderPage++;
+            const moreMovies = await fetchMovies(
+              `/provider-content/${encodeURIComponent(data.topProvider)}?page=${analyticsProviderPage}`
+            );
+            if (moreMovies) {
+              displayMovies(moreMovies, providerRow);
+            }
+          }
+        );
+      }
+    } else {
+      providerSection.classList.add("hidden");
+    }
+  } else {
+    document.getElementById("providerAnalyticsSection").classList.add("hidden");
+  }
 } catch (err) {
     /* silent */
   }
