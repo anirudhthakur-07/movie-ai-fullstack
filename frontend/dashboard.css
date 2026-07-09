@@ -1172,7 +1172,7 @@ body {
 @media (max-width: 600px) {
     #profileHeroContent {
         display: grid !important;
-        grid-template-columns: auto 1fr !important;
+        grid-template-columns: auto 1fr auto !important;
         gap: 12px !important;
         align-items: center !important;
     }
@@ -1182,24 +1182,53 @@ body {
     .profile-avatar-container {
         grid-column: 1 !important;
         grid-row: 1 !important;
-        width: 70px !important;
-        height: 70px !important;
+        width: 65px !important;
+        height: 65px !important;
     }
-    .profile-level-badge {
+    .profile-meta-info {
         grid-column: 2 !important;
         grid-row: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        text-align: left !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+    }
+    .username-row {
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+    .username-row h2 {
+        font-size: clamp(1.1rem, 5vw, 1.4rem) !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .persona-tagline {
+        font-size: clamp(0.7rem, 3.2vw, 0.8rem) !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .profile-level-badge {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
         justify-self: end !important;
-        text-align: right !important;
-        padding: 10px 16px !important;
-        border-radius: 14px !important;
+        text-align: center !important;
+        padding: 6px 12px !important;
+        border-radius: 10px !important;
         background: rgba(255, 255, 255, 0.03) !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        min-width: 80px !important;
     }
     .profile-level-badge .lvl-val {
-        font-size: 1.4rem !important;
+        font-size: 1.1rem !important;
     }
     .profile-level-badge .lvl-label {
-        font-size: 0.6rem !important;
+        font-size: 0.55rem !important;
     }
     .profile-level-progress {
         grid-column: 1 / -1 !important;
@@ -1207,21 +1236,6 @@ body {
         width: 100% !important;
         margin-top: 4px !important;
         margin-bottom: 4px !important;
-    }
-    .profile-meta-info {
-        grid-column: 1 / -1 !important;
-        grid-row: 3 !important;
-        width: 100% !important;
-        text-align: left !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 4px !important;
-    }
-    .username-row h2 {
-        font-size: 1.6rem !important;
-    }
-    .persona-tagline {
-        font-size: 0.95rem !important;
     }
 }
 
